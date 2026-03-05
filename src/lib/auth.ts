@@ -1,59 +1,35 @@
+import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import type { User } from '@/lib/types';
-import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-function setSession(user: User, token: string) {
-  useAuthStore.getState().setToken(token);
-  useAuthStore.getState().setUser(user);
-  Cookies.set('capivarex-token', token, { expires: 30, sameSite: 'lax' });
+function mapSupabaseUser(
+  supabaseUser: { id: string; email?: string; user_metadata?: Record<string, unknown> },
+): User {
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
+    plan: (supabaseUser.user_metadata?.plan as User['plan']) || 'free',
+    telegramChatId: supabaseUser.user_metadata?.telegram_chat_id as string | undefined,
+    language: supabaseUser.user_metadata?.language as string | undefined,
+  };
 }
-
-function clearSession() {
-  useAuthStore.getState().logout();
-  Cookies.remove('capivarex-token');
-}
-
-// --- Mock mode (until backend endpoints are ready) ---
-
-const MOCK_USER: User = {
-  id: 'mock-user-001',
-  email: '',
-  name: '',
-  plan: 'free',
-};
-
-const MOCK_TOKEN = 'mock-jwt-token';
-
-function isMockMode(): boolean {
-  return !API_URL || API_URL.includes('localhost');
-}
-
-// --- Auth functions ---
 
 export async function login(email: string, password: string): Promise<User> {
-  if (isMockMode()) {
-    const user = { ...MOCK_USER, email, name: email.split('@')[0] };
-    setSession(user, MOCK_TOKEN);
-    return user;
-  }
+  const supabase = createClient();
 
-  const res = await fetch(`${API_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error((err as Record<string, string>).message || 'Login failed');
+  if (error) {
+    throw new Error(error.message);
   }
 
-  const data = await res.json();
-  const user = data.user as User;
-  const token = data.token as string;
-  setSession(user, token);
+  const user = mapSupabaseUser(data.user);
+  useAuthStore.getState().setUser(user);
+  useAuthStore.getState().setToken(data.session.access_token);
   return user;
 }
 
@@ -62,82 +38,67 @@ export async function register(
   email: string,
   password: string,
 ): Promise<User> {
-  if (isMockMode()) {
-    const user = { ...MOCK_USER, email, name };
-    setSession(user, MOCK_TOKEN);
-    return user;
-  }
+  const supabase = createClient();
 
-  const res = await fetch(`${API_URL}/api/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password }),
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { name },
+    },
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as Record<string, string>).message || 'Registration failed',
-    );
+  if (error) {
+    throw new Error(error.message);
   }
 
-  const data = await res.json();
-  const user = data.user as User;
-  const token = data.token as string;
-  setSession(user, token);
+  if (!data.user) {
+    throw new Error('Registration failed. Please try again.');
+  }
+
+  const user = mapSupabaseUser(data.user);
+  useAuthStore.getState().setUser(user);
+  if (data.session) {
+    useAuthStore.getState().setToken(data.session.access_token);
+  }
   return user;
 }
 
 export async function forgotPassword(email: string): Promise<void> {
-  if (isMockMode()) return;
+  const supabase = createClient();
 
-  const res = await fetch(`${API_URL}/api/auth/forgot`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/login`,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as Record<string, string>).message || 'Request failed',
-    );
+  if (error) {
+    throw new Error(error.message);
   }
 }
 
 export async function fetchCurrentUser(): Promise<User | null> {
-  const token = useAuthStore.getState().token;
-  if (!token) return null;
+  const supabase = createClient();
 
-  if (isMockMode()) {
-    return useAuthStore.getState().user;
-  }
+  const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
 
-  try {
-    const res = await fetch(`${API_URL}/api/auth/me`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      clearSession();
-      return null;
-    }
-
-    const data = await res.json();
-    const user = data.user as User;
-    useAuthStore.getState().setUser(user);
-    return user;
-  } catch {
-    clearSession();
+  if (error || !supabaseUser) {
+    useAuthStore.getState().logout();
     return null;
   }
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const user = mapSupabaseUser(supabaseUser);
+  useAuthStore.getState().setUser(user);
+  if (session) {
+    useAuthStore.getState().setToken(session.access_token);
+  }
+  return user;
 }
 
-export function logout() {
-  clearSession();
+export async function logout(): Promise<void> {
+  const supabase = createClient();
+  await supabase.auth.signOut();
+  useAuthStore.getState().logout();
   window.location.href = '/login';
 }

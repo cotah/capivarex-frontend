@@ -1,9 +1,13 @@
+import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-function getHeaders(): HeadersInit {
-  const token = useAuthStore.getState().token;
+async function getHeaders(): Promise<HeadersInit> {
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token || useAuthStore.getState().token;
+
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -17,7 +21,7 @@ export async function sendMessage(
 
   const response = await fetch(`${API_URL}/api/chat`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: await getHeaders(),
     body: JSON.stringify({
       message,
       user_id: user?.id || 'demo-user',
@@ -43,7 +47,7 @@ export async function getServiceStatus(
 ): Promise<Record<string, unknown>> {
   const response = await fetch(
     `${API_URL}/api/auth/google/status?user_id=${userId}`,
-    { headers: getHeaders() },
+    { headers: await getHeaders() },
   );
   return response.json();
 }

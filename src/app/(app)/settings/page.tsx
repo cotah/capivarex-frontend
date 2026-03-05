@@ -32,7 +32,7 @@ export default function SettingsPage() {
           </h3>
           <div className="flex flex-col sm:flex-row gap-2">
             <button
-              onClick={logout}
+              onClick={() => logout()}
               className="rounded-xl glass py-2 px-4 text-sm text-text-muted hover:text-text transition-colors"
             >
               Sign Out

@@ -1,8 +1,9 @@
 'use client';
 
 import { useAuthStore } from '@/stores/authStore';
+import { fetchCurrentUser } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function LoadingSkeleton() {
   return (
@@ -19,14 +20,23 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    async function syncSession() {
+      await fetchCurrentUser();
+      setChecked(true);
+    }
+    syncSession();
+  }, []);
+
+  useEffect(() => {
+    if (checked && !isLoading && !user) {
       router.push('/login');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, checked, router]);
 
-  if (isLoading) return <LoadingSkeleton />;
+  if (!checked || isLoading) return <LoadingSkeleton />;
   if (!user) return null;
 
   return <>{children}</>;

@@ -1,9 +1,13 @@
+import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-function getAuthHeaders(): HeadersInit {
-  const token = useAuthStore.getState().token;
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token || useAuthStore.getState().token;
+
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -15,7 +19,7 @@ export async function redirectToCheckout(plan: 'me' | 'everywhere') {
 
   const res = await fetch(`${API_URL}/api/billing/create-checkout`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify({ plan, user_id: user?.id }),
   });
 
@@ -33,7 +37,7 @@ export async function openBillingPortal() {
 
   const res = await fetch(`${API_URL}/api/billing/portal`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify({ user_id: user?.id }),
   });
 
@@ -48,7 +52,7 @@ export async function openBillingPortal() {
 
 export async function getBillingStatus(): Promise<Record<string, unknown>> {
   const res = await fetch(`${API_URL}/api/billing/status`, {
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
   });
 
   if (!res.ok) {
