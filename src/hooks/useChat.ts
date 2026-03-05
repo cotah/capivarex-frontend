@@ -21,7 +21,7 @@ export function useChat() {
     setThinking(true);
 
     try {
-      const response = await sendMessage(text, 'demo-user', 'demo-chat');
+      const response = await sendMessage(text);
 
       addMessage({
         id: nanoid(),

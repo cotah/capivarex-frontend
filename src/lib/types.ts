@@ -18,4 +18,22 @@ export interface ServiceInfo {
   status: string;
 }
 
-export type ViewType = 'chat' | 'services' | 'insights';
+export type PlanType = 'free' | 'me' | 'everywhere';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  plan: PlanType;
+  telegramChatId?: string;
+  language?: string;
+}
+
+export interface PlanInfo {
+  id: PlanType;
+  name: string;
+  price: string;
+  priceValue: number;
+  features: string[];
+  highlighted?: boolean;
+}
