@@ -20,10 +20,10 @@ export default function AuthLayout({
         <Image
           src="/logo-horizontal.png"
           alt="Capivarex"
-          width={280}
-          height={80}
+          width={320}
+          height={120}
           priority
-          className="h-20 w-auto object-contain"
+          className="w-72 h-auto object-contain"
         />
       </motion.div>
 
