@@ -1,0 +1,72 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+const sections = [
+  { id: 'features', label: 'Features' },
+  { id: 'how-it-works', label: 'How it works' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'faq', label: 'FAQ' },
+];
+
+export default function LandingNav() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'glass-strong shadow-lg shadow-black/20' : 'bg-transparent'
+      }`}
+    >
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <Image
+          src="/logo-horizontal.png"
+          alt="Capivarex"
+          width={180}
+          height={44}
+          priority
+          className="h-10 w-auto object-contain"
+        />
+
+        <nav className="hidden sm:flex items-center gap-1">
+          {sections.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => scrollTo(id)}
+              className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text transition-colors"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/register"
+            className="rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+          >
+            Get Started
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
