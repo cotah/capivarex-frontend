@@ -1,6 +1,7 @@
 'use client';
 
 import { Music, SkipBack, Play, SkipForward } from 'lucide-react';
+import CastButton from '@/components/cast/CastButton';
 
 interface MusicCardProps {
   data?: Record<string, unknown>;
@@ -38,6 +39,7 @@ export default function MusicCard({ data }: MusicCardProps) {
         <button className="text-text-muted hover:text-text transition-colors">
           <SkipForward size={16} />
         </button>
+        <CastButton size={14} />
       </div>
     </div>
   );

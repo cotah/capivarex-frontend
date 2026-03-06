@@ -5,6 +5,7 @@ import { Settings, Trash2 } from 'lucide-react';
 import ProfileSection from '@/components/settings/ProfileSection';
 import BillingSection from '@/components/settings/BillingSection';
 import ConnectionsSection from '@/components/settings/ConnectionsSection';
+import NotificationSettings from '@/components/settings/NotificationSettings';
 import { logout } from '@/lib/auth';
 
 export default function SettingsPage() {
@@ -23,6 +24,7 @@ export default function SettingsPage() {
         <ProfileSection />
         <BillingSection />
         <ConnectionsSection />
+        <NotificationSettings />
 
         {/* Danger zone */}
         <section className="glass rounded-2xl p-5 space-y-4 border-error/10">

@@ -19,6 +19,16 @@ export const metadata: Metadata = {
   title: 'Capivarex — Your AI Life Assistant',
   description: 'AI-powered personal assistant for your daily tasks.',
   manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Capivarex',
+    startupImage: '/icon-512.png',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport: Viewport = {

@@ -1,11 +1,13 @@
 'use client';
 
 import { Toaster } from 'react-hot-toast';
+import InstallPrompt from '@/components/pwa/InstallPrompt';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      <InstallPrompt />
       <Toaster
         position="top-center"
         toastOptions={{

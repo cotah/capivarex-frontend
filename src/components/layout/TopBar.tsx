@@ -2,8 +2,10 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/stores/authStore';
 import PlanBadge from '@/components/billing/PlanBadge';
+import CastButton from '@/components/cast/CastButton';
 import { MessageSquare, Zap, BarChart3, Settings, Circle } from 'lucide-react';
 
 const navItems = [
@@ -27,13 +29,23 @@ export default function TopBar() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/20 border border-accent/30">
-            <span className="text-sm font-bold text-accent">C</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden">
+            <Image
+              src="/icons/icon-96.png"
+              alt="Capivarex"
+              width={32}
+              height={32}
+              className="object-contain"
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold tracking-[0.2em] text-text uppercase hidden sm:inline">
-              Capivarex
-            </span>
+            <Image
+              src="/logo-horizontal.png"
+              alt="Capivarex"
+              width={100}
+              height={24}
+              className="hidden sm:inline-block object-contain"
+            />
             {user && <PlanBadge plan={user.plan} />}
           </div>
         </div>
@@ -56,8 +68,9 @@ export default function TopBar() {
           ))}
         </nav>
 
-        {/* Status */}
+        {/* Status + Cast */}
         <div className="flex items-center gap-2">
+          <CastButton size={14} />
           <Circle size={6} className="fill-success text-success" />
           <span className="text-[11px] text-text-muted hidden sm:inline">
             Online
