@@ -32,38 +32,38 @@ export default function LandingNav() {
         scrolled ? 'glass-strong shadow-lg shadow-black/20' : 'bg-transparent'
       }`}
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-5">
         <Image
           src="/logo-horizontal.png"
           alt="Capivarex"
-          width={180}
-          height={44}
+          width={200}
+          height={40}
           priority
-          className="h-10 w-auto object-contain"
+          className="h-8 sm:h-10 w-auto object-contain"
         />
 
-        <nav className="hidden sm:flex items-center gap-1">
+        <nav className="hidden sm:flex items-center gap-1.5">
           {sections.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+              className="rounded-lg px-4 py-2 text-base font-medium text-text-muted hover:text-text hover:bg-white/5 transition-colors"
             >
               {label}
             </button>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link
             href={`${APP_URL}/login`}
-            className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text transition-colors"
+            className="rounded-lg px-5 py-2 text-base font-medium text-text-muted hover:text-text transition-colors"
           >
             Sign In
           </Link>
           <Link
             href={`${APP_URL}/register`}
-            className="rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+            className="rounded-xl bg-accent px-6 py-2.5 text-base font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
           >
             Get Started
           </Link>

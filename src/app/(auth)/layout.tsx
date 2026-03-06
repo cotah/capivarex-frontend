@@ -24,6 +24,7 @@ export default function AuthLayout({
           height={120}
           priority
           className="w-72 h-auto object-contain"
+          style={{ filter: 'drop-shadow(0 0 8px rgba(201,164,97,0.3))' }}
         />
       </motion.div>
 
