@@ -9,49 +9,29 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 export default function Hero() {
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center px-4 pt-14">
-      {/* Orb */}
+      {/* 3D Capivara Video */}
       <motion.div
         className="relative mb-8 flex items-center justify-center"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
       >
-        {/* Outer glow */}
-        <motion.div
-          className="absolute rounded-full"
+        {/* Glow behind video */}
+        <div
+          className="absolute w-[320px] h-[320px] sm:w-[440px] sm:h-[440px]"
           style={{
-            width: 220,
-            height: 220,
             background:
-              'radial-gradient(circle, rgba(201,164,97,0.12) 0%, transparent 70%)',
+              'radial-gradient(circle, rgba(201,164,97,0.1) 0%, transparent 70%)',
           }}
-          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
-        {/* Inner ring */}
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            width: 120,
-            height: 120,
-            background:
-              'radial-gradient(circle at 35% 35%, rgba(201,164,97,0.25), rgba(201,164,97,0.06) 60%, transparent)',
-            border: '1px solid rgba(201,164,97,0.15)',
-          }}
-          animate={{ scale: [1, 1.04, 1] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        {/* Core */}
-        <motion.div
-          className="relative rounded-full"
-          style={{
-            width: 48,
-            height: 48,
-            background: 'radial-gradient(circle at 40% 40%, #c9a461, #a0823e)',
-            boxShadow: '0 0 30px rgba(201,164,97,0.4), inset 0 0 10px rgba(255,255,255,0.1)',
-          }}
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        <video
+          src="/capivara-hero.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="relative w-[280px] sm:w-[400px] h-auto"
+          style={{ mixBlendMode: 'screen' }}
         />
       </motion.div>
 
