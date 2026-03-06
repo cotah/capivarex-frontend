@@ -8,78 +8,68 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center px-4 pt-14">
-      {/* 3D Capivara Video */}
-      <motion.div
-        className="relative mb-8 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        {/* Glow behind video */}
-        <div
-          className="absolute w-[320px] h-[320px] sm:w-[440px] sm:h-[440px]"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(201,164,97,0.1) 0%, transparent 70%)',
-          }}
-        />
-        <video
-          src="/capivara-hero.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="relative w-[280px] sm:w-[400px] h-auto"
-          style={{ mixBlendMode: 'screen' }}
-        />
-      </motion.div>
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Video background */}
+      <video
+        src="/capivara-hero.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover opacity-45"
+      />
 
-      {/* Headline */}
-      <motion.h1
-        className="text-center text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text max-w-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        Your AI{' '}
-        <span className="text-accent">Life Assistant</span>
-      </motion.h1>
+      {/* Dark overlay for legibility */}
+      <div className="absolute inset-0 bg-black/30 z-[1]" />
 
-      <motion.p
-        className="mt-4 text-center text-base sm:text-lg text-text-muted max-w-lg"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.35 }}
-      >
-        Manage your music, calendar, smart home, groceries, and more — all
-        through one intelligent conversation.
-      </motion.p>
-
-      {/* CTAs */}
-      <motion.div
-        className="mt-8 flex flex-col sm:flex-row items-center gap-3"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-      >
-        <Link
-          href={`${APP_URL}/register`}
-          className="flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+      {/* Content */}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+        {/* Headline */}
+        <motion.h1
+          className="text-center text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text max-w-3xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Get Started Free
-          <ArrowRight size={16} />
-        </Link>
-        <button
-          onClick={() =>
-            document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })
-          }
-          className="flex items-center gap-2 rounded-xl glass px-6 py-3 text-sm font-medium text-text hover:bg-white/10 transition-colors"
+          Your AI{' '}
+          <span className="text-accent">Life Assistant</span>
+        </motion.h1>
+
+        <motion.p
+          className="mt-4 text-center text-base sm:text-lg text-text-muted max-w-lg"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
         >
-          <Play size={14} />
-          See how it works
-        </button>
-      </motion.div>
+          Manage your music, calendar, smart home, groceries, and more — all
+          through one intelligent conversation.
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div
+          className="mt-8 flex flex-col sm:flex-row items-center gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <Link
+            href={`${APP_URL}/register`}
+            className="flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+          >
+            Get Started Free
+            <ArrowRight size={16} />
+          </Link>
+          <button
+            onClick={() =>
+              document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })
+            }
+            className="flex items-center gap-2 rounded-xl glass px-6 py-3 text-sm font-medium text-text hover:bg-white/10 transition-colors"
+          >
+            <Play size={14} />
+            See how it works
+          </button>
+        </motion.div>
+      </div>
     </section>
   );
 }
