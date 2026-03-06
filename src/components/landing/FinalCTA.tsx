@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
+
 export default function FinalCTA() {
   return (
     <section className="px-4 sm:px-6 py-24">
@@ -22,7 +24,7 @@ export default function FinalCTA() {
           so they can focus on what matters.
         </p>
         <Link
-          href="/register"
+          href={`${APP_URL}/register`}
           className="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3.5 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
         >
           Get Started Free

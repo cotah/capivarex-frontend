@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, Play } from 'lucide-react';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
+
 export default function Hero() {
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center px-4 pt-14">
@@ -82,7 +84,7 @@ export default function Hero() {
         transition={{ duration: 0.6, delay: 0.5 }}
       >
         <Link
-          href="/register"
+          href={`${APP_URL}/register`}
           className="flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
         >
           Get Started Free

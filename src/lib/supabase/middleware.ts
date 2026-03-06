@@ -30,6 +30,32 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
+  const isMainDomain =
+    hostname === 'capivarex.com' || hostname === 'www.capivarex.com';
+
+  /* ── Main domain (capivarex.com) → always show landing ── */
+  if (isMainDomain) {
+    // Root → rewrite to /landing (URL stays capivarex.com)
+    if (pathname === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/landing';
+      return NextResponse.rewrite(url);
+    }
+
+    // App-only routes → redirect to app subdomain
+    const appOnlyPaths = ['/services', '/insights', '/settings'];
+    if (appOnlyPaths.some((p) => pathname.startsWith(p))) {
+      return NextResponse.redirect(
+        new URL(pathname, 'https://app.capivarex.com'),
+      );
+    }
+
+    // Allow everything else on main domain (/landing, /pricing, /login, /register, etc.)
+    return supabaseResponse;
+  }
+
+  /* ── App domain (app.capivarex.com / vercel / localhost) ── */
   const publicPaths = ['/login', '/register', '/forgot-password', '/pricing', '/landing'];
   const isPublic = publicPaths.some((p) => pathname.startsWith(p));
 

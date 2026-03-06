@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
+
 const sections = [
   { id: 'features', label: 'Features' },
   { id: 'how-it-works', label: 'How it works' },
@@ -54,13 +56,13 @@ export default function LandingNav() {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/login"
+            href={`${APP_URL}/login`}
             className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text transition-colors"
           >
             Sign In
           </Link>
           <Link
-            href="/register"
+            href={`${APP_URL}/register`}
             className="rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
           >
             Get Started
