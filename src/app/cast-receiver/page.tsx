@@ -31,9 +31,10 @@ export default function CastReceiverPage() {
         <Image
           src="/logo-horizontal.png"
           alt="Capivarex"
-          width={200}
-          height={48}
+          width={280}
+          height={80}
           priority
+          className="h-20 w-auto object-contain"
         />
         <p className="text-sm text-text-muted">Ready to cast...</p>
       </div>
