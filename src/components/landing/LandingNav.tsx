@@ -36,10 +36,10 @@ export default function LandingNav() {
         <Image
           src="/logo-horizontal.png"
           alt="Capivarex"
-          width={280}
-          height={56}
+          width={500}
+          height={100}
           priority
-          className="h-14 w-auto object-contain"
+          className="h-[100px] w-auto object-contain"
         />
 
         <nav className="hidden sm:flex items-center gap-1.5">
