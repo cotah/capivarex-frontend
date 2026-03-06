@@ -9,10 +9,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
+    <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
       {/* Brand Logo */}
       <motion.div
-        className="mb-3 flex flex-col items-center gap-3"
+        className="mb-2 flex flex-col items-center"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
