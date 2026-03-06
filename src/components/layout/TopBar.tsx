@@ -28,26 +28,18 @@ export default function TopBar() {
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden">
-            <Image
-              src="/icons/icon-96.png"
-              alt="Capivarex"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
               alt="Capivarex"
-              width={100}
-              height={24}
-              className="hidden sm:inline-block object-contain"
+              width={120}
+              height={28}
+              priority
+              className="object-contain"
             />
-            {user && <PlanBadge plan={user.plan} />}
-          </div>
+          </Link>
+          {user && <PlanBadge plan={user.plan} />}
         </div>
 
         {/* Desktop nav */}

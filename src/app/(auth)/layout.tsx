@@ -20,8 +20,8 @@ export default function AuthLayout({
         <Image
           src="/logo-horizontal.png"
           alt="Capivarex"
-          width={180}
-          height={44}
+          width={200}
+          height={48}
           priority
           className="object-contain"
         />
