@@ -36,11 +36,11 @@ export async function updateSession(request: NextRequest) {
 
   /* ── Main domain (capivarex.com) → always show landing ── */
   if (isMainDomain) {
-    // Root → rewrite to /landing (URL stays capivarex.com)
+    // Root → redirect to /landing (URL changes to capivarex.com/landing)
     if (pathname === '/') {
       const url = request.nextUrl.clone();
       url.pathname = '/landing';
-      return NextResponse.rewrite(url);
+      return NextResponse.redirect(url);
     }
 
     // App-only routes → redirect to app subdomain
