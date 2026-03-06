@@ -16,7 +16,7 @@ export default function PricingPage() {
           className="mb-8"
         >
           <Link
-            href="/"
+            href="/chat"
             className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition-colors"
           >
             <ArrowLeft size={14} />

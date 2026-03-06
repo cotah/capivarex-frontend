@@ -9,7 +9,7 @@ import CastButton from '@/components/cast/CastButton';
 import { MessageSquare, Zap, BarChart3, Settings, Circle } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: 'Chat', icon: MessageSquare },
+  { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/services', label: 'Services', icon: Zap },
   { href: '/insights', label: 'Insights', icon: BarChart3 },
   { href: '/settings', label: 'Settings', icon: Settings },
@@ -20,7 +20,7 @@ export default function TopBar() {
   const user = useAuthStore((s) => s.user);
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
+    if (href === '/chat') return pathname === '/chat';
     return pathname.startsWith(href);
   };
 
@@ -29,14 +29,14 @@ export default function TopBar() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center">
+          <Link href="/chat" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
               alt="Capivarex"
-              width={180}
-              height={44}
+              width={200}
+              height={48}
               priority
-              className="h-11 w-auto object-contain"
+              className="h-12 w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}

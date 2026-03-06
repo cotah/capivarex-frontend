@@ -34,24 +34,17 @@ export async function updateSession(request: NextRequest) {
   const isMainDomain =
     hostname === 'capivarex.com' || hostname === 'www.capivarex.com';
 
-  /* ── Main domain (capivarex.com) → always show landing ── */
+  /* ── Main domain (capivarex.com) ── */
   if (isMainDomain) {
-    // Root → redirect to /landing (URL changes to capivarex.com/landing)
-    if (pathname === '/') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/landing';
-      return NextResponse.redirect(url);
-    }
-
     // App-only routes → redirect to app subdomain
-    const appOnlyPaths = ['/services', '/insights', '/settings'];
+    const appOnlyPaths = ['/chat', '/services', '/insights', '/settings'];
     if (appOnlyPaths.some((p) => pathname.startsWith(p))) {
       return NextResponse.redirect(
         new URL(pathname, 'https://app.capivarex.com'),
       );
     }
 
-    // Allow everything else on main domain (/landing, /pricing, /login, /register, etc.)
+    // Allow everything else on main domain (/, /landing, /pricing, /login, /register, etc.)
     return supabaseResponse;
   }
 
@@ -59,7 +52,8 @@ export async function updateSession(request: NextRequest) {
   const publicPaths = ['/login', '/register', '/forgot-password', '/pricing', '/landing'];
   const isPublic = publicPaths.some((p) => pathname.startsWith(p));
 
-  if (!user && !isPublic) {
+  // Root page (/) handles its own redirect to /chat, let it through
+  if (!user && !isPublic && pathname !== '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
@@ -67,7 +61,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user && (pathname === '/login' || pathname === '/register')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/chat';
     return NextResponse.redirect(url);
   }
 

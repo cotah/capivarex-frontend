@@ -34,7 +34,7 @@ export default function LoginForm() {
     try {
       await login(email, password);
       toast.success('Welcome back!');
-      router.push('/');
+      router.push('/chat');
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Login failed. Please try again.',
