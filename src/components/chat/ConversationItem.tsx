@@ -85,7 +85,7 @@ export default function ConversationItem({ id, title, active, onSelect }: Conver
   }
 
   return (
-    <div className="group relative">
+    <div className={`group relative ${menuOpen ? 'z-[999]' : 'z-0'}`}>
       <button
         onClick={onSelect}
         className={`flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${
