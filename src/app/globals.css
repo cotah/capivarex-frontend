@@ -103,3 +103,18 @@ body::before {
 .animate-eye-glow {
   animation: eyeGlow 1.5s ease-in-out infinite;
 }
+
+/* Voice: fast glow when bot is speaking */
+@keyframes eyeGlowFast {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 8px #F6B93B; }
+  50% { opacity: 1; box-shadow: 0 0 25px #F6B93B, 0 0 50px rgba(246, 185, 59, 0.4); }
+}
+.animate-eye-glow-fast {
+  animation: eyeGlowFast 0.6s ease-in-out infinite;
+}
+
+/* Voice: steady glow when listening */
+.animate-eye-glow-steady {
+  opacity: 0.9;
+  box-shadow: 0 0 12px #F6B93B, 0 0 24px rgba(246, 185, 59, 0.3);
+}

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, KeyboardEvent } from 'react';
-import { Send, Mic } from 'lucide-react';
+import { Send, Mic, AudioLines } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/chatStore';
+import VoiceOverlay from '@/components/chat/VoiceOverlay';
 
 interface InputBarProps {
   centered?: boolean;
@@ -11,6 +12,7 @@ interface InputBarProps {
 
 export default function InputBar({ centered = false }: InputBarProps) {
   const [text, setText] = useState('');
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { send } = useChat();
   const isThinking = useChatStore((s) => s.isThinking);
@@ -67,25 +69,39 @@ export default function InputBar({ centered = false }: InputBarProps) {
       >
         <Send size={14} />
       </button>
+
+      {/* Voice conversation button */}
+      <button
+        onClick={() => setVoiceOpen(true)}
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 transition-all duration-200"
+        aria-label="Voice conversation"
+      >
+        <AudioLines size={16} />
+      </button>
     </div>
   );
 
-  /* Centered mode — inline, no fixed positioning */
-  if (centered) {
-    return <div className="w-full px-4">{inputRow}</div>;
-  }
-
-  /* Default mode — fixed at the bottom */
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50">
-      {/* Gradient fade */}
-      <div className="h-8 bg-gradient-to-t from-bg to-transparent pointer-events-none" />
+    <>
+      {/* Centered mode — inline, no fixed positioning */}
+      {centered ? (
+        <div className="w-full px-4">{inputRow}</div>
+      ) : (
+        /* Default mode — fixed at the bottom */
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+          {/* Gradient fade */}
+          <div className="h-8 bg-gradient-to-t from-bg to-transparent pointer-events-none" />
 
-      <div className="bg-bg/80 backdrop-blur-xl pb-safe">
-        <div className="mx-auto max-w-3xl px-4 pb-4">
-          {inputRow}
+          <div className="bg-bg/80 backdrop-blur-xl pb-safe">
+            <div className="mx-auto max-w-3xl px-4 pb-4">
+              {inputRow}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* Voice overlay */}
+      {voiceOpen && <VoiceOverlay onClose={() => setVoiceOpen(false)} />}
+    </>
   );
 }

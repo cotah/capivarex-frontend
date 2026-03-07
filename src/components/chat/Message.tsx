@@ -13,7 +13,12 @@ interface MessageProps {
 
 export default function Message({ message }: MessageProps) {
   const isUser = message.role === 'user';
+  const isVoice = message.source === 'voice';
   const videoId = message.data?.video_id as string | undefined;
+
+  /* Voice messages get a golden border */
+  const voiceBorderUser = isVoice ? 'border-2 border-amber-500' : 'border border-accent/20';
+  const voiceBorderBot = isVoice ? 'border border-amber-500/30' : '';
 
   return (
     <motion.div
@@ -27,8 +32,8 @@ export default function Message({ message }: MessageProps) {
         <div
           className={`px-4 py-2.5 text-base leading-relaxed ${
             isUser
-              ? 'bg-accent/15 border border-accent/20 text-text rounded-2xl rounded-br'
-              : 'glass text-text rounded-2xl rounded-bl'
+              ? `bg-accent/15 ${voiceBorderUser} text-text rounded-2xl rounded-br`
+              : `glass ${voiceBorderBot} text-text rounded-2xl rounded-bl`
           }`}
         >
           {message.text}

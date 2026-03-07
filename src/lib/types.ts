@@ -2,6 +2,8 @@ export type MessageRole = 'user' | 'assistant';
 
 export type MessageType = 'text' | 'music' | 'calendar' | 'shopping' | 'weather';
 
+export type MessageSource = 'text' | 'voice';
+
 export interface ChatMessage {
   id: string;
   role: MessageRole;
@@ -9,6 +11,7 @@ export interface ChatMessage {
   time: string;
   type?: MessageType;
   data?: Record<string, unknown>;
+  source?: MessageSource;
 }
 
 export interface ServiceInfo {
