@@ -15,11 +15,11 @@ export async function fetchInsightStats(
 
   return {
     messages: (data.messages as number) || 0,
-    groceryTotal: (data.grocery_total as number) || 0,
-    songsPlayed: (data.songs_played as number) || 0,
+    groceryTotal: (data.grocery_total as number) || (data.total_spent as number) || (data.groceryTotal as number) || 0,
+    songsPlayed: (data.songs_played as number) || (data.songsPlayed as number) || 0,
     events: (data.events as number) || 0,
-    shoppingTrips: (data.shopping_trips as number) || 0,
-    avgPerTrip: (data.avg_per_trip as number) || 0,
+    shoppingTrips: (data.shopping_trips as number) || (data.trips as number) || (data.shoppingTrips as number) || 0,
+    avgPerTrip: (data.avg_per_trip as number) || (data.avgPerTrip as number) || 0,
   };
 }
 

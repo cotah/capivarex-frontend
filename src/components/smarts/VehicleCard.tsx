@@ -37,7 +37,8 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
     }
     async function load() {
       try {
-        const raw = await apiClient<Record<string, unknown>[]>('/api/webapp/smarts/vehicles');
+        const resp = await apiClient<{ vehicles: Record<string, unknown>[] } | Record<string, unknown>[]>('/api/webapp/smarts/vehicles');
+        const raw = Array.isArray(resp) ? resp : (resp.vehicles || []);
         setVehicles(
           raw.map((v) => ({
             id: v.id as string,

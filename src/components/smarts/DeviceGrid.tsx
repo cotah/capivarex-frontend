@@ -23,8 +23,8 @@ export default function DeviceGrid({ connected = true }: DeviceGridProps) {
     }
     async function load() {
       try {
-        const data = await apiClient<SmartDevice[]>('/api/webapp/smarts/devices');
-        setDevices(data);
+        const resp = await apiClient<{ devices: SmartDevice[] } | SmartDevice[]>('/api/webapp/smarts/devices');
+        setDevices(Array.isArray(resp) ? resp : (resp.devices || []));
       } catch {
         // toast already shown
       } finally {

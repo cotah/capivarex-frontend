@@ -46,8 +46,9 @@ export const useConversationStore = create<ConversationStore>((set) => ({
   fetchConversations: async () => {
     set({ isLoading: true });
     try {
-      const data = await apiClient<ConversationSummary[]>('/api/webapp/conversations');
-      set({ conversations: data.map(toConversation), isLoading: false });
+      const resp = await apiClient<{ conversations: ConversationSummary[] } | ConversationSummary[]>('/api/webapp/conversations');
+      const list = Array.isArray(resp) ? resp : (resp.conversations || []);
+      set({ conversations: list.map(toConversation), isLoading: false });
     } catch {
       set({ isLoading: false });
     }

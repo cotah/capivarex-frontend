@@ -23,8 +23,13 @@ export const useServicesStore = create<ServicesStore>((set) => ({
   fetchAll: async () => {
     set({ isLoading: true });
     try {
-      const data = await apiClient<ServiceConnection[]>('/api/webapp/services/status');
-      set({ connections: data, isLoading: false });
+      const data = await apiClient<{ services: Record<string, { connected: boolean; updated_at?: string }> }>('/api/webapp/services/status');
+      const connections: ServiceConnection[] = Object.entries(data.services || {}).map(([provider, info]) => ({
+        provider,
+        connected: info.connected,
+        lastChecked: info.updated_at,
+      }));
+      set({ connections, isLoading: false });
     } catch {
       set({ isLoading: false });
     }

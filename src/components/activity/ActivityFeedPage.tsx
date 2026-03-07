@@ -24,11 +24,12 @@ export default function ActivityFeedPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await apiClient<ActivityEntry[]>(
+        const resp = await apiClient<{ activities: ActivityEntry[]; has_more?: boolean }>(
           `/api/webapp/activity?limit=${limit}`,
         );
-        setActivities(data);
-        setHasMore(data.length >= limit);
+        const items = resp.activities || [];
+        setActivities(items);
+        setHasMore(resp.has_more ?? items.length >= limit);
       } catch {
         // toast already shown
       } finally {
@@ -41,12 +42,13 @@ export default function ActivityFeedPage() {
   const loadMore = async () => {
     const newOffset = offset + limit;
     try {
-      const data = await apiClient<ActivityEntry[]>(
+      const resp = await apiClient<{ activities: ActivityEntry[]; has_more?: boolean }>(
         `/api/webapp/activity?limit=${limit}&offset=${newOffset}`,
       );
-      setActivities((prev) => [...prev, ...data]);
+      const items = resp.activities || [];
+      setActivities((prev) => [...prev, ...items]);
       setOffset(newOffset);
-      setHasMore(data.length >= limit);
+      setHasMore(resp.has_more ?? items.length >= limit);
     } catch {
       // toast already shown
     }

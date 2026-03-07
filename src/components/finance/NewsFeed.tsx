@@ -15,12 +15,13 @@ export default function NewsFeed() {
   useEffect(() => {
     async function load() {
       try {
-        const raw = await apiClient<Record<string, unknown>[]>('/api/webapp/finance/news');
+        const resp = await apiClient<{ news: Record<string, unknown>[] } | Record<string, unknown>[]>('/api/webapp/finance/news');
+        const raw = Array.isArray(resp) ? resp : (resp.news || []);
         setNews(
           raw.map((item) => ({
-            id: item.id as string,
-            title: item.title as string,
-            source: item.source as string,
+            id: (item.id as string) || '',
+            title: (item.title as string) || '',
+            source: (item.source as string) || '',
             timeAgo: (item.time_ago as string) || (item.timeAgo as string) || '',
           })),
         );
