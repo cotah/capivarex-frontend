@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useAuthStore } from '@/stores/authStore';
 import PlanBadge from '@/components/billing/PlanBadge';
 import CastButton from '@/components/cast/CastButton';
+import { useConversationStore } from '@/stores/conversationStore';
 import {
   MessageSquare,
   Zap,
@@ -16,6 +17,7 @@ import {
   Clock,
   Settings,
   Circle,
+  PanelLeft,
 } from 'lucide-react';
 
 const navItems = [
@@ -32,6 +34,8 @@ const navItems = [
 export default function TopBar() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
+  const toggleSidebar = useConversationStore((s) => s.toggleSidebar);
+  const isChat = pathname === '/chat';
 
   const isActive = (href: string) => {
     if (href === '/chat') return pathname === '/chat';
@@ -40,7 +44,7 @@ export default function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
-      <div className="flex h-14 w-full items-center justify-between px-6">
+      <div className="flex h-14 w-full items-center justify-between px-3 md:px-6">
         {/* Left: Logo + Badge — extrema esquerda */}
         <div className="flex items-center gap-3 shrink-0">
           <Link href="/chat" className="flex items-center">
@@ -76,6 +80,15 @@ export default function TopBar() {
 
         {/* Right: Status — extrema direita */}
         <div className="flex items-center gap-2 shrink-0">
+          {isChat && (
+            <button
+              onClick={toggleSidebar}
+              className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <PanelLeft size={18} />
+            </button>
+          )}
           <CastButton size={14} />
           <Circle size={6} className="fill-success text-success" />
           <span className="text-sm text-text-muted hidden md:inline">

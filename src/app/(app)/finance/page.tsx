@@ -25,7 +25,7 @@ export default function FinancePage() {
     >
       <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center gap-2">
             <TrendingUp size={18} className="text-accent" />
             <h2 className="text-3xl font-semibold text-text">Finance</h2>
