@@ -50,7 +50,7 @@ export default function TopBar() {
               width={160}
               height={40}
               priority
-              className="h-10 w-auto object-contain"
+              className="h-7 md:h-10 w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}
