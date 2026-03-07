@@ -181,14 +181,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     onClose();
   };
 
-  /* Eye glow animation speed based on state */
-  const eyeAnimation =
-    voiceState === 'speaking'
-      ? 'animate-eye-glow-fast'
-      : voiceState === 'listening'
-        ? 'animate-eye-glow-steady'
-        : 'animate-eye-glow';
-
   return (
     <AnimatePresence>
       <motion.div
@@ -221,23 +213,13 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           ) : (
             <>
               {/* Capivara avatar */}
-              <div className="relative w-[150px] h-[150px]">
+              <div className="w-[150px] h-[150px]">
                 <Image
                   src="/capivara-smart.png"
                   alt="Capivarex Voice"
                   width={150}
                   height={150}
                   className="w-full h-full object-contain"
-                />
-                {/* Left eye */}
-                <div
-                  className={`absolute w-4 h-4 rounded-full ${eyeAnimation}`}
-                  style={{ top: '30%', left: '25%', backgroundColor: '#F6B93B' }}
-                />
-                {/* Right eye */}
-                <div
-                  className={`absolute w-4 h-4 rounded-full ${eyeAnimation}`}
-                  style={{ top: '30%', right: '25%', backgroundColor: '#F6B93B' }}
                 />
               </div>
 
