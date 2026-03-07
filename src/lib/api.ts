@@ -34,9 +34,8 @@ export async function apiClient<T>(
   });
 
   if (response.status === 401) {
-    useAuthStore.getState().logout();
-    window.location.href = '/login';
-    throw new ApiError(401, 'Session expired');
+    console.warn('API returned 401 — token may be invalid');
+    throw new ApiError(401, 'Authentication failed');
   }
 
   if (!response.ok) {
