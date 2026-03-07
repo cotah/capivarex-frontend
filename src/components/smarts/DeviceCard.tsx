@@ -45,7 +45,7 @@ export default function DeviceCard({ name, icon, status, room, type }: DeviceCar
         <button
           onClick={() => setIsOn(!isOn)}
           className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-            isOn ? 'bg-accent' : 'bg-white/10'
+            isOn ? 'bg-amber-500' : 'bg-gray-600'
           }`}
         >
           <span
