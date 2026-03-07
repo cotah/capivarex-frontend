@@ -146,8 +146,8 @@ export default function InstallPrompt() {
     /* Already installed as PWA */
     if (isStandalone()) return;
 
-    /* User already dismissed permanently */
-    if (localStorage.getItem(DISMISSED_KEY)) return;
+    /* User already dismissed this session */
+    if (sessionStorage.getItem(DISMISSED_KEY)) return;
 
     /* ── iOS path ── */
     if (isIOS()) {
@@ -202,7 +202,7 @@ export default function InstallPrompt() {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem(DISMISSED_KEY, '1');
+    sessionStorage.setItem(DISMISSED_KEY, '1');
     setVisible(false);
   };
 
