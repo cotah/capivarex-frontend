@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Share, MoreVertical, Plus, Check } from 'lucide-react';
+import { Download, X, Share, MoreVertical, Plus, Check, ExternalLink } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -30,6 +30,13 @@ function isIOS(): boolean {
   );
 }
 
+function isSafariBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /^((?!chrome|android|CriOS|FxiOS|OPiOS).)*safari/i.test(
+    navigator.userAgent,
+  );
+}
+
 /* ── Tutorial Modal ── */
 function InstallTutorial({
   type,
@@ -38,22 +45,44 @@ function InstallTutorial({
   type: 'ios' | 'android';
   onClose: () => void;
 }) {
+  const safari = isSafariBrowser();
+
   const steps =
     type === 'ios'
-      ? [
-          {
-            icon: <Share size={22} className="text-accent" />,
-            text: 'Tap the Share button in your browser toolbar',
-          },
-          {
-            icon: <Plus size={22} className="text-accent" />,
-            text: 'Scroll down and tap "Add to Home Screen"',
-          },
-          {
-            icon: <Check size={22} className="text-accent" />,
-            text: 'Tap "Add" to install Capivarex',
-          },
-        ]
+      ? safari
+        ? [
+            {
+              icon: <Share size={22} className="text-accent" />,
+              text: 'Tap the Share button in your browser toolbar',
+            },
+            {
+              icon: <Plus size={22} className="text-accent" />,
+              text: 'Scroll down and tap "Add to Home Screen"',
+            },
+            {
+              icon: <Check size={22} className="text-accent" />,
+              text: 'Tap "Add" to install Capivarex',
+            },
+          ]
+        : [
+            {
+              icon: <ExternalLink size={22} className="text-accent" />,
+              text: 'Open this page in Safari',
+              note: 'Add to Home Screen only works in Safari',
+            },
+            {
+              icon: <Share size={22} className="text-accent" />,
+              text: 'Tap the Share button (↑) in Safari',
+            },
+            {
+              icon: <Plus size={22} className="text-accent" />,
+              text: 'Scroll down and tap "Add to Home Screen"',
+            },
+            {
+              icon: <Check size={22} className="text-accent" />,
+              text: 'Tap "Add" to install Capivarex',
+            },
+          ]
       : [
           {
             icon: <MoreVertical size={22} className="text-accent" />,
@@ -117,6 +146,9 @@ function InstallTutorial({
                   Step {i + 1}
                 </p>
                 <p className="text-sm text-text">{step.text}</p>
+                {'note' in step && step.note && (
+                  <p className="text-xs text-text-muted mt-0.5">{step.note}</p>
+                )}
               </div>
             </div>
           ))}
