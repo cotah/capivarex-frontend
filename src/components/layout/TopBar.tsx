@@ -40,24 +40,24 @@ export default function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2 md:py-3">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         {/* Logo + Badge */}
         <div className="flex items-center gap-3">
           <Link href="/chat" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
               alt="Capivarex"
-              width={500}
-              height={160}
+              width={180}
+              height={48}
               priority
-              className="h-10 md:h-[100px] lg:h-[160px] w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}
         </div>
 
         {/* Desktop nav — hidden on mobile */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-5">
+        <nav className="hidden md:flex items-center gap-6">
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}

@@ -13,9 +13,8 @@ export default function AppLayout({
     <AuthGuard>
       <div className="relative z-10 flex flex-col min-h-screen">
         <TopBar />
-        {/* pt: offset for fixed header (mobile thin, desktop tall with large logo) */}
-        {/* pb-24: offset for bottom bar on mobile, pb-0 on desktop */}
-        <div className="flex-1 pt-16 md:pt-48 pb-24 md:pb-0">{children}</div>
+        {/* pt-14: offset for fixed h-14 header. pb-24: offset for bottom bar on mobile */}
+        <div className="flex-1 pt-14 pb-24 md:pb-0">{children}</div>
         <BottomBar />
       </div>
     </AuthGuard>
