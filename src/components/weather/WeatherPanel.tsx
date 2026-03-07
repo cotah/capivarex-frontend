@@ -1,37 +1,13 @@
 'use client';
 
 import { Search } from 'lucide-react';
+import type { WeatherData } from '@/hooks/useWeather';
 
-const mockData = {
-  city: 'Dublin',
-  temp: 14,
-  feelsLike: 11,
-  high: 16,
-  low: 9,
-  humidity: 72,
-  wind: '18 km/h',
-  condition: 'Partly Cloudy',
-  icon: '🌤️',
-  hours: [
-    { time: 'Now', temp: 14, icon: '🌤️' },
-    { time: '14:00', temp: 15, icon: '🌤️' },
-    { time: '15:00', temp: 15, icon: '☁️' },
-    { time: '16:00', temp: 14, icon: '☁️' },
-    { time: '17:00', temp: 13, icon: '🌧️' },
-    { time: '18:00', temp: 12, icon: '🌧️' },
-  ],
-  days: [
-    { day: 'Tomorrow', high: 15, low: 8, icon: '🌧️' },
-    { day: 'Sunday', high: 13, low: 7, icon: '☁️' },
-    { day: 'Monday', high: 16, low: 9, icon: '🌤️' },
-    { day: 'Tuesday', high: 17, low: 10, icon: '☀️' },
-    { day: 'Wednesday', high: 14, low: 8, icon: '🌧️' },
-  ],
-};
+interface WeatherPanelProps {
+  data: WeatherData;
+}
 
-export default function WeatherPanel() {
-  const d = mockData;
-
+export default function WeatherPanel({ data: d }: WeatherPanelProps) {
   return (
     <div className="w-[calc(100vw-2rem)] md:w-80 rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-amber-500/20 shadow-2xl shadow-black/50 overflow-hidden">
       {/* Header + current */}
