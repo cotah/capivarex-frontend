@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useChatStore } from '@/stores/chatStore';
 import Message from './Message';
-import ThinkingDots from './ThinkingDots';
+import ThinkingCapivara from './ThinkingCapivara';
 
 export default function MessageList() {
   const messages = useChatStore((s) => s.messages);
@@ -19,7 +19,7 @@ export default function MessageList() {
       {messages.map((msg) => (
         <Message key={msg.id} message={msg} />
       ))}
-      {isThinking && <ThinkingDots />}
+      {isThinking && <ThinkingCapivara />}
       <div ref={bottomRef} />
     </div>
   );
