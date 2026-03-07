@@ -2,7 +2,7 @@
   "name": "Capivarex — Your AI Life Assistant",
   "short_name": "Capivarex",
   "description": "AI-powered personal assistant for your daily tasks.",
-  "start_url": "/",
+  "start_url": "/chat",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0a0a0f",
