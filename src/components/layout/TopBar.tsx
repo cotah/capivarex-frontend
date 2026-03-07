@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useAuthStore } from '@/stores/authStore';
 import PlanBadge from '@/components/billing/PlanBadge';
 import CastButton from '@/components/cast/CastButton';
+import WeatherChip from '@/components/weather/WeatherChip';
 import { useConversationStore } from '@/stores/conversationStore';
 import {
   MessageSquare,
@@ -78,8 +79,11 @@ export default function TopBar() {
           ))}
         </nav>
 
-        {/* Right: Status — extrema direita */}
+        {/* Right: Weather + Status */}
         <div className="flex items-center gap-2 shrink-0">
+          <div className="hidden md:block">
+            <WeatherChip />
+          </div>
           {isChat && (
             <button
               onClick={toggleSidebar}

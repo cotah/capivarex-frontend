@@ -6,6 +6,7 @@ import InputBar from '@/components/layout/InputBar';
 import MessageList from '@/components/chat/MessageList';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import { PanelLeft } from 'lucide-react';
+import WeatherChip from '@/components/weather/WeatherChip';
 
 export default function ChatPage() {
   const messages = useChatStore((s) => s.messages);
@@ -35,6 +36,9 @@ export default function ChatPage() {
         {/* ═══ Empty state — centered welcome + input ═══ */}
         {!hasMessages ? (
           <div className="mx-auto flex h-[calc(100vh-3.5rem-6rem)] md:h-[calc(100vh-3.5rem)] max-w-3xl flex-col items-center justify-center">
+            <div className="mb-4 md:hidden">
+              <WeatherChip />
+            </div>
             <h1 className="mb-8 text-center text-3xl font-light tracking-wide text-text md:text-5xl">
               Anywhere. Anytime.
             </h1>
