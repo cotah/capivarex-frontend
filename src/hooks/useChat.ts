@@ -1,4 +1,5 @@
 import { useChatStore } from '@/stores/chatStore';
+import { useConversationStore } from '@/stores/conversationStore';
 import { sendMessage } from '@/lib/api';
 import { nanoid } from 'nanoid';
 
@@ -21,7 +22,12 @@ export function useChat() {
     setThinking(true);
 
     try {
-      const response = await sendMessage(text);
+      let conversationId = useConversationStore.getState().activeConversationId;
+      if (!conversationId) {
+        conversationId = await useConversationStore.getState().createConversation();
+      }
+
+      const response = await sendMessage(text, conversationId);
 
       addMessage({
         id: nanoid(),
@@ -37,6 +43,13 @@ export function useChat() {
         type: response.type as 'text' | 'music' | 'calendar' | undefined,
         data: response.data as Record<string, unknown> | undefined,
       });
+
+      if (response.conversation_title) {
+        useConversationStore.getState().renameConversation(
+          conversationId,
+          response.conversation_title as string,
+        );
+      }
     } catch {
       addMessage({
         id: nanoid(),

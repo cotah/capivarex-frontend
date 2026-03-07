@@ -1,31 +1,11 @@
 'use client';
 
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Car, MapPin, Battery, Gauge } from 'lucide-react';
-
-interface Vehicle {
-  id: string;
-  name: string;
-  battery: number;
-  range: number;
-  status: string;
-  location: string;
-  lastUpdated: string;
-  isCharging: boolean;
-}
-
-const mockVehicles: Vehicle[] = [
-  {
-    id: '1',
-    name: 'Tesla Model 3',
-    battery: 78,
-    range: 310,
-    status: 'parked',
-    location: 'Home — Dublin, Ireland',
-    lastUpdated: '2026-03-07T04:10:00Z',
-    isCharging: false,
-  },
-];
+import { apiClient } from '@/lib/api';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
+import type { Vehicle } from '@/lib/types';
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -47,25 +27,65 @@ interface VehicleListProps {
 }
 
 export default function VehicleList({ connected = true }: VehicleListProps) {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!connected) {
+      setLoading(false);
+      return;
+    }
+    async function load() {
+      try {
+        const raw = await apiClient<Record<string, unknown>[]>('/api/webapp/smarts/vehicles');
+        setVehicles(
+          raw.map((v) => ({
+            id: v.id as string,
+            name: v.name as string,
+            battery: v.battery as number,
+            range: v.range as number,
+            status: v.status as string,
+            location: v.location as string,
+            lastUpdated: (v.last_updated as string) || (v.lastUpdated as string) || '',
+            isCharging: (v.is_charging as boolean) || (v.isCharging as boolean) || false,
+          })),
+        );
+      } catch {
+        // toast already shown
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [connected]);
+
   if (!connected) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Car size={48} className="text-text-muted/30 mb-4" />
-        <p className="text-base font-medium text-text mb-1">No vehicle connected</p>
-        <p className="text-sm text-text-muted mb-4">Connect your car with Smartcar</p>
-        <Link
-          href="/services"
-          className="rounded-xl bg-accent px-5 py-2.5 text-base font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
-        >
-          Connect
-        </Link>
-      </div>
+      <EmptyState
+        icon={Car}
+        title="No vehicle connected"
+        description="Connect your car with Smartcar"
+        actionLabel="Connect"
+        actionHref="/services"
+      />
+    );
+  }
+
+  if (loading) return <LoadingSpinner />;
+
+  if (vehicles.length === 0) {
+    return (
+      <EmptyState
+        icon={Car}
+        title="No vehicles found"
+        description="Your connected vehicles will appear here."
+      />
     );
   }
 
   return (
     <div className="space-y-3">
-      {mockVehicles.map((v) => (
+      {vehicles.map((v) => (
         <div key={v.id} className="glass rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <Car size={18} className="text-accent" />

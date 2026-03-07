@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import toast from 'react-hot-toast';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,40 +15,52 @@ async function getHeaders(): Promise<HeadersInit> {
   };
 }
 
-export async function sendMessage(
-  message: string,
-): Promise<Record<string, unknown>> {
-  const user = useAuthStore.getState().user;
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
 
-  const response = await fetch(`${API_URL}/api/chat`, {
-    method: 'POST',
-    headers: await getHeaders(),
-    body: JSON.stringify({
-      message,
-      user_id: user?.id || 'demo-user',
-      chat_id: user?.telegramChatId || user?.id || 'demo-chat',
-    }),
+export async function apiClient<T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(await getHeaders()),
+      ...options?.headers,
+    },
   });
 
   if (response.status === 401) {
     useAuthStore.getState().logout();
     window.location.href = '/login';
-    throw new Error('Session expired');
+    throw new ApiError(401, 'Session expired');
   }
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const msg = await response.text().catch(() => 'Unknown error');
+    toast.error(msg || `Error ${response.status}`);
+    throw new ApiError(response.status, msg);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json();
 }
 
-export async function getServiceStatus(
-  userId: string,
+export async function sendMessage(
+  message: string,
+  conversationId?: string,
 ): Promise<Record<string, unknown>> {
-  const response = await fetch(
-    `${API_URL}/api/auth/google/status?user_id=${userId}`,
-    { headers: await getHeaders() },
-  );
-  return response.json();
+  return apiClient<Record<string, unknown>>('/api/webapp/chat', {
+    method: 'POST',
+    body: JSON.stringify({
+      message,
+      ...(conversationId ? { conversation_id: conversationId } : {}),
+    }),
+  });
 }

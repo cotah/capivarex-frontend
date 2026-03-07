@@ -105,7 +105,7 @@ export default function ServiceGrid() {
 
   useEffect(() => {
     if (user?.id) {
-      fetchAll(user.id);
+      fetchAll();
     }
   }, [user?.id, fetchAll]);
 

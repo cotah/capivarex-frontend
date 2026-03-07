@@ -5,10 +5,17 @@ import { X } from 'lucide-react';
 import { useConversationStore } from '@/stores/conversationStore';
 import NewChatButton from './NewChatButton';
 import ConversationList from './ConversationList';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 export default function ChatSidebar() {
   const sidebarOpen = useConversationStore((s) => s.sidebarOpen);
   const setSidebarOpen = useConversationStore((s) => s.setSidebarOpen);
+  const isLoading = useConversationStore((s) => s.isLoading);
+  const fetchConversations = useConversationStore((s) => s.fetchConversations);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
 
   /* Close on Escape */
   useEffect(() => {
@@ -53,7 +60,7 @@ export default function ChatSidebar() {
         </div>
 
         {/* Conversation list */}
-        <ConversationList />
+        {isLoading ? <LoadingSpinner /> : <ConversationList />}
       </aside>
     </>
   );

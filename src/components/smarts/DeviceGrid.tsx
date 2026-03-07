@@ -1,44 +1,66 @@
 'use client';
 
-import DeviceCard from './DeviceCard';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Home } from 'lucide-react';
-
-const mockDevices = [
-  { id: '1', name: 'Living Room Light', type: 'light', icon: '💡', status: 'on', room: 'Living Room' },
-  { id: '2', name: 'Bedroom Light', type: 'light', icon: '💡', status: 'off', room: 'Bedroom' },
-  { id: '3', name: 'Front Door Lock', type: 'lock', icon: '🔒', status: 'locked', room: 'Entrance' },
-  { id: '4', name: 'Thermostat', type: 'thermostat', icon: '🌡️', status: '21°C', room: 'Hallway' },
-  { id: '5', name: 'Kitchen Plug', type: 'plug', icon: '🔌', status: 'on', room: 'Kitchen' },
-  { id: '6', name: 'Garage Door', type: 'lock', icon: '🚪', status: 'closed', room: 'Garage' },
-  { id: '7', name: 'Garden Camera', type: 'camera', icon: '📹', status: 'recording', room: 'Garden' },
-  { id: '8', name: 'Bathroom Light', type: 'light', icon: '💡', status: 'off', room: 'Bathroom' },
-];
+import { apiClient } from '@/lib/api';
+import DeviceCard from './DeviceCard';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
+import type { SmartDevice } from '@/lib/types';
 
 interface DeviceGridProps {
   connected?: boolean;
 }
 
 export default function DeviceGrid({ connected = true }: DeviceGridProps) {
+  const [devices, setDevices] = useState<SmartDevice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!connected) {
+      setLoading(false);
+      return;
+    }
+    async function load() {
+      try {
+        const data = await apiClient<SmartDevice[]>('/api/webapp/smarts/devices');
+        setDevices(data);
+      } catch {
+        // toast already shown
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [connected]);
+
   if (!connected) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Home size={48} className="text-text-muted/30 mb-4" />
-        <p className="text-base font-medium text-text mb-1">No smart home connected</p>
-        <p className="text-sm text-text-muted mb-4">Connect your SmartThings account to control devices</p>
-        <Link
-          href="/services"
-          className="rounded-xl bg-accent px-5 py-2.5 text-base font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
-        >
-          Connect
-        </Link>
-      </div>
+      <EmptyState
+        icon={Home}
+        title="No smart home connected"
+        description="Connect your SmartThings account to control devices"
+        actionLabel="Connect"
+        actionHref="/services"
+      />
+    );
+  }
+
+  if (loading) return <LoadingSpinner />;
+
+  if (devices.length === 0) {
+    return (
+      <EmptyState
+        icon={Home}
+        title="No devices found"
+        description="Your smart home devices will appear here once detected."
+      />
     );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {mockDevices.map((d) => (
+      {devices.map((d) => (
         <DeviceCard
           key={d.id}
           name={d.name}

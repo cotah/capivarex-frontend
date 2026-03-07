@@ -4,9 +4,10 @@ interface ReminderItemProps {
   text: string;
   dueAt: string;
   completed: boolean;
+  onToggle?: () => void;
 }
 
-export default function ReminderItem({ text, dueAt, completed }: ReminderItemProps) {
+export default function ReminderItem({ text, dueAt, completed, onToggle }: ReminderItemProps) {
   const date = new Date(dueAt);
   const formatted = date.toLocaleDateString('en-IE', {
     day: 'numeric',
@@ -20,7 +21,13 @@ export default function ReminderItem({ text, dueAt, completed }: ReminderItemPro
   return (
     <div className="glass rounded-xl px-4 py-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
-        <span className="text-base flex-shrink-0">{completed ? '✅' : '🔔'}</span>
+        <button
+          onClick={onToggle}
+          className="text-base flex-shrink-0 hover:scale-110 transition-transform"
+          aria-label={completed ? 'Mark as pending' : 'Mark as completed'}
+        >
+          {completed ? '✅' : '🔔'}
+        </button>
         <p
           className={`text-base truncate ${
             completed

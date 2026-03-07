@@ -1,24 +1,70 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
+import { fetchReminders, toggleReminder } from '@/lib/notes';
 import ReminderItem from './ReminderItem';
-
-const mockReminders = [
-  { id: '1', text: 'Call dentist for checkup', dueAt: '2026-03-08T09:00:00Z', completed: false },
-  { id: '2', text: 'Pay electricity bill', dueAt: '2026-03-10T12:00:00Z', completed: false },
-  { id: '3', text: 'Submit tax documents', dueAt: '2026-03-15T17:00:00Z', completed: false },
-  { id: '4', text: 'Buy groceries for the week', dueAt: '2026-03-06T11:00:00Z', completed: true },
-  { id: '5', text: 'Send birthday gift to Maria', dueAt: '2026-03-05T10:00:00Z', completed: true },
-  { id: '6', text: 'Renew gym membership', dueAt: '2026-03-20T08:00:00Z', completed: false },
-];
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
+import type { Reminder } from '@/lib/types';
 
 export default function RemindersList() {
-  const pending = mockReminders.filter((r) => !r.completed);
-  const completed = mockReminders.filter((r) => r.completed);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchReminders();
+        setReminders(data);
+      } catch {
+        // error handled upstream
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const handleToggle = async (id: string, completed: boolean) => {
+    setReminders((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, completed } : r)),
+    );
+    try {
+      await toggleReminder(id, completed);
+    } catch {
+      // revert on error
+      setReminders((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, completed: !completed } : r)),
+      );
+    }
+  };
+
+  if (loading) return <LoadingSpinner />;
+
+  if (reminders.length === 0) {
+    return (
+      <EmptyState
+        icon={Bell}
+        title="No reminders yet"
+        description="Ask Capivarex to set a reminder for you."
+      />
+    );
+  }
+
+  const pending = reminders.filter((r) => !r.completed);
+  const completed = reminders.filter((r) => r.completed);
 
   return (
     <div className="space-y-3">
       {pending.map((r) => (
-        <ReminderItem key={r.id} text={r.text} dueAt={r.dueAt} completed={false} />
+        <ReminderItem
+          key={r.id}
+          text={r.text}
+          dueAt={r.due_at}
+          completed={false}
+          onToggle={() => handleToggle(r.id, true)}
+        />
       ))}
       {completed.length > 0 && (
         <>
@@ -26,7 +72,13 @@ export default function RemindersList() {
             Completed
           </p>
           {completed.map((r) => (
-            <ReminderItem key={r.id} text={r.text} dueAt={r.dueAt} completed={true} />
+            <ReminderItem
+              key={r.id}
+              text={r.text}
+              dueAt={r.due_at}
+              completed={true}
+              onToggle={() => handleToggle(r.id, false)}
+            />
           ))}
         </>
       )}

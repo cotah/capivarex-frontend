@@ -1,25 +1,51 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { Plus, StickyNote } from 'lucide-react';
+import { fetchNotes } from '@/lib/notes';
 import NoteCard from './NoteCard';
-import { Plus } from 'lucide-react';
-
-const mockNotes = [
-  { id: '1', title: 'Shopping ideas', content: 'Need to check prices for a new laptop. Compare Dell XPS vs MacBook Air. Also look at monitors.', createdAt: '2026-03-05T14:30:00Z' },
-  { id: '2', title: 'Meeting notes - Project Alpha', content: 'Discussed project timeline. Deadline moved to April 15. Need to finalize API contracts by next week.', createdAt: '2026-03-04T10:15:00Z' },
-  { id: '3', title: 'Travel plans', content: 'Look into flights to Lisbon for Easter. Check Airbnb in Alfama area. Budget: max €800 total.', createdAt: '2026-03-02T18:00:00Z' },
-  { id: '4', title: 'Recipe - Pasta Carbonara', content: 'Ingredients: spaghetti, eggs, pecorino, guanciale, black pepper. Cook pasta al dente, mix eggs with cheese...', createdAt: '2026-02-28T20:45:00Z' },
-  { id: '5', title: 'Book recommendations', content: 'Atomic Habits by James Clear, Deep Work by Cal Newport, The Pragmatic Programmer.', createdAt: '2026-02-25T09:30:00Z' },
-];
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
+import type { Note } from '@/lib/types';
 
 export default function NotesList() {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchNotes();
+        setNotes(data);
+      } catch {
+        // error handled upstream
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+
+  if (notes.length === 0) {
+    return (
+      <EmptyState
+        icon={StickyNote}
+        title="No notes yet"
+        description="Ask Capivarex to take a note or create one yourself."
+      />
+    );
+  }
+
   return (
     <div className="space-y-3">
-      {mockNotes.map((note) => (
+      {notes.map((note) => (
         <NoteCard
           key={note.id}
           title={note.title}
           content={note.content}
-          createdAt={note.createdAt}
+          createdAt={note.created_at}
         />
       ))}
 

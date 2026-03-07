@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
+import { apiClient } from '@/lib/api';
 import SubTabs from '@/components/shared/SubTabs';
 import StockList from '@/components/finance/StockList';
 import CryptoList from '@/components/finance/CryptoList';
 import NewsFeed from '@/components/finance/NewsFeed';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import type { PortfolioResponse, StockItem, CryptoItem } from '@/lib/types';
 
 const tabs = [
   { id: 'stocks', label: 'Stocks' },
@@ -16,6 +19,26 @@ const tabs = [
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState('stocks');
+  const [stocks, setStocks] = useState<StockItem[]>([]);
+  const [crypto, setCrypto] = useState<CryptoItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await apiClient<PortfolioResponse>('/api/webapp/finance/portfolio');
+        setStocks(data.stocks || []);
+        setCrypto(data.crypto || []);
+      } catch {
+        // toast already shown
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <motion.div
@@ -34,8 +57,8 @@ export default function FinancePage() {
         </div>
 
         {/* Content */}
-        {activeTab === 'stocks' && <StockList />}
-        {activeTab === 'crypto' && <CryptoList />}
+        {activeTab === 'stocks' && <StockList stocks={stocks} />}
+        {activeTab === 'crypto' && <CryptoList crypto={crypto} />}
         {activeTab === 'news' && <NewsFeed />}
       </div>
     </motion.div>

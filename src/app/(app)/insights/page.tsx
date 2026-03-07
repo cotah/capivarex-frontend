@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ChevronDown } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore';
 import StatsGrid from '@/components/insights/StatsGrid';
 import SpendingChart from '@/components/insights/SpendingChart';
 import StoreRanking from '@/components/insights/StoreRanking';
 import ProductsTable from '@/components/insights/ProductsTable';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
 import {
   fetchInsightStats,
   fetchGrocerySpending,
@@ -37,7 +38,6 @@ function getMonthLabel(month: string): string {
 }
 
 export default function InsightsPage() {
-  const user = useAuthStore((s) => s.user);
   const [month, setMonth] = useState(getCurrentMonth());
   const [showPicker, setShowPicker] = useState(false);
 
@@ -48,20 +48,24 @@ export default function InsightsPage() {
 
   useEffect(() => {
     async function load() {
-      const userId = user?.id || 'demo-user';
       setLoading(true);
-      const [s, sp, st] = await Promise.all([
-        fetchInsightStats(userId, month),
-        fetchGrocerySpending(userId),
-        fetchStoreRanking(userId, month),
-      ]);
-      setStats(s);
-      setSpending(sp);
-      setStores(st);
-      setLoading(false);
+      try {
+        const [s, sp, st] = await Promise.all([
+          fetchInsightStats(month),
+          fetchGrocerySpending(),
+          fetchStoreRanking(month),
+        ]);
+        setStats(s);
+        setSpending(sp);
+        setStores(st);
+      } catch {
+        // toast already shown by apiClient
+      } finally {
+        setLoading(false);
+      }
     }
     load();
-  }, [user?.id, month]);
+  }, [month]);
 
   const availableMonths: string[] = [];
   const now = new Date();
@@ -73,10 +77,16 @@ export default function InsightsPage() {
   }
 
   if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!stats) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
-      </div>
+      <EmptyState
+        icon={ShoppingCart}
+        title="No shopping data yet"
+        description="Start scanning receipts or adding items to see your insights here."
+      />
     );
   }
 
@@ -127,7 +137,7 @@ export default function InsightsPage() {
         </div>
 
         {/* Stats — Total Spent, Shopping Trips, Avg per Trip */}
-        {stats && <StatsGrid stats={stats} />}
+        <StatsGrid stats={stats} />
 
         {/* Charts row — Monthly spending + Store ranking */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -2,17 +2,12 @@
 
 import { Plus } from 'lucide-react';
 import { useConversationStore } from '@/stores/conversationStore';
-import { useChatStore } from '@/stores/chatStore';
 
 export default function NewChatButton() {
   const createConversation = useConversationStore((s) => s.createConversation);
-  const setThinking = useChatStore((s) => s.setThinking);
 
-  const handleNewChat = () => {
-    createConversation();
-    // Clear current chat messages
-    useChatStore.setState({ messages: [], isThinking: false });
-    setThinking(false);
+  const handleNewChat = async () => {
+    await createConversation();
   };
 
   return (

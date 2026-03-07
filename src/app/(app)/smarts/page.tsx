@@ -6,6 +6,7 @@ import { Home } from 'lucide-react';
 import SubTabs from '@/components/shared/SubTabs';
 import DeviceGrid from '@/components/smarts/DeviceGrid';
 import VehicleList from '@/components/smarts/VehicleCard';
+import { useServicesStore } from '@/stores/servicesStore';
 
 const tabs = [
   { id: 'devices', label: 'Devices' },
@@ -14,6 +15,10 @@ const tabs = [
 
 export default function SmartsPage() {
   const [activeTab, setActiveTab] = useState('devices');
+  const connections = useServicesStore((s) => s.connections);
+
+  const smartthingsConnected = connections.find((c) => c.provider === 'smartthings')?.connected ?? false;
+  const smartcarConnected = connections.find((c) => c.provider === 'smartcar')?.connected ?? false;
 
   return (
     <motion.div
@@ -32,7 +37,11 @@ export default function SmartsPage() {
         </div>
 
         {/* Content */}
-        {activeTab === 'devices' ? <DeviceGrid /> : <VehicleList />}
+        {activeTab === 'devices' ? (
+          <DeviceGrid connected={smartthingsConnected} />
+        ) : (
+          <VehicleList connected={smartcarConnected} />
+        )}
       </div>
     </motion.div>
   );

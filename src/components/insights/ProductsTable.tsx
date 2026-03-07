@@ -1,38 +1,46 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-
-interface Product {
-  name: string;
-  quantity: number;
-  avgPrice: number;
-  total: number;
-}
-
-const MOCK_PRODUCTS: Product[] = [
-  { name: 'Chicken', quantity: 5, avgPrice: 7.99, total: 39.95 },
-  { name: 'Milk 1L', quantity: 8, avgPrice: 1.49, total: 11.92 },
-  { name: 'Bread', quantity: 6, avgPrice: 1.79, total: 10.74 },
-  { name: 'Eggs 12pk', quantity: 3, avgPrice: 3.49, total: 10.47 },
-  { name: 'Bananas', quantity: 7, avgPrice: 1.15, total: 8.05 },
-  { name: 'Rice 1kg', quantity: 2, avgPrice: 2.29, total: 4.58 },
-  { name: 'Tomatoes', quantity: 4, avgPrice: 0.99, total: 3.96 },
-  { name: 'Pasta 500g', quantity: 3, avgPrice: 1.19, total: 3.57 },
-  { name: 'Olive Oil', quantity: 1, avgPrice: 5.99, total: 5.99 },
-  { name: 'Onions 1kg', quantity: 3, avgPrice: 0.89, total: 2.67 },
-  { name: 'Yoghurt', quantity: 6, avgPrice: 0.79, total: 4.74 },
-  { name: 'Cheese', quantity: 2, avgPrice: 3.29, total: 6.58 },
-  { name: 'Butter', quantity: 2, avgPrice: 2.49, total: 4.98 },
-  { name: 'Orange Juice', quantity: 3, avgPrice: 2.19, total: 6.57 },
-  { name: 'Potatoes 2kg', quantity: 2, avgPrice: 1.99, total: 3.98 },
-];
+import { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
+import { fetchGroceryProducts } from '@/lib/insights';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
+import type { GroceryProduct } from '@/lib/types';
 
 const DEFAULT_VISIBLE = 10;
 
 export default function ProductsTable() {
+  const [products, setProducts] = useState<GroceryProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
-  const sorted = [...MOCK_PRODUCTS].sort((a, b) => b.total - a.total);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchGroceryProducts();
+        setProducts(data);
+      } catch {
+        // toast already shown
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+
+  if (products.length === 0) {
+    return (
+      <EmptyState
+        icon={ShoppingCart}
+        title="No products yet"
+        description="Scan a receipt to start tracking your purchases."
+      />
+    );
+  }
+
+  const sorted = [...products].sort((a, b) => b.total - a.total);
   const visible = expanded ? sorted : sorted.slice(0, DEFAULT_VISIBLE);
   const hasMore = sorted.length > DEFAULT_VISIBLE;
 
@@ -73,10 +81,10 @@ export default function ProductsTable() {
                   {product.quantity}
                 </td>
                 <td className="py-2.5 px-3 text-right text-text-muted">
-                  €{product.avgPrice.toFixed(2)}
+                  &euro;{product.avgPrice.toFixed(2)}
                 </td>
                 <td className="py-2.5 pl-3 text-right text-text font-medium">
-                  €{product.total.toFixed(2)}
+                  &euro;{product.total.toFixed(2)}
                 </td>
               </tr>
             ))}

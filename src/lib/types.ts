@@ -41,7 +41,7 @@ export interface PlanInfo {
   highlighted?: boolean;
 }
 
-/* ── Phase 3: Services ────────────────────────────── */
+/* ── Services ────────────────────────────── */
 
 export interface ServiceDefinition {
   id: string;
@@ -65,7 +65,24 @@ export interface ServiceConnection {
   lastChecked?: string;
 }
 
-/* ── Phase 3: Insights ────────────────────────────── */
+/* ── Conversations ────────────────────────── */
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationDetail {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  created_at: string;
+  updated_at: string;
+}
+
+/* ── Insights ────────────────────────────── */
 
 export interface InsightStats {
   messages: number;
@@ -87,9 +104,98 @@ export interface StoreSpending {
   percentage: number;
 }
 
+export interface GroceryProduct {
+  name: string;
+  quantity: number;
+  avgPrice: number;
+  total: number;
+}
+
+/* ── Activity ────────────────────────────── */
+
 export interface ActivityItem {
   type: 'music' | 'calendar' | 'grocery' | 'email' | 'chat';
   time: string;
   text: string;
   icon: string;
+}
+
+export interface ActivityEntry {
+  id: string;
+  icon: string;
+  time: string;
+  description: string;
+  service: string;
+  agent: string;
+  date: string;
+}
+
+/* ── Smarts ────────────────────────────── */
+
+export interface SmartDevice {
+  id: string;
+  name: string;
+  type: string;
+  icon: string;
+  status: string;
+  room: string;
+}
+
+export interface Vehicle {
+  id: string;
+  name: string;
+  battery: number;
+  range: number;
+  status: string;
+  location: string;
+  lastUpdated: string;
+  isCharging: boolean;
+}
+
+/* ── Finance ────────────────────────────── */
+
+export interface StockItem {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  positive: boolean;
+}
+
+export interface CryptoItem {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  positive: boolean;
+}
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  source: string;
+  timeAgo: string;
+}
+
+export interface PortfolioResponse {
+  stocks: StockItem[];
+  crypto: CryptoItem[];
+}
+
+/* ── Notes & Reminders ────────────────── */
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+}
+
+export interface Reminder {
+  id: string;
+  text: string;
+  due_at: string;
+  completed: boolean;
+  user_id: string;
 }

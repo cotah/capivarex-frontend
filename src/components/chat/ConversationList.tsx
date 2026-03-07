@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { useConversationStore, type Conversation } from '@/stores/conversationStore';
-import { useChatStore } from '@/stores/chatStore';
 import ConversationItem from './ConversationItem';
 
 interface GroupedConversations {
@@ -48,9 +47,6 @@ export default function ConversationList() {
 
   const handleSelect = (id: string) => {
     setActive(id);
-    // Load conversation messages (mock: clear for now)
-    useChatStore.setState({ messages: [], isThinking: false });
-    // Close sidebar on mobile
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
     }
