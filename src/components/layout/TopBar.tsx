@@ -43,7 +43,7 @@ export default function TopBar() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
+    <header className="fixed top-0 left-0 right-0 z-50 glass-strong pt-safe">
       <div className="flex h-14 w-full items-center justify-between px-3 md:px-6">
         {/* Left: Logo + Badge — extrema esquerda */}
         <div className="flex items-center gap-3 shrink-0">
