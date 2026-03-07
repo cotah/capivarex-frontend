@@ -38,6 +38,10 @@ const ALL_SERVICES: ServiceDefinition[] = [
   { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['everywhere'], oauth: 'smartcar' },
   { id: 'leaving_now', name: 'Smart Departure', icon: 'Navigation', description: 'Traffic + weather + calendar combined', category: 'Transport', plans: ['me', 'everywhere'] },
 
+  // ── Travel ──
+  { id: 'flights', name: 'Smart Flights', icon: 'Plane', description: 'Search flights, compare prices, and book tickets', category: 'Travel', plans: ['me', 'everywhere'] },
+  { id: 'stay', name: 'Smart Stay', icon: 'Hotel', description: 'Find hotels, Airbnb, and accommodation deals', category: 'Travel', plans: ['me', 'everywhere'] },
+
   // ── Shopping & Finance ──
   { id: 'mercado', name: 'Smart Shopping', icon: 'ShoppingCart', description: 'OCR receipts, price tracking, shopping lists', category: 'Shopping', plans: ['me', 'everywhere'] },
   { id: 'finance', name: 'Finance', icon: 'TrendingUp', description: 'Stocks, crypto, exchange rates', category: 'Finance', plans: ['me', 'everywhere'] },
