@@ -16,7 +16,9 @@ import {
   Clock,
   Settings,
   Circle,
+  PanelLeft,
 } from 'lucide-react';
+import { useConversationStore } from '@/stores/conversationStore';
 
 const navItems = [
   { href: '/chat', label: 'Chat', icon: MessageSquare },
@@ -32,6 +34,8 @@ const navItems = [
 export default function TopBar() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
+  const toggleSidebar = useConversationStore((s) => s.toggleSidebar);
+  const isChat = pathname === '/chat';
 
   const isActive = (href: string) => {
     if (href === '/chat') return pathname === '/chat';
@@ -43,6 +47,16 @@ export default function TopBar() {
       <div className="flex h-14 w-full items-center justify-between px-6">
         {/* Left: Logo + Badge — extrema esquerda */}
         <div className="flex items-center gap-3 shrink-0">
+          {/* PanelLeft toggle — mobile only, chat page only */}
+          {isChat && (
+            <button
+              onClick={toggleSidebar}
+              className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+              aria-label="Toggle chat history"
+            >
+              <PanelLeft size={20} />
+            </button>
+          )}
           <Link href="/chat" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
