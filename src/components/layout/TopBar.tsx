@@ -47,10 +47,10 @@ export default function TopBar() {
             <Image
               src="/logo-horizontal.png"
               alt="Capivarex"
-              width={180}
-              height={48}
+              width={720}
+              height={192}
               priority
-              className="h-10 w-auto object-contain"
+              className="h-40 w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}
