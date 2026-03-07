@@ -88,7 +88,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
         <div className="w-full px-4">{inputRow}</div>
       ) : (
         /* Default mode — fixed at the bottom */
-        <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-50">
           {/* Gradient fade */}
           <div className="h-8 bg-gradient-to-t from-bg to-transparent pointer-events-none" />
 

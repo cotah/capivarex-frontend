@@ -17,10 +17,10 @@ export default function ChatPage() {
     <>
       <ChatSidebar />
 
-      {/* PanelLeft toggle — always visible */}
+      {/* PanelLeft toggle — desktop only */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-[4.25rem] left-4 z-30 flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+        className="fixed top-[4.25rem] left-4 z-30 hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
         aria-label="Toggle sidebar"
       >
         <PanelLeft size={20} />
@@ -45,7 +45,7 @@ export default function ChatPage() {
         ) : (
           /* ═══ Conversation active — messages + input fixed at bottom ═══ */
           <>
-            <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-3xl flex-col pb-24">
+            <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-3xl flex-col pb-40 md:pb-24">
               <MessageList />
             </div>
             <InputBar />
