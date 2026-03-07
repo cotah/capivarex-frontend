@@ -30,9 +30,23 @@ export default function WeatherChip() {
         <span className="hidden md:inline text-text-muted">Dublin</span>
       </button>
 
+      {/* Desktop: absolute dropdown */}
       {open && (
-        <div className="absolute top-full mt-2 right-0 md:right-0 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 z-50">
+        <div className="hidden md:block absolute top-full mt-2 right-0 z-50">
           <WeatherPanel />
+        </div>
+      )}
+
+      {/* Mobile: fixed centered overlay */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-50 flex items-start justify-center pt-24">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onMouseDown={() => setOpen(false)}
+          />
+          <div className="relative mx-4 max-h-[70vh] overflow-y-auto rounded-2xl">
+            <WeatherPanel />
+          </div>
         </div>
       )}
     </div>
