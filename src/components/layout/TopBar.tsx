@@ -40,29 +40,29 @@ export default function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2 md:py-3">
+        {/* Logo + Badge */}
+        <div className="flex items-center gap-3">
           <Link href="/chat" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
               alt="Capivarex"
-              width={200}
-              height={48}
+              width={500}
+              height={160}
               priority
-              className="h-10 sm:h-12 w-auto object-contain"
+              className="h-10 md:h-[100px] lg:h-[160px] w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}
         </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-0.5">
+        {/* Desktop nav — hidden on mobile */}
+        <nav className="hidden md:flex items-center gap-3 lg:gap-5">
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-base font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-base font-medium transition-all duration-200 ${
                 isActive(href)
                   ? 'bg-accent-soft text-accent'
                   : 'text-text-muted hover:text-text hover:bg-white/5'
@@ -78,29 +78,11 @@ export default function TopBar() {
         <div className="flex items-center gap-2">
           <CastButton size={14} />
           <Circle size={6} className="fill-success text-success" />
-          <span className="text-sm text-text-muted hidden sm:inline">
+          <span className="text-sm text-text-muted hidden md:inline">
             Online
           </span>
         </div>
       </div>
-
-      {/* Mobile nav — horizontal scroll, hidden scrollbar */}
-      <nav className="nav-scroll flex sm:hidden items-center gap-1 pb-2 px-4 overflow-x-auto flex-nowrap">
-        {navItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-medium transition-all duration-200 ${
-              isActive(href)
-                ? 'bg-accent-soft text-accent'
-                : 'text-text-muted hover:text-text hover:bg-white/5'
-            }`}
-          >
-            <Icon size={13} />
-            {label}
-          </Link>
-        ))}
-      </nav>
     </header>
   );
 }
