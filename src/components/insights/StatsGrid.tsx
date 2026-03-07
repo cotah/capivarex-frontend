@@ -9,34 +9,27 @@ interface StatsGridProps {
 
 export default function StatsGrid({ stats }: StatsGridProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       <StatCard
-        icon="📊"
-        value={stats.messages}
-        label="Messages this mo"
-        trend="up"
-        trendValue="+12% vs last month"
-      />
-      <StatCard
-        icon="🛒"
+        icon="💰"
         value={`€${stats.groceryTotal.toFixed(2)}`}
-        label="Grocery this mo"
+        label="Total Spent"
         trend="down"
         trendValue="-8% vs last month"
       />
       <StatCard
-        icon="🎵"
-        value={stats.songsPlayed}
-        label="Songs played"
+        icon="🛒"
+        value={stats.shoppingTrips}
+        label="Shopping Trips"
         trend="up"
-        trendValue="+5% vs last month"
+        trendValue="+1 vs last month"
       />
       <StatCard
-        icon="📅"
-        value={stats.events}
-        label="Events this mo"
-        trend="neutral"
-        trendValue="Same as last month"
+        icon="📊"
+        value={`€${stats.avgPerTrip.toFixed(2)}`}
+        label="Avg per Trip"
+        trend="down"
+        trendValue="-€5.30 vs last month"
       />
     </div>
   );

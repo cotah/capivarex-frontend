@@ -45,9 +45,12 @@ export interface ServiceDefinition {
   name: string;
   icon: string;
   description: string;
+  category: string;
+  plans: PlanType[];
+  oauth?: string;
   authPath?: string;
   statusPath?: string;
-  minPlan: PlanType;
+  minPlan?: PlanType;
   comingSoon?: boolean;
 }
 
@@ -66,6 +69,8 @@ export interface InsightStats {
   groceryTotal: number;
   songsPlayed: number;
   events: number;
+  shoppingTrips: number;
+  avgPerTrip: number;
 }
 
 export interface MonthlySpending {

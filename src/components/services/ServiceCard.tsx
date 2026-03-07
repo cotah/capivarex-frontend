@@ -1,49 +1,113 @@
 'use client';
 
-import { Circle } from 'lucide-react';
+import { Circle, Lock } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import Link from 'next/link';
 import ConnectButton from './ConnectButton';
-import type { PlanType } from '@/lib/types';
+import type { ServiceDefinition, PlanType } from '@/lib/types';
+
+const PLAN_RANK: Record<PlanType, number> = { free: 0, me: 1, everywhere: 2 };
+const PLAN_LABEL: Record<PlanType, string> = {
+  free: 'Free',
+  me: 'Me',
+  everywhere: 'Everywhere',
+};
 
 interface ServiceCardProps {
-  name: string;
-  icon: string;
-  description: string;
+  service: ServiceDefinition;
   connected: boolean;
   status?: string;
-  comingSoon?: boolean;
-  minPlan: PlanType;
   userPlan: PlanType;
   onConnect: () => void;
   onDisconnect: () => void;
 }
 
+function getMinPlan(service: ServiceDefinition): PlanType {
+  if (service.plans.includes('free')) return 'free';
+  if (service.plans.includes('me')) return 'me';
+  return 'everywhere';
+}
+
+function ServiceIcon({ name }: { name: string }) {
+  const iconMap = Icons as unknown as Record<string, React.ComponentType<{ size?: number; className?: string }>>;
+  const LucideIcon = iconMap[name];
+  if (LucideIcon) {
+    return <LucideIcon size={20} className="text-accent" />;
+  }
+  return <span className="text-lg">{name}</span>;
+}
+
 export default function ServiceCard({
-  name,
-  icon,
-  description,
+  service,
   connected,
   status,
-  comingSoon,
-  minPlan,
   userPlan,
   onConnect,
   onDisconnect,
 }: ServiceCardProps) {
-  if (comingSoon) {
+  const minPlan = getMinPlan(service);
+  const needsUpgrade = PLAN_RANK[userPlan] < PLAN_RANK[minPlan];
+
+  // Coming Soon
+  if (service.comingSoon) {
     return (
       <div className="glass rounded-2xl p-5 opacity-40 select-none">
         <div className="flex items-start justify-between mb-3">
-          <span className="text-2xl">{icon}</span>
+          <ServiceIcon name={service.icon} />
           <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-text-muted uppercase tracking-wider">
             Coming Soon
           </span>
         </div>
-        <p className="text-sm font-medium text-text mb-1">{name}</p>
-        <p className="text-xs text-text-muted leading-relaxed">{description}</p>
+        <p className="text-sm font-medium text-text mb-1">{service.name}</p>
+        <p className="text-xs text-text-muted leading-relaxed">{service.description}</p>
       </div>
     );
   }
 
+  // Requires upgrade
+  if (needsUpgrade) {
+    return (
+      <div className="glass rounded-2xl p-5 opacity-60">
+        <div className="flex items-start justify-between mb-3">
+          <ServiceIcon name={service.icon} />
+          <div className="flex items-center gap-1.5">
+            <Lock size={10} className="text-text-muted" />
+            <span className="text-[11px] text-text-muted">
+              {PLAN_LABEL[minPlan]} plan
+            </span>
+          </div>
+        </div>
+        <p className="text-sm font-medium text-text mb-1">{service.name}</p>
+        <p className="text-xs text-text-muted leading-relaxed mb-3">{service.description}</p>
+        <Link
+          href="/pricing"
+          className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent hover:bg-accent/20 transition-colors"
+        >
+          <Lock size={10} />
+          Upgrade to {PLAN_LABEL[minPlan]}
+        </Link>
+      </div>
+    );
+  }
+
+  // Available (no OAuth) — works directly in chat
+  if (!service.oauth && !connected) {
+    return (
+      <div className="glass rounded-2xl p-5 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200">
+        <div className="flex items-start justify-between mb-3">
+          <ServiceIcon name={service.icon} />
+          <div className="flex items-center gap-1.5">
+            <Circle size={6} className="fill-blue-400 text-blue-400" />
+            <span className="text-[11px] text-blue-400/80">Available</span>
+          </div>
+        </div>
+        <p className="text-sm font-medium text-text mb-1">{service.name}</p>
+        <p className="text-xs text-text-muted leading-relaxed">{service.description}</p>
+      </div>
+    );
+  }
+
+  // OAuth service (connected or not)
   return (
     <div
       className={`glass rounded-2xl p-5 transition-all duration-200 ${
@@ -52,9 +116,8 @@ export default function ServiceCard({
           : 'hover:border-accent/20 hover:shadow-lg hover:shadow-accent/5'
       }`}
     >
-      {/* Header */}
       <div className="flex items-start justify-between mb-3">
-        <span className="text-2xl">{icon}</span>
+        <ServiceIcon name={service.icon} />
         <div className="flex items-center gap-1.5">
           <Circle
             size={6}
@@ -74,20 +137,16 @@ export default function ServiceCard({
         </div>
       </div>
 
-      {/* Info */}
-      <p className="text-sm font-medium text-text mb-1">{name}</p>
+      <p className="text-sm font-medium text-text mb-1">{service.name}</p>
       <p className="text-xs text-text-muted leading-relaxed mb-1">
-        {description}
+        {service.description}
       </p>
 
-      {/* Status line */}
       {connected && status && (
         <p className="text-[11px] text-accent/70 mb-3">{status}</p>
       )}
-      {!connected && !status && <div className="mb-3" />}
-      {connected && !status && <div className="mb-3" />}
+      {(!status || (!connected && !status)) && <div className="mb-3" />}
 
-      {/* Action */}
       <ConnectButton
         connected={connected}
         minPlan={minPlan}

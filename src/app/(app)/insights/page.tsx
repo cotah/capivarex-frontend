@@ -2,23 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, ChevronDown } from 'lucide-react';
+import { ShoppingCart, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import StatsGrid from '@/components/insights/StatsGrid';
 import SpendingChart from '@/components/insights/SpendingChart';
 import StoreRanking from '@/components/insights/StoreRanking';
-import ActivityFeed from '@/components/insights/ActivityFeed';
+import ProductsTable from '@/components/insights/ProductsTable';
 import {
   fetchInsightStats,
   fetchGrocerySpending,
   fetchStoreRanking,
-  fetchActivityFeed,
 } from '@/lib/insights';
 import type {
   InsightStats,
   MonthlySpending,
   StoreSpending,
-  ActivityItem,
 } from '@/lib/types';
 
 const MONTHS = [
@@ -46,23 +44,20 @@ export default function InsightsPage() {
   const [stats, setStats] = useState<InsightStats | null>(null);
   const [spending, setSpending] = useState<MonthlySpending[]>([]);
   const [stores, setStores] = useState<StoreSpending[]>([]);
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       const userId = user?.id || 'demo-user';
       setLoading(true);
-      const [s, sp, st, a] = await Promise.all([
+      const [s, sp, st] = await Promise.all([
         fetchInsightStats(userId, month),
         fetchGrocerySpending(userId),
         fetchStoreRanking(userId, month),
-        fetchActivityFeed(userId),
       ]);
       setStats(s);
       setSpending(sp);
       setStores(st);
-      setActivities(a);
       setLoading(false);
     }
     load();
@@ -95,8 +90,8 @@ export default function InsightsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BarChart3 size={18} className="text-accent" />
-            <h2 className="text-lg font-semibold text-text">Your Insights</h2>
+            <ShoppingCart size={18} className="text-accent" />
+            <h2 className="text-lg font-semibold text-text">Shopping Insights</h2>
           </div>
 
           {/* Month picker */}
@@ -131,17 +126,17 @@ export default function InsightsPage() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats — Total Spent, Shopping Trips, Avg per Trip */}
         {stats && <StatsGrid stats={stats} />}
 
-        {/* Charts row */}
+        {/* Charts row — Monthly spending + Store ranking */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <SpendingChart data={spending} />
           <StoreRanking stores={stores} />
         </div>
 
-        {/* Activity */}
-        <ActivityFeed activities={activities} />
+        {/* Products Table */}
+        <ProductsTable />
       </div>
     </motion.div>
   );

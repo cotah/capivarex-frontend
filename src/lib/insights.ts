@@ -14,6 +14,8 @@ const MOCK_STATS: InsightStats = {
   groceryTotal: 187.5,
   songsPlayed: 84,
   events: 12,
+  shoppingTrips: 3,
+  avgPerTrip: 42.52,
 };
 
 const MOCK_SPENDING: MonthlySpending[] = [
@@ -72,6 +74,8 @@ export async function fetchInsightStats(
       groceryTotal: data.grocery_total as number,
       songsPlayed: data.songs_played as number,
       events: data.events as number,
+      shoppingTrips: (data.shopping_trips as number) || 0,
+      avgPerTrip: (data.avg_per_trip as number) || 0,
     };
   }
 

@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
   /* ── Main domain (capivarex.com) ── */
   if (isMainDomain) {
     // App-only routes → redirect to app subdomain
-    const appOnlyPaths = ['/chat', '/services', '/insights', '/settings'];
+    const appOnlyPaths = ['/chat', '/services', '/notes', '/smarts', '/finance', '/insights', '/activity', '/settings'];
     if (appOnlyPaths.some((p) => pathname.startsWith(p))) {
       return NextResponse.redirect(
         new URL(pathname, 'https://app.capivarex.com'),

@@ -64,6 +64,15 @@ body::before {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Hidden scrollbar for mobile nav */
+.nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+.nav-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Glass utility */
 @layer utilities {
   .glass {
