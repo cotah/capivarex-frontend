@@ -40,24 +40,24 @@ export default function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        {/* Logo + Badge */}
-        <div className="flex items-center gap-3">
+      <div className="flex h-14 w-full items-center justify-between px-6">
+        {/* Left: Logo + Badge — extrema esquerda */}
+        <div className="flex items-center gap-3 shrink-0">
           <Link href="/chat" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
               alt="Capivarex"
-              width={720}
-              height={192}
+              width={160}
+              height={40}
               priority
-              className="h-40 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}
         </div>
 
-        {/* Desktop nav — hidden on mobile */}
-        <nav className="hidden md:flex items-center gap-6">
+        {/* Center: Nav */}
+        <nav className="hidden md:flex items-center gap-5">
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
@@ -74,8 +74,8 @@ export default function TopBar() {
           ))}
         </nav>
 
-        {/* Status + Cast */}
-        <div className="flex items-center gap-2">
+        {/* Right: Status — extrema direita */}
+        <div className="flex items-center gap-2 shrink-0">
           <CastButton size={14} />
           <Circle size={6} className="fill-success text-success" />
           <span className="text-sm text-text-muted hidden md:inline">
