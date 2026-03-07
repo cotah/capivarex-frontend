@@ -52,7 +52,7 @@ export default function RegisterForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <label htmlFor="name" className="block text-xs text-text-muted mb-1.5">
+        <label htmlFor="name" className="block text-sm text-text-muted mb-1.5">
           Name
         </label>
         <input
@@ -62,13 +62,13 @@ export default function RegisterForm() {
           onChange={(e) => setName(e.target.value)}
           placeholder="Your name"
           autoComplete="name"
-          className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-text placeholder:text-text-muted/50 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-colors"
+          className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-base text-text placeholder:text-text-muted/50 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-colors"
         />
       </div>
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-xs text-text-muted mb-1.5">
+        <label htmlFor="email" className="block text-sm text-text-muted mb-1.5">
           Email
         </label>
         <input
@@ -78,7 +78,7 @@ export default function RegisterForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           autoComplete="email"
-          className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-text placeholder:text-text-muted/50 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-colors"
+          className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-base text-text placeholder:text-text-muted/50 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-colors"
         />
       </div>
 
@@ -86,7 +86,7 @@ export default function RegisterForm() {
       <div>
         <label
           htmlFor="password"
-          className="block text-xs text-text-muted mb-1.5"
+          className="block text-sm text-text-muted mb-1.5"
         >
           Password
         </label>
@@ -114,7 +114,7 @@ export default function RegisterForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-sm font-medium text-bg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-accent/20"
+        className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-base font-medium text-bg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-accent/20"
       >
         {isSubmitting ? (
           <div className="h-4 w-4 rounded-full border-2 border-bg/30 border-t-bg animate-spin" />
@@ -127,7 +127,7 @@ export default function RegisterForm() {
       </button>
 
       {/* Login link */}
-      <p className="text-center text-xs text-text-muted">
+      <p className="text-center text-sm text-text-muted">
         Already have an account?{' '}
         <Link
           href="/login"

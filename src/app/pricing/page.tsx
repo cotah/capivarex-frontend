@@ -17,7 +17,7 @@ export default function PricingPage() {
         >
           <Link
             href="/chat"
-            className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors"
           >
             <ArrowLeft size={14} />
             Back to app
@@ -52,7 +52,7 @@ export default function PricingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-center text-xs text-text-muted/50 mt-8"
+          className="text-center text-sm text-text-muted/50 mt-8"
         >
           All plans include end-to-end encryption and GDPR compliance.
           Cancel anytime.

@@ -12,8 +12,8 @@ export default function NewsItem({ title, source, timeAgo }: NewsItemProps) {
       <div className="flex items-start gap-3">
         <span className="text-base flex-shrink-0 mt-0.5">📰</span>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-text truncate">{title}</p>
-          <p className="text-[11px] text-text-muted mt-0.5">
+          <p className="text-base font-medium text-text truncate">{title}</p>
+          <p className="text-sm text-text-muted mt-0.5">
             {source} · {timeAgo}
           </p>
         </div>

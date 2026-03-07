@@ -17,11 +17,11 @@ export default function NotificationSettings() {
   if (!supported) {
     return (
       <section className="glass rounded-2xl p-5 space-y-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-text">
+        <h3 className="flex items-center gap-2 text-base font-semibold text-text">
           <BellOff size={16} className="text-text-muted" />
           Push Notifications
         </h3>
-        <p className="text-xs text-text-muted">
+        <p className="text-sm text-text-muted">
           Push notifications are not supported in this browser.
         </p>
       </section>
@@ -30,7 +30,7 @@ export default function NotificationSettings() {
 
   return (
     <section className="glass rounded-2xl p-5 space-y-4">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-text">
+      <h3 className="flex items-center gap-2 text-base font-semibold text-text">
         <Bell size={16} className="text-accent" />
         Push Notifications
       </h3>
@@ -38,10 +38,10 @@ export default function NotificationSettings() {
       {/* Master toggle */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-text">
+          <p className="text-base text-text">
             {subscribed ? 'Notifications enabled' : 'Enable notifications'}
           </p>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-sm text-text-muted">
             {permission === 'denied'
               ? 'Blocked in browser settings'
               : 'Receive updates even when the app is closed'}
@@ -71,7 +71,7 @@ export default function NotificationSettings() {
             <div key={key}>
               {i > 0 && <div className="my-2.5 border-t border-white/5" />}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-text-muted">{label}</span>
+                <span className="text-sm text-text-muted">{label}</span>
                 <div className="h-5 w-9 rounded-full bg-accent/25 relative">
                   <span className="absolute top-0.5 left-[15px] h-4 w-4 rounded-full bg-accent transition-all" />
                 </div>

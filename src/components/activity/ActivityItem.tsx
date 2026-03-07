@@ -14,12 +14,12 @@ export default function ActivityItem({ icon, time, description, service, agent }
       <div className="flex items-start gap-3">
         <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-text">{description}</p>
-          <p className="text-[11px] text-text-muted mt-0.5">
+          <p className="text-base text-text">{description}</p>
+          <p className="text-sm text-text-muted mt-0.5">
             {service} · {agent}
           </p>
         </div>
-        <span className="text-[11px] font-mono text-text-muted flex-shrink-0">
+        <span className="text-sm font-mono text-text-muted flex-shrink-0">
           {time}
         </span>
       </div>

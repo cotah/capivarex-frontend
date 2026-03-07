@@ -38,12 +38,12 @@ export default function ProductsTable() {
 
   return (
     <div className="glass rounded-2xl p-5">
-      <h3 className="text-sm font-semibold text-text mb-4">
+      <h3 className="text-base font-semibold text-text mb-4">
         Products Purchased
       </h3>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-accent/15">
               <th className="text-left font-semibold text-accent py-2 pr-4">
@@ -87,7 +87,7 @@ export default function ProductsTable() {
       {hasMore && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors mx-auto"
+          className="mt-3 flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 transition-colors mx-auto"
         >
           {expanded ? (
             <>

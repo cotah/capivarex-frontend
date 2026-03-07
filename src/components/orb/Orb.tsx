@@ -117,7 +117,7 @@ export default function Orb() {
 
       {/* Label */}
       <motion.p
-        className="text-xs text-text-muted"
+        className="text-sm text-text-muted"
         key={state}
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}

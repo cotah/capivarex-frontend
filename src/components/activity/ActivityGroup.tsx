@@ -21,7 +21,7 @@ export default function ActivityGroup({ label, items }: ActivityGroupProps) {
 
   return (
     <section>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted/60 mb-3">
+      <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted/60 mb-3">
         {label}
       </h3>
       <div className="space-y-2">

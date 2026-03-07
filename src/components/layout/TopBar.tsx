@@ -48,9 +48,9 @@ export default function TopBar() {
               src="/logo-horizontal.png"
               alt="Capivarex"
               width={200}
-              height={44}
+              height={48}
               priority
-              className="h-9 sm:h-11 w-auto object-contain"
+              className="h-10 sm:h-12 w-auto object-contain"
             />
           </Link>
           {user && <PlanBadge plan={user.plan} />}
@@ -62,13 +62,13 @@ export default function TopBar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-base font-medium transition-all duration-200 ${
                 isActive(href)
                   ? 'bg-accent-soft text-accent'
                   : 'text-text-muted hover:text-text hover:bg-white/5'
               }`}
             >
-              <Icon size={14} />
+              <Icon size={16} />
               {label}
             </Link>
           ))}
@@ -78,7 +78,7 @@ export default function TopBar() {
         <div className="flex items-center gap-2">
           <CastButton size={14} />
           <Circle size={6} className="fill-success text-success" />
-          <span className="text-[11px] text-text-muted hidden sm:inline">
+          <span className="text-sm text-text-muted hidden sm:inline">
             Online
           </span>
         </div>
@@ -90,7 +90,7 @@ export default function TopBar() {
           <Link
             key={href}
             href={href}
-            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200 ${
+            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-medium transition-all duration-200 ${
               isActive(href)
                 ? 'bg-accent-soft text-accent'
                 : 'text-text-muted hover:text-text hover:bg-white/5'

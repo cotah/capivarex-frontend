@@ -23,7 +23,7 @@ export default function NotesList() {
         />
       ))}
 
-      <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20 mt-4">
+      <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-base font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20 mt-4">
         <Plus size={16} />
         New Note
       </button>

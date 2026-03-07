@@ -36,11 +36,11 @@ export default function DeviceCard({ name, icon, status, room, type }: DeviceCar
         <span className="text-2xl">{icon}</span>
         <div className="flex items-center gap-1.5">
           <span className={`inline-block w-1.5 h-1.5 rounded-full ${statusColor === 'text-success' ? 'bg-success' : 'bg-text-muted/40'}`} />
-          <span className={`text-[11px] ${statusColor}`}>{statusLabel}</span>
+          <span className={`text-sm ${statusColor}`}>{statusLabel}</span>
         </div>
       </div>
-      <p className="text-sm font-medium text-text mb-0.5">{name}</p>
-      <p className="text-[11px] text-text-muted mb-3">{room}</p>
+      <p className="text-base font-medium text-text mb-0.5">{name}</p>
+      <p className="text-sm text-text-muted mb-3">{room}</p>
       {isToggleable && (
         <button
           onClick={() => setIsOn(!isOn)}

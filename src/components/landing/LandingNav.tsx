@@ -57,13 +57,13 @@ export default function LandingNav() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href={`${APP_URL}/login`}
-            className="whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text transition-colors sm:px-5 sm:py-2 sm:text-base"
+            className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-text-muted hover:text-text transition-colors sm:px-5 sm:py-2 sm:text-base"
           >
             Sign In
           </Link>
           <Link
             href={`${APP_URL}/register`}
-            className="whitespace-nowrap rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20 sm:px-6 sm:py-2.5 sm:text-base"
+            className="whitespace-nowrap rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20 sm:px-6 sm:py-2.5 sm:text-base"
           >
             Get Started
           </Link>

@@ -79,7 +79,7 @@ export default function Features() {
                 <f.icon size={20} className="text-accent" />
               </div>
               <h3 className="text-sm font-semibold text-text mb-1.5">{f.title}</h3>
-              <p className="text-xs text-text-muted leading-relaxed">
+              <p className="text-sm text-text-muted leading-relaxed">
                 {f.description}
               </p>
             </motion.div>

@@ -51,11 +51,11 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Car size={48} className="text-text-muted/30 mb-4" />
-        <p className="text-sm font-medium text-text mb-1">No vehicle connected</p>
-        <p className="text-xs text-text-muted mb-4">Connect your car with Smartcar</p>
+        <p className="text-base font-medium text-text mb-1">No vehicle connected</p>
+        <p className="text-sm text-text-muted mb-4">Connect your car with Smartcar</p>
         <Link
           href="/services"
-          className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+          className="rounded-xl bg-accent px-5 py-2.5 text-base font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
         >
           Connect
         </Link>
@@ -69,8 +69,8 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
         <div key={v.id} className="glass rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <Car size={18} className="text-accent" />
-            <p className="text-sm font-semibold text-text">{v.name}</p>
-            <span className="ml-auto rounded-full bg-white/5 px-2.5 py-0.5 text-[10px] text-text-muted uppercase tracking-wider">
+            <p className="text-base font-semibold text-text">{v.name}</p>
+            <span className="ml-auto rounded-full bg-white/5 px-2.5 py-0.5 text-sm text-text-muted uppercase tracking-wider">
               {v.status}
             </span>
           </div>
@@ -80,9 +80,9 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
             <Battery size={14} className="text-text-muted flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-text">{v.battery}%</span>
+                <span className="text-sm text-text">{v.battery}%</span>
                 {v.isCharging && (
-                  <span className="text-[10px] text-success">Charging</span>
+                  <span className="text-sm text-success">Charging</span>
                 )}
               </div>
               <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
@@ -97,16 +97,16 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
           {/* Range */}
           <div className="flex items-center gap-3 mb-2">
             <Gauge size={14} className="text-text-muted flex-shrink-0" />
-            <span className="text-xs text-text">{v.range} km range</span>
+            <span className="text-sm text-text">{v.range} km range</span>
           </div>
 
           {/* Location */}
           <div className="flex items-center gap-3 mb-2">
             <MapPin size={14} className="text-text-muted flex-shrink-0" />
-            <span className="text-xs text-text-muted">{v.location}</span>
+            <span className="text-sm text-text-muted">{v.location}</span>
           </div>
 
-          <p className="text-[10px] text-text-muted/50 mt-3">
+          <p className="text-sm text-text-muted/50 mt-3">
             Last updated {timeAgo(v.lastUpdated)}
           </p>
         </div>

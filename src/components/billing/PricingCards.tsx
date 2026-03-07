@@ -89,7 +89,7 @@ export default function PricingCards() {
             {/* Highlight badge */}
             {isHighlighted && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-[10px] font-semibold text-bg uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-bg uppercase tracking-wider">
                   <Sparkles size={10} />
                   Popular
                 </span>

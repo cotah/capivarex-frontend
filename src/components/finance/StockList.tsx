@@ -20,7 +20,7 @@ export default function StockList() {
           <StockRow key={stock.symbol} {...stock} />
         ))}
       </div>
-      <p className="text-[11px] text-text-muted/40 text-center mt-3 italic">
+      <p className="text-sm text-text-muted/40 text-center mt-3 italic">
         Ask: &quot;Add NVDA to my watchlist&quot;
       </p>
     </div>

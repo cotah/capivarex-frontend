@@ -16,9 +16,9 @@ export default function NoteCard({ title, content, createdAt }: NoteCardProps) {
 
   return (
     <div className="glass rounded-2xl p-5 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 cursor-pointer">
-      <p className="text-sm font-semibold text-text mb-1">{title}</p>
-      <p className="text-[11px] font-mono text-text-muted mb-2">{formatted}</p>
-      <p className="text-xs text-text-muted leading-relaxed line-clamp-2">
+      <p className="text-base font-semibold text-text mb-1">{title}</p>
+      <p className="text-sm font-mono text-text-muted mb-2">{formatted}</p>
+      <p className="text-sm text-text-muted leading-relaxed line-clamp-2">
         {content}
       </p>
     </div>

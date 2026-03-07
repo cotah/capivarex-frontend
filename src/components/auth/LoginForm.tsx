@@ -48,7 +48,7 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-xs text-text-muted mb-1.5">
+        <label htmlFor="email" className="block text-sm text-text-muted mb-1.5">
           Email
         </label>
         <input
@@ -58,7 +58,7 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           autoComplete="email"
-          className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-text placeholder:text-text-muted/50 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-colors"
+          className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-base text-text placeholder:text-text-muted/50 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-colors"
         />
       </div>
 
@@ -66,7 +66,7 @@ export default function LoginForm() {
       <div>
         <label
           htmlFor="password"
-          className="block text-xs text-text-muted mb-1.5"
+          className="block text-sm text-text-muted mb-1.5"
         >
           Password
         </label>
@@ -94,7 +94,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-sm font-medium text-bg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-accent/20"
+        className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-base font-medium text-bg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-accent/20"
       >
         {isSubmitting ? (
           <div className="h-4 w-4 rounded-full border-2 border-bg/30 border-t-bg animate-spin" />
@@ -110,7 +110,7 @@ export default function LoginForm() {
       <div className="text-center">
         <Link
           href="/forgot-password"
-          className="text-xs text-text-muted hover:text-accent transition-colors"
+          className="text-sm text-text-muted hover:text-accent transition-colors"
         >
           Forgot password?
         </Link>
@@ -119,7 +119,7 @@ export default function LoginForm() {
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 border-t border-white/10" />
-        <span className="text-[10px] text-text-muted uppercase tracking-wider">
+        <span className="text-sm text-text-muted uppercase tracking-wider">
           or
         </span>
         <div className="flex-1 border-t border-white/10" />
@@ -129,16 +129,16 @@ export default function LoginForm() {
       <button
         type="button"
         disabled
-        className="w-full flex items-center justify-center gap-2 rounded-xl glass py-2.5 text-sm text-text-muted cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 rounded-xl glass py-2.5 text-base text-text-muted cursor-not-allowed"
       >
         Continue with Google
-        <span className="text-[10px] bg-white/5 rounded px-1.5 py-0.5">
+        <span className="text-sm bg-white/5 rounded px-1.5 py-0.5">
           Soon
         </span>
       </button>
 
       {/* Register link */}
-      <p className="text-center text-xs text-text-muted">
+      <p className="text-center text-sm text-text-muted">
         {"Don't have an account? "}
         <Link
           href="/register"

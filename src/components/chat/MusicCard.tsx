@@ -18,8 +18,8 @@ export default function MusicCard({ data }: MusicCardProps) {
           <Music size={18} className="text-accent" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-text truncate">{track}</p>
-          <p className="text-xs text-text-muted truncate">{artist}</p>
+          <p className="text-base font-medium text-text truncate">{track}</p>
+          <p className="text-sm text-text-muted truncate">{artist}</p>
         </div>
       </div>
 

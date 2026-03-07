@@ -14,8 +14,8 @@ export default function UsageBar({ used, total, label }: UsageBarProps) {
     <div className="space-y-1.5">
       {label && (
         <div className="flex items-center justify-between">
-          <span className="text-xs text-text-muted">{label}</span>
-          <span className="text-xs text-text-muted">
+          <span className="text-sm text-text-muted">{label}</span>
+          <span className="text-sm text-text-muted">
             {used}/{total}
           </span>
         </div>
@@ -28,7 +28,7 @@ export default function UsageBar({ used, total, label }: UsageBarProps) {
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <p className="text-[10px] text-text-muted/60 text-right">
+      <p className="text-sm text-text-muted/60 text-right">
         {Math.round(percentage)}% used
       </p>
     </div>

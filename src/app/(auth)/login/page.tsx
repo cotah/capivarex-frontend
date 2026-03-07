@@ -7,7 +7,7 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <div>
-      <h1 className="text-center text-lg font-semibold text-text mb-6">
+      <h1 className="text-center text-2xl font-semibold text-text mb-6">
         Welcome back
       </h1>
       <LoginForm />

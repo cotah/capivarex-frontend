@@ -62,7 +62,7 @@ export default function ActivityFeedPage() {
       {!showAll && mockActivities.length > 11 && (
         <button
           onClick={() => setShowAll(true)}
-          className="w-full rounded-xl glass px-4 py-3 text-xs font-medium text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+          className="w-full rounded-xl glass px-4 py-3 text-sm font-medium text-text-muted hover:text-text hover:bg-white/5 transition-colors"
         >
           Load more
         </button>

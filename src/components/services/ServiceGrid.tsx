@@ -188,7 +188,7 @@ export default function ServiceGrid() {
     if (services.length === 0) return null;
     return (
       <section>
-        <h3 className={`text-xs font-semibold uppercase tracking-wider mb-4 ${titleClass}`}>
+        <h3 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${titleClass}`}>
           {title}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

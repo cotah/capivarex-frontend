@@ -33,7 +33,7 @@ interface TooltipProps {
 function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-strong rounded-lg px-3 py-2 text-xs">
+    <div className="glass-strong rounded-lg px-3 py-2 text-sm">
       <p className="text-text-muted">{label}</p>
       <p className="font-semibold text-accent">
         €{payload[0].value.toFixed(2)}
@@ -52,7 +52,7 @@ export default function SpendingChart({ data }: SpendingChartProps) {
 
   return (
     <section className="glass rounded-2xl p-5">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">
+      <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
         Grocery Spending
       </h3>
       <div className="h-52">

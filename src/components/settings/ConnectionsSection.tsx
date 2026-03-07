@@ -18,7 +18,7 @@ const connections: Connection[] = [
 export default function ConnectionsSection() {
   return (
     <section className="glass rounded-2xl p-5 space-y-4">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-text">
+      <h3 className="flex items-center gap-2 text-base font-semibold text-text">
         <Plug size={16} className="text-accent" />
         Connections
       </h3>
@@ -31,7 +31,7 @@ export default function ConnectionsSection() {
               <div className="flex items-center gap-3">
                 <span className="text-lg">{conn.icon}</span>
                 <div>
-                  <p className="text-sm text-text">{conn.name}</p>
+                  <p className="text-base text-text">{conn.name}</p>
                   <div className="flex items-center gap-1.5">
                     <Circle
                       size={6}
@@ -41,14 +41,14 @@ export default function ConnectionsSection() {
                           : 'fill-text-muted text-text-muted'
                       }
                     />
-                    <span className="text-[11px] text-text-muted">
+                    <span className="text-sm text-text-muted">
                       {conn.connected ? 'Connected' : 'Not connected'}
                     </span>
                   </div>
                 </div>
               </div>
               {!conn.connected && (
-                <button className="rounded-lg bg-accent/10 px-3 py-1.5 text-[11px] font-medium text-accent hover:bg-accent/20 transition-colors">
+                <button className="rounded-lg bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent/20 transition-colors">
                   Connect
                 </button>
               )}

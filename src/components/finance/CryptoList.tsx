@@ -19,7 +19,7 @@ export default function CryptoList() {
           <CryptoRow key={coin.symbol} {...coin} />
         ))}
       </div>
-      <p className="text-[11px] text-text-muted/40 text-center mt-3 italic">
+      <p className="text-sm text-text-muted/40 text-center mt-3 italic">
         Ask: &quot;What&apos;s the price of SOL?&quot;
       </p>
     </div>

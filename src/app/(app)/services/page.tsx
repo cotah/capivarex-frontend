@@ -16,9 +16,9 @@ export default function ServicesPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-1">
             <Zap size={18} className="text-accent" />
-            <h2 className="text-lg font-semibold text-text">Your Services</h2>
+            <h2 className="text-3xl font-semibold text-text">Your Services</h2>
           </div>
-          <p className="text-xs text-text-muted">
+          <p className="text-sm text-text-muted">
             Connect your accounts to unlock more features
           </p>
         </div>

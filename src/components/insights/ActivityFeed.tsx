@@ -13,7 +13,7 @@ export default function ActivityFeed({ activities }: ActivityFeedProps) {
 
   return (
     <section className="glass rounded-2xl p-5">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">
+      <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
         Recent Activity
       </h3>
       <div className="space-y-0 max-h-80 overflow-y-auto">
@@ -24,7 +24,7 @@ export default function ActivityFeed({ activities }: ActivityFeedProps) {
               <span className="text-sm mt-0.5">{item.icon}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-text leading-snug">{item.text}</p>
-                <p className="text-[11px] text-text-muted mt-0.5">
+                <p className="text-sm text-text-muted mt-0.5">
                   {item.time}
                 </p>
               </div>
@@ -36,7 +36,7 @@ export default function ActivityFeed({ activities }: ActivityFeedProps) {
       {activities.length > 5 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          className="mt-3 w-full rounded-lg glass py-2 text-xs text-text-muted hover:text-accent transition-colors"
+          className="mt-3 w-full rounded-lg glass py-2 text-sm text-text-muted hover:text-accent transition-colors"
         >
           Show more ({activities.length - 5} more)
         </button>

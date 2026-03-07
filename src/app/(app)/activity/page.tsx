@@ -15,7 +15,7 @@ export default function ActivityPage() {
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <Clock size={18} className="text-accent" />
-          <h2 className="text-lg font-semibold text-text">Activity</h2>
+          <h2 className="text-3xl font-semibold text-text">Activity</h2>
         </div>
 
         {/* Feed */}

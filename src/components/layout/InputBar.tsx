@@ -44,7 +44,7 @@ export default function InputBar() {
               onKeyDown={handleKeyDown}
               placeholder="Ask Capivarex anything..."
               disabled={isThinking}
-              className="flex-1 bg-transparent text-sm text-text placeholder:text-text-muted outline-none disabled:opacity-50"
+              className="flex-1 bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50"
             />
 
             {/* Mic button */}

@@ -51,7 +51,7 @@ export default function Demo() {
           {/* Mockup header */}
           <div className="flex items-center gap-2 mb-5 pb-3 border-b border-white/5">
             <div className="h-2 w-2 rounded-full bg-accent/60" />
-            <span className="text-[11px] text-text-muted">Capivarex Chat</span>
+            <span className="text-sm text-text-muted">Capivarex Chat</span>
           </div>
 
           <div className="space-y-3">
@@ -66,7 +66,7 @@ export default function Demo() {
               >
                 <div className="flex flex-col max-w-[80%]">
                   <div
-                    className={`px-3.5 py-2 text-xs leading-relaxed rounded-2xl ${
+                    className={`px-3.5 py-2 text-sm leading-relaxed rounded-2xl ${
                       msg.role === 'user'
                         ? 'bg-accent/15 border border-accent/20 text-text rounded-br'
                         : 'glass text-text rounded-bl'
@@ -82,10 +82,10 @@ export default function Demo() {
                         <Music size={14} className="text-accent" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[11px] font-medium text-text truncate">
+                        <p className="text-sm font-medium text-text truncate">
                           {msg.track}
                         </p>
-                        <p className="text-[10px] text-text-muted truncate">
+                        <p className="text-sm text-text-muted truncate">
                           {msg.artist}
                         </p>
                       </div>

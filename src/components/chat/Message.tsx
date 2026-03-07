@@ -25,7 +25,7 @@ export default function Message({ message }: MessageProps) {
       <div className={`max-w-[85%] sm:max-w-[70%] ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
         {/* Bubble */}
         <div
-          className={`px-4 py-2.5 text-sm leading-relaxed ${
+          className={`px-4 py-2.5 text-base leading-relaxed ${
             isUser
               ? 'bg-accent/15 border border-accent/20 text-text rounded-2xl rounded-br'
               : 'glass text-text rounded-2xl rounded-bl'
@@ -46,7 +46,7 @@ export default function Message({ message }: MessageProps) {
         {!isUser && videoId && (
           <button
             onClick={() => castYouTube(videoId)}
-            className="mt-1.5 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted hover:text-accent hover:bg-accent/5 transition-colors"
+            className="mt-1.5 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm text-text-muted hover:text-accent hover:bg-accent/5 transition-colors"
           >
             <Tv size={12} />
             Cast to TV
@@ -54,7 +54,7 @@ export default function Message({ message }: MessageProps) {
         )}
 
         {/* Timestamp */}
-        <span className="mt-1 text-[10px] text-text-muted px-1">
+        <span className="mt-1 text-sm text-text-muted px-1">
           {message.time}
         </span>
       </div>

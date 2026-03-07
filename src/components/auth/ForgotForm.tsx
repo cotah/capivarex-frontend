@@ -47,12 +47,12 @@ export default function ForgotForm() {
           <Mail size={24} className="text-accent" />
         </div>
         <p className="text-sm text-text">Check your email</p>
-        <p className="text-xs text-text-muted">
+        <p className="text-sm text-text-muted">
           We sent a password reset link to <strong className="text-text">{email}</strong>
         </p>
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 transition-colors"
         >
           <ArrowLeft size={14} />
           Back to login
@@ -63,13 +63,13 @@ export default function ForgotForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-xs text-text-muted text-center">
+      <p className="text-sm text-text-muted text-center">
         Enter your email and we will send you a reset link.
       </p>
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-xs text-text-muted mb-1.5">
+        <label htmlFor="email" className="block text-sm text-text-muted mb-1.5">
           Email
         </label>
         <input
@@ -100,7 +100,7 @@ export default function ForgotForm() {
       <div className="text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors"
         >
           <ArrowLeft size={14} />
           Back to login

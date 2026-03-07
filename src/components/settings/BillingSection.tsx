@@ -21,7 +21,7 @@ export default function BillingSection() {
 
   return (
     <section className="glass rounded-2xl p-5 space-y-4">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-text">
+      <h3 className="flex items-center gap-2 text-base font-semibold text-text">
         <CreditCard size={16} className="text-accent" />
         Plan & Billing
       </h3>
@@ -29,7 +29,7 @@ export default function BillingSection() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-text">Current plan:</span>
+            <span className="text-base text-text">Current plan:</span>
             <PlanBadge plan={plan} />
           </div>
         </div>
@@ -44,13 +44,13 @@ export default function BillingSection() {
           {plan !== 'everywhere' && (
             <Link
               href="/pricing"
-              className="flex-1 flex items-center justify-center rounded-xl bg-accent py-2 text-sm font-medium text-bg hover:bg-accent/90 transition-colors"
+              className="flex-1 flex items-center justify-center rounded-xl bg-accent py-2 text-base font-medium text-bg hover:bg-accent/90 transition-colors"
             >
               {plan === 'free' ? 'Upgrade Plan' : 'Upgrade to Everywhere'}
             </Link>
           )}
           {plan !== 'free' && (
-            <button className="flex-1 flex items-center justify-center rounded-xl glass py-2 text-sm text-text-muted hover:text-text transition-colors">
+            <button className="flex-1 flex items-center justify-center rounded-xl glass py-2 text-base text-text-muted hover:text-text transition-colors">
               Manage Subscription
             </button>
           )}

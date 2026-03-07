@@ -26,7 +26,7 @@ export default function SmartsPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Home size={18} className="text-accent" />
-            <h2 className="text-lg font-semibold text-text">Smarts</h2>
+            <h2 className="text-3xl font-semibold text-text">Smarts</h2>
           </div>
           <SubTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>

@@ -10,7 +10,7 @@ function LoadingSkeleton() {
     <div className="flex h-screen items-center justify-center bg-bg">
       <div className="flex flex-col items-center gap-4">
         <div className="h-10 w-10 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
-        <p className="text-xs text-text-muted">Loading...</p>
+        <p className="text-sm text-text-muted">Loading...</p>
       </div>
     </div>
   );

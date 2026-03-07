@@ -20,8 +20,8 @@ export default function StatCard({
   return (
     <div className="glass rounded-2xl p-4">
       <span className="text-lg">{icon}</span>
-      <p className="mt-2 text-2xl font-bold text-text">{value}</p>
-      <p className="text-xs text-text-muted">{label}</p>
+      <p className="mt-2 text-3xl font-bold text-text">{value}</p>
+      <p className="text-sm text-text-muted">{label}</p>
       {trend && trendValue && (
         <div className="mt-2 flex items-center gap-1">
           {trend === 'up' && (
@@ -34,7 +34,7 @@ export default function StatCard({
             <Minus size={12} className="text-text-muted" />
           )}
           <span
-            className={`text-[11px] ${
+            className={`text-sm ${
               trend === 'up'
                 ? 'text-success'
                 : trend === 'down'

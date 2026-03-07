@@ -59,7 +59,7 @@ export default function InstallPrompt() {
 
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-text">Install Capivarex</p>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-sm text-text-muted">
                 Add to home screen for a better experience
               </p>
             </div>
@@ -67,7 +67,7 @@ export default function InstallPrompt() {
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={handleInstall}
-                className="rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/30 transition-colors"
+                className="rounded-lg bg-accent/20 px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent/30 transition-colors"
               >
                 Install
               </button>

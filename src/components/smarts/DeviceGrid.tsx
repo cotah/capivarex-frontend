@@ -24,11 +24,11 @@ export default function DeviceGrid({ connected = true }: DeviceGridProps) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Home size={48} className="text-text-muted/30 mb-4" />
-        <p className="text-sm font-medium text-text mb-1">No smart home connected</p>
-        <p className="text-xs text-text-muted mb-4">Connect your SmartThings account to control devices</p>
+        <p className="text-base font-medium text-text mb-1">No smart home connected</p>
+        <p className="text-sm text-text-muted mb-4">Connect your SmartThings account to control devices</p>
         <Link
           href="/services"
-          className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+          className="rounded-xl bg-accent px-5 py-2.5 text-base font-semibold text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
         >
           Connect
         </Link>

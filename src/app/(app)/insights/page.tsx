@@ -91,14 +91,14 @@ export default function InsightsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingCart size={18} className="text-accent" />
-            <h2 className="text-lg font-semibold text-text">Shopping Insights</h2>
+            <h2 className="text-3xl font-semibold text-text">Shopping Insights</h2>
           </div>
 
           {/* Month picker */}
           <div className="relative">
             <button
               onClick={() => setShowPicker(!showPicker)}
-              className="flex items-center gap-1.5 rounded-lg glass px-3 py-1.5 text-xs text-text-muted hover:text-text transition-colors"
+              className="flex items-center gap-1.5 rounded-lg glass px-3 py-1.5 text-sm text-text-muted hover:text-text transition-colors"
             >
               {getMonthLabel(month)}
               <ChevronDown size={14} />
@@ -112,7 +112,7 @@ export default function InsightsPage() {
                       setMonth(m);
                       setShowPicker(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+                    className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
                       m === month
                         ? 'text-accent bg-accent-soft'
                         : 'text-text-muted hover:text-text hover:bg-white/5'

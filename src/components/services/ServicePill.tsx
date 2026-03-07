@@ -15,7 +15,7 @@ export default function ServicePill({ service }: ServicePillProps) {
         <p className="text-sm font-medium text-text group-hover:text-accent transition-colors">
           {service.name}
         </p>
-        <p className="text-[11px] text-text-muted">{service.status}</p>
+        <p className="text-sm text-text-muted">{service.status}</p>
       </div>
       <Circle
         size={8}

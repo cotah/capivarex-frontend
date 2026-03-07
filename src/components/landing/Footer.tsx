@@ -46,7 +46,7 @@ export default function Footer() {
               height={30}
               className="h-8 w-auto object-contain mb-3"
             />
-            <p className="text-xs text-text-muted leading-relaxed max-w-[200px]">
+            <p className="text-sm text-text-muted leading-relaxed max-w-[200px]">
               Your AI-powered life assistant. One conversation, every service.
             </p>
           </div>
@@ -54,7 +54,7 @@ export default function Footer() {
           {/* Columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <h4 className="text-xs font-semibold text-text uppercase tracking-wider mb-3">
+              <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
                 {col.title}
               </h4>
               <ul className="space-y-2">
@@ -62,7 +62,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-xs text-text-muted hover:text-text transition-colors"
+                      className="text-sm text-text-muted hover:text-text transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -75,7 +75,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-white/5 pt-6 text-center">
-          <p className="text-[11px] text-text-muted/50">
+          <p className="text-sm text-text-muted/50">
             &copy; 2026 Capivarex. All rights reserved.
           </p>
         </div>

@@ -22,7 +22,7 @@ export default function RemindersList() {
       ))}
       {completed.length > 0 && (
         <>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted/50 pt-2">
+          <p className="text-sm font-semibold uppercase tracking-wider text-text-muted/50 pt-2">
             Completed
           </p>
           {completed.map((r) => (
