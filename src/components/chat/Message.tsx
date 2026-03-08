@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Tv } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/lib/types';
 import MusicCard from './MusicCard';
 import CalendarCard from './CalendarCard';
@@ -51,7 +52,28 @@ export default function Message({ message }: MessageProps) {
               : `glass ${voiceBorderBot} text-text rounded-2xl rounded-bl`
           }`}
         >
-          {message.text}
+          <ReactMarkdown
+            components={{
+              a: ({ href, children }) => (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent underline hover:text-accent/80 transition-colors"
+                >
+                  {children}
+                </a>
+              ),
+              p: ({ children }) => <span>{children}</span>,
+              strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+              em: ({ children }) => <em>{children}</em>,
+              code: ({ children }) => (
+                <code className="bg-white/10 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
+              ),
+            }}
+          >
+            {message.text}
+          </ReactMarkdown>
         </div>
 
         {/* Contextual cards */}
