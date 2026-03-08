@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '@/stores/chatStore';
 import { sendMessage } from '@/lib/api';
 import { nanoid } from 'nanoid';
+import type { MessageType } from '@/lib/types';
 
 type VoiceState = 'idle' | 'listening' | 'speaking';
 
@@ -136,7 +137,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         role: 'assistant',
         text: reply,
         time: now(),
-        type: response.type as 'text' | 'music' | 'calendar' | undefined,
+        type: response.type as MessageType | undefined,
         data: response.data as Record<string, unknown> | undefined,
         source: 'voice',
       });

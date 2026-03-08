@@ -2,6 +2,7 @@ import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
 import { sendMessage } from '@/lib/api';
 import { nanoid } from 'nanoid';
+import type { MessageType } from '@/lib/types';
 
 export function useChat() {
   const { addMessage, setThinking } = useChatStore();
@@ -40,7 +41,7 @@ export function useChat() {
           hour: '2-digit',
           minute: '2-digit',
         }),
-        type: response.type as 'text' | 'music' | 'calendar' | undefined,
+        type: response.type as MessageType | undefined,
         data: response.data as Record<string, unknown> | undefined,
       });
 

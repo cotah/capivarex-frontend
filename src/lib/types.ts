@@ -1,6 +1,6 @@
 export type MessageRole = 'user' | 'assistant';
 
-export type MessageType = 'text' | 'music' | 'calendar' | 'shopping' | 'weather';
+export type MessageType = 'text' | 'music' | 'calendar' | 'shopping' | 'weather' | 'image' | 'video';
 
 export type MessageSource = 'text' | 'voice';
 

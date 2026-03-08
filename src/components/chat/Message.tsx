@@ -7,6 +7,8 @@ import MusicCard from './MusicCard';
 import CalendarCard from './CalendarCard';
 import { castYouTube } from '@/lib/cast';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
 interface MessageProps {
   message: ChatMessage;
 }
@@ -15,10 +17,17 @@ export default function Message({ message }: MessageProps) {
   const isUser = message.role === 'user';
   const isVoice = message.source === 'voice';
   const videoId = message.data?.video_id as string | undefined;
+  const imageUrl = message.data?.image_url as string | undefined;
+  const imageUrls = message.data?.image_urls as string[] | undefined;
 
   /* Voice messages get a golden border */
   const voiceBorderUser = isVoice ? 'border-2 border-amber-500' : 'border border-accent/20';
   const voiceBorderBot = isVoice ? 'border border-amber-500/30' : '';
+
+  function resolveUrl(path: string): string {
+    if (path.startsWith('http')) return path;
+    return `${API_URL}${path}`;
+  }
 
   return (
     <motion.div
@@ -45,6 +54,44 @@ export default function Message({ message }: MessageProps) {
         )}
         {!isUser && message.type === 'calendar' && (
           <CalendarCard data={message.data} />
+        )}
+
+        {/* Single generated image */}
+        {!isUser && imageUrl && (
+          <div className="mt-3 rounded-xl overflow-hidden border border-glass-border">
+            <img
+              src={resolveUrl(imageUrl)}
+              alt={(message.data?.prompt as string) || 'Generated image'}
+              className="w-full max-w-md rounded-xl cursor-pointer"
+              loading="lazy"
+              onClick={() => window.open(resolveUrl(imageUrl), '_blank')}
+            />
+          </div>
+        )}
+
+        {/* Multiple generated images */}
+        {!isUser && imageUrls && imageUrls.length > 0 && imageUrls.map((url, i) => (
+          <div key={i} className="mt-3 rounded-xl overflow-hidden border border-glass-border">
+            <img
+              src={resolveUrl(url)}
+              alt={`Generated image ${i + 1}`}
+              className="w-full max-w-md rounded-xl cursor-pointer"
+              loading="lazy"
+              onClick={() => window.open(resolveUrl(url), '_blank')}
+            />
+          </div>
+        ))}
+
+        {/* YouTube video embed */}
+        {!isUser && videoId && (
+          <div className="mt-3 rounded-xl overflow-hidden border border-glass-border aspect-video max-w-md w-full">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
         )}
 
         {/* Cast to TV button for video messages */}
