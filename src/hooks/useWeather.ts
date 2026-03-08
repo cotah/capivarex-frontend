@@ -1,30 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-/* ── WMO weather-code → emoji ─────────────────────────── */
-function wmoEmoji(code: number): string {
-  if (code === 0) return '☀️';
-  if (code <= 3) return '🌤️';
-  if (code <= 48) return '🌫️';
-  if (code <= 57) return '🌦️';
-  if (code <= 67) return '🌧️';
-  if (code <= 77) return '🌨️';
-  if (code <= 82) return '🌧️';
-  return '⛈️';
-}
+const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY || '';
+const CACHE_KEY = 'capivarex_weather';
+const CITY_KEY = 'capivarex_weather_city';
+const CACHE_TTL = 15 * 60 * 1000; // 15 min
+const FALLBACK_CITY = 'Dublin';
 
-function wmoLabel(code: number): string {
-  if (code === 0) return 'Clear sky';
-  if (code === 1) return 'Mainly clear';
-  if (code === 2) return 'Partly cloudy';
-  if (code === 3) return 'Overcast';
-  if (code <= 48) return 'Fog';
-  if (code <= 57) return 'Drizzle';
-  if (code <= 67) return 'Rain';
-  if (code <= 77) return 'Snow';
-  if (code <= 82) return 'Rain showers';
-  return 'Thunderstorm';
+/* ── Condition text → emoji ─────────────────────────── */
+function conditionEmoji(text: string): string {
+  const t = text.toLowerCase();
+  if (t.includes('sunny') || t.includes('clear')) return '☀️';
+  if (t.includes('partly cloudy') || t.includes('partly')) return '🌤️';
+  if (t.includes('cloudy') || t.includes('overcast')) return '☁️';
+  if (t.includes('mist') || t.includes('fog')) return '🌫️';
+  if (t.includes('thunder')) return '⛈️';
+  if (t.includes('snow') || t.includes('sleet') || t.includes('blizzard') || t.includes('ice')) return '🌨️';
+  if (t.includes('drizzle') || t.includes('light rain')) return '🌦️';
+  if (t.includes('rain') || t.includes('shower')) return '🌧️';
+  return '🌤️';
 }
 
 export interface HourForecast {
@@ -54,13 +49,12 @@ export interface WeatherData {
   days: DayForecast[];
 }
 
-const CACHE_KEY = 'capivarex_weather';
-const CACHE_TTL = 15 * 60 * 1000; // 15 min
-
 interface CachedWeather {
   data: WeatherData;
   ts: number;
 }
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function readCache(): WeatherData | null {
   try {
@@ -80,88 +74,94 @@ function writeCache(data: WeatherData) {
   } catch { /* quota */ }
 }
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-async function fetchCity(lat: number, lon: number): Promise<string> {
+function readLastCity(): string {
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`,
-      { headers: { 'Accept-Language': 'en' } },
-    );
-    const json = await res.json();
-    return (
-      json.address?.city ||
-      json.address?.town ||
-      json.address?.village ||
-      json.address?.municipality ||
-      'Unknown'
-    );
+    return localStorage.getItem(CITY_KEY) || '';
   } catch {
-    return 'Unknown';
+    return '';
   }
 }
 
-async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
-  const city = await fetchCity(lat, lon);
+function writeLastCity(city: string) {
+  try {
+    localStorage.setItem(CITY_KEY, city);
+  } catch { /* quota */ }
+}
 
-  const params = new URLSearchParams({
-    latitude: String(lat),
-    longitude: String(lon),
-    current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m',
-    hourly: 'temperature_2m,weather_code',
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min',
-    timezone: 'auto',
-    forecast_days: '6',
-  });
+function mapResponse(json: Record<string, unknown>): WeatherData {
+  const current = json.current as Record<string, unknown>;
+  const location = json.location as Record<string, unknown>;
+  const forecast = json.forecast as Record<string, unknown> | undefined;
+  const forecastDays = (forecast?.forecastday || []) as Record<string, unknown>[];
 
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
-  const json = await res.json();
+  // Today's forecast for high/low
+  const todayForecast = forecastDays[0] as Record<string, unknown> | undefined;
 
-  const current = json.current;
-  const hourly = json.hourly;
-  const daily = json.daily;
-
-  // Build next 6 hours starting from current hour
+  // Hourly — next 6 hours from now
   const nowHour = new Date().getHours();
-  const hourStart = hourly.time.findIndex(
-    (t: string) => new Date(t).getHours() >= nowHour && new Date(t).toDateString() === new Date().toDateString(),
+  const todayHours = ((todayForecast?.hour || []) as Record<string, unknown>[]);
+  const day1 = forecastDays[1] as Record<string, unknown> | undefined;
+  const tomorrowHours = ((day1?.hour || []) as Record<string, unknown>[]);
+  const allHours = [...todayHours, ...tomorrowHours];
+
+  const hourStart = todayHours.findIndex(
+    (h) => new Date(h.time as string).getHours() >= nowHour,
   );
   const hours: HourForecast[] = [];
-  for (let i = 0; i < 6 && hourStart + i < hourly.time.length; i++) {
-    const idx = hourStart + i;
+  for (let i = 0; i < 6; i++) {
+    const idx = hourStart >= 0 ? hourStart + i : i;
+    const h = allHours[idx];
+    if (!h) break;
+    const hCond = h.condition as Record<string, unknown> | undefined;
     hours.push({
-      time: i === 0 ? 'Now' : new Date(hourly.time[idx]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      temp: Math.round(hourly.temperature_2m[idx]),
-      icon: wmoEmoji(hourly.weather_code[idx]),
+      time: i === 0 ? 'Now' : new Date(h.time as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      temp: Math.round(h.temp_c as number),
+      icon: conditionEmoji((hCond?.text as string) || ''),
     });
   }
 
-  // Build 5-day forecast (skip today → indices 1..5)
+  // 5-day forecast (skip today → indices 1..5)
   const days: DayForecast[] = [];
-  for (let i = 1; i <= 5 && i < daily.time.length; i++) {
-    const date = new Date(daily.time[i] + 'T00:00:00');
+  for (let i = 1; i < forecastDays.length && days.length < 5; i++) {
+    const fd = forecastDays[i];
+    const fdDay = fd.day as Record<string, unknown>;
+    const fdCond = fdDay.condition as Record<string, unknown> | undefined;
+    const date = new Date((fd.date as string) + 'T00:00:00');
     days.push({
       day: i === 1 ? 'Tomorrow' : WEEKDAYS[date.getDay()],
-      high: Math.round(daily.temperature_2m_max[i]),
-      low: Math.round(daily.temperature_2m_min[i]),
-      icon: wmoEmoji(daily.weather_code[i]),
+      high: Math.round(fdDay.maxtemp_c as number),
+      low: Math.round(fdDay.mintemp_c as number),
+      icon: conditionEmoji((fdCond?.text as string) || ''),
     });
   }
 
-  const data: WeatherData = {
+  const city = (location?.name as string) || 'Unknown';
+  writeLastCity(city);
+
+  const curCond = current.condition as Record<string, unknown> | undefined;
+  const todayDay = todayForecast?.day as Record<string, unknown> | undefined;
+
+  return {
     city,
-    temp: Math.round(current.temperature_2m),
-    feelsLike: Math.round(current.apparent_temperature),
-    high: Math.round(daily.temperature_2m_max[0]),
-    low: Math.round(daily.temperature_2m_min[0]),
-    humidity: Math.round(current.relative_humidity_2m),
-    wind: `${Math.round(current.wind_speed_10m)} km/h`,
-    condition: wmoLabel(current.weather_code),
-    icon: wmoEmoji(current.weather_code),
+    temp: Math.round(current.temp_c as number),
+    feelsLike: Math.round(current.feelslike_c as number),
+    high: todayDay ? Math.round(todayDay.maxtemp_c as number) : Math.round(current.temp_c as number),
+    low: todayDay ? Math.round(todayDay.mintemp_c as number) : Math.round(current.temp_c as number),
+    humidity: Math.round(current.humidity as number),
+    wind: `${Math.round(current.wind_kph as number)} km/h`,
+    condition: (curCond?.text as string) || '',
+    icon: conditionEmoji((curCond?.text as string) || ''),
     hours,
     days,
   };
+}
 
+async function fetchWeatherByQuery(query: string): Promise<WeatherData> {
+  const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(query)}&days=6&aqi=no`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Weather API ${res.status}`);
+  const json = await res.json();
+  const data = mapResponse(json);
   writeCache(data);
   return data;
 }
@@ -170,37 +170,55 @@ export function useWeather() {
   const [data, setData] = useState<WeatherData | null>(readCache);
   const [loading, setLoading] = useState(!readCache());
 
+  /* ── Initial load: geolocation → last city → fallback ── */
   useEffect(() => {
-    // If we have a cache hit, still refresh in background but don't show loading
     const cached = readCache();
     if (cached) {
       setData(cached);
       setLoading(false);
     }
 
-    if (!navigator.geolocation) {
+    if (!API_KEY) {
       setLoading(false);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const result = await fetchWeather(pos.coords.latitude, pos.coords.longitude);
-          setData(result);
-        } catch {
-          // keep cached data if available
-        } finally {
-          setLoading(false);
-        }
-      },
-      () => {
-        // Geolocation denied — keep cached data or null
-        setLoading(false);
-      },
-      { timeout: 10000, maximumAge: 600000 },
-    );
+    function loadByCity(city: string) {
+      fetchWeatherByQuery(city)
+        .then(setData)
+        .catch(() => { /* keep cached */ })
+        .finally(() => setLoading(false));
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          loadByCity(`${pos.coords.latitude},${pos.coords.longitude}`);
+        },
+        () => {
+          // Denied — use last city or fallback
+          loadByCity(readLastCity() || FALLBACK_CITY);
+        },
+        { timeout: 10000, maximumAge: 600000 },
+      );
+    } else {
+      loadByCity(readLastCity() || FALLBACK_CITY);
+    }
   }, []);
 
-  return { data, loading };
+  /* ── Search by city name ── */
+  const searchCity = useCallback(async (city: string) => {
+    if (!API_KEY || !city.trim()) return;
+    setLoading(true);
+    try {
+      const result = await fetchWeatherByQuery(city.trim());
+      setData(result);
+    } catch {
+      // keep current data
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { data, loading, searchCity };
 }

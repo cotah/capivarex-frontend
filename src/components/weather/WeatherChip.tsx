@@ -7,7 +7,7 @@ import WeatherPanel from './WeatherPanel';
 export default function WeatherChip() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const { data, loading } = useWeather();
+  const { data, loading, searchCity } = useWeather();
 
   /* Close on click outside */
   useEffect(() => {
@@ -21,7 +21,8 @@ export default function WeatherChip() {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  if (loading || !data) return null;
+  if (!data && loading) return null;
+  if (!data) return null;
 
   return (
     <div ref={ref} className="relative shrink-0">
@@ -37,7 +38,7 @@ export default function WeatherChip() {
       {/* Desktop: absolute dropdown */}
       {open && (
         <div className="hidden md:block absolute top-full mt-2 right-0 z-50">
-          <WeatherPanel data={data} />
+          <WeatherPanel data={data} searching={loading} onSearch={searchCity} />
         </div>
       )}
 
@@ -49,7 +50,7 @@ export default function WeatherChip() {
             onMouseDown={() => setOpen(false)}
           />
           <div className="relative mx-4 max-h-[70vh] overflow-y-auto rounded-2xl">
-            <WeatherPanel data={data} />
+            <WeatherPanel data={data} searching={loading} onSearch={searchCity} />
           </div>
         </div>
       )}

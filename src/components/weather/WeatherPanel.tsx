@@ -1,13 +1,25 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Loader2 } from 'lucide-react';
 import type { WeatherData } from '@/hooks/useWeather';
 
 interface WeatherPanelProps {
   data: WeatherData;
+  searching?: boolean;
+  onSearch: (city: string) => void;
 }
 
-export default function WeatherPanel({ data: d }: WeatherPanelProps) {
+export default function WeatherPanel({ data: d, searching, onSearch }: WeatherPanelProps) {
+  const [query, setQuery] = useState('');
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && query.trim()) {
+      onSearch(query.trim());
+      setQuery('');
+    }
+  }
+
   return (
     <div className="w-[calc(100vw-2rem)] md:w-80 rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-amber-500/20 shadow-2xl shadow-black/50 overflow-hidden">
       {/* Header + current */}
@@ -77,9 +89,16 @@ export default function WeatherPanel({ data: d }: WeatherPanelProps) {
       {/* Search */}
       <div className="p-3 pt-2 border-t border-white/5">
         <div className="flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-2">
-          <Search size={14} className="text-gray-500 shrink-0" />
+          {searching ? (
+            <Loader2 size={14} className="text-amber-400 shrink-0 animate-spin" />
+          ) : (
+            <Search size={14} className="text-gray-500 shrink-0" />
+          )}
           <input
             type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search location..."
             className="flex-1 bg-transparent text-sm text-white placeholder:text-gray-500 outline-none"
           />
