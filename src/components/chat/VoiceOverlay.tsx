@@ -5,6 +5,7 @@ import { X, Mic, MicOff } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '@/stores/chatStore';
+import { useConversationStore } from '@/stores/conversationStore';
 import { sendMessage } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
@@ -125,7 +126,11 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     setBotText('Thinking...');
 
     try {
-      const response = await sendMessage(finalText);
+      let conversationId = useConversationStore.getState().activeConversationId;
+      if (!conversationId) {
+        conversationId = await useConversationStore.getState().createConversation();
+      }
+      const response = await sendMessage(finalText, conversationId);
       const reply =
         (response.response as string) ||
         (response.message as string) ||
