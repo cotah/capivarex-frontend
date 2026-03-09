@@ -58,7 +58,12 @@ export const useConversationStore = create<ConversationStore>((set) => ({
     set({ activeConversationId: id });
     try {
       const detail = await apiClient<ConversationDetail>(`/api/webapp/conversations/${id}`);
-      const messages = detail.messages || [];
+      const messages = (detail.messages || []).map((m: ChatMessage & { created_at?: string }) => ({
+        ...m,
+        time: m.time ?? (m.created_at
+          ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : ''),
+      }));
       useChatStore.setState({ messages, isThinking: false });
       set((s) => ({
         conversations: s.conversations.map((c) =>
