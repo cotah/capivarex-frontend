@@ -82,18 +82,9 @@ export const useConversationStore = create<ConversationStore>((set) => ({
       }));
       useChatStore.setState({ messages: [], isThinking: false });
       return conv.id;
-    } catch {
-      const fallbackId = crypto.randomUUID();
-      const now = new Date().toISOString();
-      set((s) => ({
-        conversations: [
-          { id: fallbackId, title: 'New Chat', messages: [], createdAt: now, updatedAt: now },
-          ...s.conversations,
-        ],
-        activeConversationId: fallbackId,
-      }));
-      useChatStore.setState({ messages: [], isThinking: false });
-      return fallbackId;
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
     }
   },
 
