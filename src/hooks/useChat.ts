@@ -45,6 +45,16 @@ export function useChat() {
         data: response.data as Record<string, unknown> | undefined,
       });
 
+      // Update sidebar with latest message preview and timestamp
+      if (conversationId) {
+        useConversationStore.getState().addMessageToConversation(conversationId, {
+          id: nanoid(),
+          role: 'assistant',
+          text: (response.response as string) || (response.message as string) || '',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        });
+      }
+
       if (response.conversation_title) {
         useConversationStore.getState().renameConversation(
           conversationId,
