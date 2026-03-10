@@ -49,7 +49,7 @@ export default function ChatPage() {
         ) : (
           /* ═══ Conversation active — messages + input fixed at bottom ═══ */
           <>
-            <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-3xl flex-col pb-40 md:pb-24">
+            <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-3xl flex-col overflow-hidden">
               <MessageList />
             </div>
             <InputBar />
