@@ -29,13 +29,13 @@ const ALL_SERVICES: ServiceDefinition[] = [
   { id: 'media_cast', name: 'Cast to TV', icon: 'Tv', description: 'Send content to your TV via Chromecast', category: 'Entertainment', plans: ['everywhere'] },
 
   // ── Smart Home ──
-  { id: 'smarthome', name: 'SmartThings', icon: 'Home', description: 'Control lights, locks, thermostat, sensors', category: 'Smart Home', plans: ['everywhere'], oauth: 'smartthings' },
+  { id: 'smarthome', name: 'SmartThings', icon: 'Home', description: 'Control lights, locks, thermostat, sensors', category: 'Smart Home', plans: ['everywhere'], oauth: 'smartthings', comingSoon: true },
 
   // ── Transport & Navigation ──
   { id: 'traffic', name: 'Traffic', icon: 'Navigation', description: 'Real-time traffic and route info', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
   { id: 'transport', name: 'Public Transport', icon: 'Bus', description: 'Bus, train, metro schedules and routes', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
   { id: 'maps', name: 'Maps', icon: 'Map', description: 'Directions, places, navigation', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
-  { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['everywhere'], oauth: 'smartcar' },
+  { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['everywhere'], oauth: 'smartcar', comingSoon: true },
   { id: 'leaving_now', name: 'Smart Departure', icon: 'Navigation', description: 'Traffic + weather + calendar combined', category: 'Transport', plans: ['me', 'everywhere'] },
 
   // ── Travel ──
@@ -57,7 +57,7 @@ const ALL_SERVICES: ServiceDefinition[] = [
 
   // ── Development ──
   { id: 'dev', name: 'Dev Assistant', icon: 'Code', description: 'Code generation, debugging, explanations', category: 'Development', plans: ['me', 'everywhere'] },
-  { id: 'github', name: 'GitHub', icon: 'Github', description: 'Manage repos, commits, issues', category: 'Development', plans: ['me', 'everywhere'], oauth: 'github' },
+  { id: 'github', name: 'GitHub', icon: 'Github', description: 'Manage repos, commits, issues', category: 'Development', plans: ['me', 'everywhere'], oauth: 'github', comingSoon: true },
 
   // ── Image & Media ──
   { id: 'image', name: 'Image Generation', icon: 'ImageIcon', description: 'Generate images with AI', category: 'Media', plans: ['me', 'everywhere'] },
@@ -83,20 +83,7 @@ const OAUTH_MAP: Record<string, string> = {
   github: '/api/auth/github/connect',
 };
 
-async function checkServiceStatus(
-  provider: string,
-  userId: string,
-): Promise<{ connected: boolean }> {
-  try {
-    const res = await fetch(
-      `${API_URL}/api/auth/${provider}/status?user_id=${userId}`,
-    );
-    if (!res.ok) return { connected: false };
-    return (await res.json()) as { connected: boolean };
-  } catch {
-    return { connected: false };
-  }
-}
+const COMING_SOON_OAUTH = new Set(['smartthings', 'smartcar', 'github']);
 
 export default function ServiceGrid() {
   const user = useAuthStore((s) => s.user);
@@ -130,27 +117,24 @@ export default function ServiceGrid() {
   const handleConnect = useCallback(
     (service: ServiceDefinition) => {
       if (!user?.id || !service.oauth) return;
+      if (COMING_SOON_OAUTH.has(service.oauth)) return;
       const authPath = OAUTH_MAP[service.oauth];
       if (!authPath) return;
 
-      window.open(
+      const oauthWindow = window.open(
         `${API_URL}${authPath}?user_id=${user.id}`,
         'oauth',
-        'width=500,height=700',
+        'width=600,height=700',
       );
 
-      const lookupId = service.oauth;
-      const interval = setInterval(async () => {
-        const status = await checkServiceStatus(lookupId, user.id);
-        if (status.connected) {
-          clearInterval(interval);
-          updateConnection(lookupId, { connected: true });
+      const checkClosed = setInterval(() => {
+        if (oauthWindow?.closed) {
+          clearInterval(checkClosed);
+          fetchAll();
         }
-      }, 3000);
-
-      setTimeout(() => clearInterval(interval), 120000);
+      }, 500);
     },
-    [user?.id, updateConnection],
+    [user?.id, fetchAll],
   );
 
   const handleDisconnect = useCallback(

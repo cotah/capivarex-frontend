@@ -37,13 +37,23 @@ function groupByPeriod(conversations: Conversation[]): GroupedConversations[] {
   return groups;
 }
 
-export default function ConversationList() {
+interface ConversationListProps {
+  searchQuery?: string;
+}
+
+export default function ConversationList({ searchQuery = '' }: ConversationListProps) {
   const conversations = useConversationStore((s) => s.conversations);
   const activeId = useConversationStore((s) => s.activeConversationId);
   const setActive = useConversationStore((s) => s.setActiveConversation);
   const setSidebarOpen = useConversationStore((s) => s.setSidebarOpen);
 
-  const groups = useMemo(() => groupByPeriod(conversations), [conversations]);
+  const filtered = useMemo(() => {
+    if (!searchQuery.trim()) return conversations;
+    const q = searchQuery.toLowerCase();
+    return conversations.filter((c) => c.title.toLowerCase().includes(q));
+  }, [conversations, searchQuery]);
+
+  const groups = useMemo(() => groupByPeriod(filtered), [filtered]);
 
   const handleSelect = (id: string) => {
     setActive(id);
@@ -56,6 +66,14 @@ export default function ConversationList() {
     return (
       <p className="px-4 py-6 text-center text-sm text-text-muted">
         No conversations yet.
+      </p>
+    );
+  }
+
+  if (filtered.length === 0) {
+    return (
+      <p className="px-4 py-6 text-center text-sm text-text-muted">
+        No matches found.
       </p>
     );
   }

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Tv } from 'lucide-react';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/lib/types';
 import MusicCard from './MusicCard';
@@ -86,12 +87,14 @@ export default function Message({ message }: MessageProps) {
 
         {/* Single generated image */}
         {!isUser && singleImageUrl !== undefined && (
-          <div className="mt-3 rounded-xl overflow-hidden border border-glass-border">
-            <img
+          <div className="relative mt-3 rounded-xl overflow-hidden border border-glass-border max-w-md w-full">
+            <Image
               src={resolveUrl(singleImageUrl)}
               alt={typeof message.data?.prompt === 'string' ? message.data.prompt : 'Generated image'}
-              className="w-full max-w-md rounded-xl cursor-pointer"
-              loading="lazy"
+              width={448}
+              height={448}
+              className="w-full rounded-xl cursor-pointer"
+              unoptimized
               onClick={() => window.open(resolveUrl(singleImageUrl), '_blank')}
             />
           </div>
@@ -99,12 +102,14 @@ export default function Message({ message }: MessageProps) {
 
         {/* Multiple generated images */}
         {!isUser && hasMultipleImages && rawImageUrls.map((url, i) => (
-          <div key={i} className="mt-3 rounded-xl overflow-hidden border border-glass-border">
-            <img
+          <div key={i} className="relative mt-3 rounded-xl overflow-hidden border border-glass-border max-w-md w-full">
+            <Image
               src={resolveUrl(url)}
               alt={`Generated image ${i + 1}`}
-              className="w-full max-w-md rounded-xl cursor-pointer"
-              loading="lazy"
+              width={448}
+              height={448}
+              className="w-full rounded-xl cursor-pointer"
+              unoptimized
               onClick={() => window.open(resolveUrl(url), '_blank')}
             />
           </div>

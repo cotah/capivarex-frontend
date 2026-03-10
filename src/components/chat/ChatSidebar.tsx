@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Search } from 'lucide-react';
 import { useConversationStore } from '@/stores/conversationStore';
 import NewChatButton from './NewChatButton';
 import ConversationList from './ConversationList';
+import QuotaIndicator from './QuotaIndicator';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 export default function ChatSidebar() {
@@ -12,6 +13,7 @@ export default function ChatSidebar() {
   const setSidebarOpen = useConversationStore((s) => s.setSidebarOpen);
   const isLoading = useConversationStore((s) => s.isLoading);
   const fetchConversations = useConversationStore((s) => s.fetchConversations);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchConversations();
@@ -59,8 +61,27 @@ export default function ChatSidebar() {
           <NewChatButton />
         </div>
 
+        {/* Search */}
+        <div className="px-3 pb-2">
+          <div className="relative">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted/50" />
+            <input
+              type="text"
+              placeholder="Search conversations…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg bg-white/5 border border-glass-border pl-8 pr-3 py-1.5 text-xs text-text placeholder:text-text-muted/40 focus:outline-none focus:border-accent/30 transition-colors"
+            />
+          </div>
+        </div>
+
         {/* Conversation list */}
-        {isLoading ? <LoadingSpinner /> : <ConversationList />}
+        {isLoading ? <LoadingSpinner /> : <ConversationList searchQuery={searchQuery} />}
+
+        {/* Quota indicator */}
+        <div className="border-t border-glass-border">
+          <QuotaIndicator />
+        </div>
       </aside>
     </>
   );
