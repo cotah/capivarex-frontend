@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Tv } from 'lucide-react';
+import { Tv, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/lib/types';
@@ -16,11 +16,15 @@ function resolveUrl(path: string): string {
   return `${API_URL}${path}`;
 }
 
+type TTSState = 'idle' | 'loading' | 'playing';
+
 interface MessageProps {
   message: ChatMessage;
+  ttsState?: TTSState;
+  onTTSToggle?: () => void;
 }
 
-export default function Message({ message }: MessageProps) {
+export default function Message({ message, ttsState = 'idle', onTTSToggle }: MessageProps) {
   const isUser = message.role === 'user';
   const isVoice = message.source === 'voice';
   const videoId = typeof message.data?.video_id === 'string' ? message.data.video_id : undefined;
@@ -150,10 +154,31 @@ export default function Message({ message }: MessageProps) {
           </button>
         )}
 
-        {/* Timestamp */}
-        <span className="mt-1 text-sm text-text-muted px-1">
-          {message.time}
-        </span>
+        {/* Timestamp + TTS */}
+        <div className="mt-1 flex items-center gap-2 px-1">
+          <span className="text-sm text-text-muted">
+            {message.time}
+          </span>
+          {!isUser && onTTSToggle && (
+            <button
+              onClick={onTTSToggle}
+              className={`flex items-center justify-center transition-colors ${
+                ttsState === 'playing'
+                  ? 'text-accent'
+                  : 'text-text-muted/50 hover:text-text-muted'
+              }`}
+              aria-label={ttsState === 'playing' ? 'Stop speaking' : 'Read aloud'}
+            >
+              {ttsState === 'loading' ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : ttsState === 'playing' ? (
+                <VolumeX size={12} />
+              ) : (
+                <Volume2 size={12} />
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );

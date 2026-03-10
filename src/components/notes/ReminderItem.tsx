@@ -1,14 +1,14 @@
 'use client';
 
 interface ReminderItemProps {
-  text: string;
-  dueAt: string;
-  completed: boolean;
+  title: string;
+  remindAt: string;
+  done: boolean;
   onToggle?: () => void;
 }
 
-export default function ReminderItem({ text, dueAt, completed, onToggle }: ReminderItemProps) {
-  const date = new Date(dueAt);
+export default function ReminderItem({ title, remindAt, done, onToggle }: ReminderItemProps) {
+  const date = new Date(remindAt);
   const formatted = date.toLocaleDateString('en-IE', {
     day: 'numeric',
     month: 'short',
@@ -24,18 +24,18 @@ export default function ReminderItem({ text, dueAt, completed, onToggle }: Remin
         <button
           onClick={onToggle}
           className="text-base flex-shrink-0 hover:scale-110 transition-transform"
-          aria-label={completed ? 'Mark as pending' : 'Mark as completed'}
+          aria-label={done ? 'Mark as pending' : 'Mark as done'}
         >
-          {completed ? '✅' : '🔔'}
+          {done ? '\u2705' : '\uD83D\uDD14'}
         </button>
         <p
           className={`text-base truncate ${
-            completed
+            done
               ? 'text-text-muted/50 line-through'
               : 'text-text font-medium'
           }`}
         >
-          {text}
+          {title}
         </p>
       </div>
       <div className="flex-shrink-0 text-right">

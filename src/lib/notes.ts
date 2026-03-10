@@ -35,9 +35,9 @@ export async function fetchReminders(): Promise<Reminder[]> {
   return Array.isArray(data) ? data : (data.reminders || []);
 }
 
-export async function toggleReminder(id: string, completed: boolean): Promise<void> {
+export async function toggleReminder(id: string, done: boolean): Promise<void> {
   return apiClient<void>(`/api/webapp/reminders/${id}`, {
     method: 'PATCH',
-    body: JSON.stringify({ completed }),
+    body: JSON.stringify({ done }),
   });
 }

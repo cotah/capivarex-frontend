@@ -194,8 +194,7 @@ export interface Note {
 
 export interface Reminder {
   id: string;
-  text: string;
-  due_at: string;
-  completed: boolean;
-  user_id: string;
+  title: string;
+  remind_at: string;
+  done: boolean;
 }

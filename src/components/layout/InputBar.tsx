@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, KeyboardEvent } from 'react';
-import { Send, Mic, AudioLines } from 'lucide-react';
+import { Send, Mic, MicOff, AudioLines, Loader2 } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/chatStore';
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
 import VoiceOverlay from '@/components/chat/VoiceOverlay';
 
 interface InputBarProps {
@@ -16,6 +17,17 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { send } = useChat();
   const isThinking = useChatStore((s) => s.isThinking);
+  const { state: micState, supported: micSupported, startRecording, stopRecording } = useVoiceRecorder();
+
+  const handleMic = async () => {
+    if (micState === 'recording') {
+      const transcribed = await stopRecording();
+      if (transcribed) setText((prev) => (prev ? `${prev} ${transcribed}` : transcribed));
+      inputRef.current?.focus();
+    } else if (micState === 'idle') {
+      startRecording();
+    }
+  };
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -48,13 +60,30 @@ export default function InputBar({ centered = false }: InputBarProps) {
         className="flex-1 bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50"
       />
 
-      {/* Mic button */}
-      <button
-        className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted hover:text-text transition-colors"
-        aria-label="Voice input"
-      >
-        <Mic size={16} />
-      </button>
+      {/* Mic button — transcribe via backend */}
+      {micSupported && (
+        <button
+          onClick={handleMic}
+          disabled={micState === 'transcribing' || isThinking}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
+            micState === 'recording'
+              ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30'
+              : micState === 'transcribing'
+                ? 'bg-white/5 text-text-muted'
+                : 'text-accent hover:text-accent/80 hover:bg-accent/5'
+          }`}
+          aria-label={micState === 'recording' ? 'Stop recording' : 'Voice input'}
+          title={micState === 'error' ? 'Voice not available' : undefined}
+        >
+          {micState === 'transcribing' ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : micState === 'recording' ? (
+            <MicOff size={16} />
+          ) : (
+            <Mic size={16} />
+          )}
+        </button>
+      )}
 
       {/* Send button */}
       <button

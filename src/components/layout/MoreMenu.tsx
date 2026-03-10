@@ -4,9 +4,10 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, BarChart3, Clock, Settings, X } from 'lucide-react';
+import { Brain, TrendingUp, BarChart3, Clock, Settings, X } from 'lucide-react';
 
 const moreItems = [
+  { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/finance', label: 'Finance', icon: TrendingUp },
   { href: '/insights', label: 'Insights', icon: BarChart3 },
   { href: '/activity', label: 'Activity', icon: Clock },

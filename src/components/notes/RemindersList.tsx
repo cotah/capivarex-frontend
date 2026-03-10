@@ -26,16 +26,16 @@ export default function RemindersList() {
     load();
   }, []);
 
-  const handleToggle = async (id: string, completed: boolean) => {
+  const handleToggle = async (id: string, done: boolean) => {
     setReminders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, completed } : r)),
+      prev.map((r) => (r.id === id ? { ...r, done } : r)),
     );
     try {
-      await toggleReminder(id, completed);
+      await toggleReminder(id, done);
     } catch {
       // revert on error
       setReminders((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, completed: !completed } : r)),
+        prev.map((r) => (r.id === id ? { ...r, done: !done } : r)),
       );
     }
   };
@@ -46,37 +46,37 @@ export default function RemindersList() {
     return (
       <EmptyState
         icon={Bell}
-        title="No reminders yet"
-        description="Ask Capivarex to set a reminder for you."
+        title="No reminders"
+        description="Ask Capivarex to set one for you."
       />
     );
   }
 
-  const pending = reminders.filter((r) => !r.completed);
-  const completed = reminders.filter((r) => r.completed);
+  const pending = reminders.filter((r) => !r.done);
+  const done = reminders.filter((r) => r.done);
 
   return (
     <div className="space-y-3">
       {pending.map((r) => (
         <ReminderItem
           key={r.id}
-          text={r.text}
-          dueAt={r.due_at}
-          completed={false}
+          title={r.title}
+          remindAt={r.remind_at}
+          done={false}
           onToggle={() => handleToggle(r.id, true)}
         />
       ))}
-      {completed.length > 0 && (
+      {done.length > 0 && (
         <>
           <p className="text-sm font-semibold uppercase tracking-wider text-text-muted/50 pt-2">
-            Completed
+            Done
           </p>
-          {completed.map((r) => (
+          {done.map((r) => (
             <ReminderItem
               key={r.id}
-              text={r.text}
-              dueAt={r.due_at}
-              completed={true}
+              title={r.title}
+              remindAt={r.remind_at}
+              done={true}
               onToggle={() => handleToggle(r.id, false)}
             />
           ))}
