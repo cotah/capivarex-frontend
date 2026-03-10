@@ -7,7 +7,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 async function getHeaders(): Promise<HeadersInit> {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token || useAuthStore.getState().token;
+
+  // Prefer Supabase session token (always fresh)
+  // Fallback to store token only if it's a valid non-empty string
+  const storeToken = useAuthStore.getState().token;
+  const token =
+    session?.access_token ||
+    (storeToken && storeToken !== 'undefined' && storeToken !== 'null'
+      ? storeToken
+      : null);
 
   return {
     'Content-Type': 'application/json',

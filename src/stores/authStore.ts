@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'capivarex-auth',
-      partialize: (state) => ({ user: state.user }),
+      partialize: (state) => ({ user: state.user, token: state.token }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setLoading(false);
