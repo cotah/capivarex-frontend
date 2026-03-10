@@ -51,8 +51,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const audioRef = useRef<any>(null);
+  const audioRef = useRef<AudioBufferSourceNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   const addMessage = useChatStore((s) => s.addMessage);
@@ -63,7 +62,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   /* ── Start recording ── */
   const startRecording = useCallback(async () => {
     // If speaking, interrupt and restart
-    if (audioRef.current) {
+    if (audioRef.current && 'stop' in audioRef.current) {
       try { audioRef.current.stop(); } catch { /* already stopped */ }
       audioRef.current = null;
     }
@@ -100,8 +99,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     // Unlock AudioContext INSIDE the user gesture, BEFORE any async work.
     // iOS Safari blocks audio playback if AudioContext is created after a fetch.
     const AudioCtxClass = window.AudioContext
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      || (window as any).webkitAudioContext as typeof AudioContext | undefined;
+      || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     let audioCtx = audioCtxRef.current;
     if (AudioCtxClass && (!audioCtx || audioCtx.state === 'closed')) {
       audioCtx = new AudioCtxClass();
@@ -278,7 +276,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     // Stop audio playback
-    if (audioRef.current) {
+    if (audioRef.current && 'stop' in audioRef.current) {
       try { audioRef.current.stop(); } catch { /* already stopped */ }
       audioRef.current = null;
     }
