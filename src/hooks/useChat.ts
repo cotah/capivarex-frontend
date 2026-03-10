@@ -1,6 +1,6 @@
 import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
-import { sendMessage } from '@/lib/api';
+import { sendMessage, ApiError } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
 
@@ -61,11 +61,14 @@ export function useChat() {
           response.conversation_title as string,
         );
       }
-    } catch {
+    } catch (error) {
+      const isQuotaExceeded = error instanceof ApiError && error.status === 429;
       addMessage({
         id: nanoid(),
         role: 'assistant',
-        text: 'Sorry, something went wrong. Please try again.',
+        text: isQuotaExceeded
+          ? 'Daily limit reached. Upgrade your plan to continue. [Upgrade →](/pricing)'
+          : 'Sorry, something went wrong. Please try again.',
         time: new Date().toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',

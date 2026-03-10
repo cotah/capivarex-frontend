@@ -40,7 +40,9 @@ export async function apiClient<T>(
 
   if (!response.ok) {
     const msg = await response.text().catch(() => 'Unknown error');
-    toast.error(msg || `Error ${response.status}`);
+    if (response.status !== 429) {
+      toast.error(msg || `Error ${response.status}`);
+    }
     throw new ApiError(response.status, msg);
   }
 

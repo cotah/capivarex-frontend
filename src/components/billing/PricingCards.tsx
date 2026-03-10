@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { redirectToCheckout } from '@/lib/stripe';
 import type { PlanInfo, PlanType } from '@/lib/types';
@@ -56,11 +57,17 @@ const plans: PlanInfo[] = [
 
 export default function PricingCards() {
   const user = useAuthStore((s) => s.user);
+  const router = useRouter();
   const currentPlan = user?.plan || 'free';
   const [loadingPlan, setLoadingPlan] = useState<PlanType | null>(null);
 
   const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free' || planId === currentPlan) return;
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
 
     setLoadingPlan(planId);
     try {
@@ -133,10 +140,10 @@ export default function PricingCards() {
               </button>
             ) : plan.id === 'free' ? (
               <button
-                disabled
-                className="w-full rounded-xl glass py-2.5 text-sm text-text-muted cursor-default"
+                onClick={() => router.push(user ? '/chat' : '/register')}
+                className="w-full rounded-xl glass py-2.5 text-sm text-text-muted hover:text-text transition-colors"
               >
-                Free Forever
+                {user ? 'Current Plan' : 'Get Started'}
               </button>
             ) : (
               <button
