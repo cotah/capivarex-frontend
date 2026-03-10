@@ -66,23 +66,15 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
           chunksRef.current = [];
 
           try {
-            // Convert blob to base64 for JSON transport
-            const buffer = await blob.arrayBuffer();
-            const bytes = new Uint8Array(buffer);
-            let binary = '';
-            for (let i = 0; i < bytes.length; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            const audioBase64 = btoa(binary);
+            const formData = new FormData();
+            const ext = mr.mimeType.includes('webm') ? 'webm' : 'mp4';
+            formData.append('audio', blob, `recording.${ext}`);
 
             const result = await apiClient<TranscribeResponse>(
               '/api/webapp/voice/transcribe',
               {
                 method: 'POST',
-                body: JSON.stringify({
-                  audio_base64: audioBase64,
-                  content_type: mr.mimeType,
-                }),
+                body: formData,
               },
             );
 

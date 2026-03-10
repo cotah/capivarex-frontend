@@ -33,12 +33,22 @@ export async function apiClient<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
+  const baseHeaders = await getHeaders();
+  const isFormData = options?.body instanceof FormData;
+
+  // When sending FormData, omit Content-Type so the browser sets the
+  // multipart boundary automatically. Keep Authorization intact.
+  let headers: HeadersInit;
+  if (isFormData) {
+    const { 'Content-Type': _ct, ...rest } = baseHeaders as Record<string, string>;
+    headers = { ...rest, ...options?.headers };
+  } else {
+    headers = { ...baseHeaders, ...options?.headers };
+  }
+
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
-    headers: {
-      ...(await getHeaders()),
-      ...options?.headers,
-    },
+    headers,
   });
 
   if (response.status === 401) {
