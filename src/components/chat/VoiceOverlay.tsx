@@ -51,7 +51,9 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const audioRef = useRef<any>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const addMessage = useChatStore((s) => s.addMessage);
 
@@ -62,7 +64,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const startRecording = useCallback(async () => {
     // If speaking, interrupt and restart
     if (audioRef.current) {
-      audioRef.current.pause();
+      try { audioRef.current.stop(); } catch { /* already stopped */ }
       audioRef.current = null;
     }
 
@@ -94,6 +96,18 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const stopAndProcess = useCallback(async () => {
     const mr = mediaRecorderRef.current;
     if (!mr || mr.state !== 'recording') return;
+
+    // Unlock AudioContext INSIDE the user gesture, BEFORE any async work.
+    // iOS Safari blocks audio playback if AudioContext is created after a fetch.
+    const AudioCtxClass = window.AudioContext
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      || (window as any).webkitAudioContext as typeof AudioContext | undefined;
+    let audioCtx = audioCtxRef.current;
+    if (AudioCtxClass && (!audioCtx || audioCtx.state === 'closed')) {
+      audioCtx = new AudioCtxClass();
+      audioCtxRef.current = audioCtx;
+    }
+    if (audioCtx) await audioCtx.resume(); // unlock inside gesture
 
     // Stop recording and collect blob
     const blob = await new Promise<Blob>((resolve) => {
@@ -189,7 +203,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
 
       setBotText(reply);
 
-      /* ── Step 3: ElevenLabs TTS ── */
+      /* ── Step 3: ElevenLabs TTS via AudioContext (iOS-safe) ── */
       setVoiceState('speaking');
       setStatusText('');
 
@@ -202,7 +216,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           },
         );
 
-        if (synth.audio_base64) {
+        if (synth.audio_base64 && audioCtx) {
           const contentType = synth.content_type || 'audio/mpeg';
           const binaryStr = atob(synth.audio_base64);
           const bytes = new Uint8Array(binaryStr.length);
@@ -211,23 +225,21 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           }
           const audioBlob = new Blob([bytes], { type: contentType });
           const audioUrl = URL.createObjectURL(audioBlob);
-          const audio = new Audio(audioUrl);
-          audioRef.current = audio;
 
-          audio.onended = () => {
+          const arrayBuffer = await (await fetch(audioUrl)).arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+          const source = audioCtx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(audioCtx.destination);
+          source.onended = () => {
             URL.revokeObjectURL(audioUrl);
             audioRef.current = null;
             setVoiceState('idle');
           };
-          audio.onerror = () => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-            setVoiceState('idle');
-          };
-
-          await audio.play();
+          source.start(0);
+          audioRef.current = source;
         } else {
-          // No audio returned, go idle
+          // No audio returned or no AudioContext, go idle
           setVoiceState('idle');
         }
       } catch {
@@ -267,8 +279,13 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     // Stop audio playback
     if (audioRef.current) {
-      audioRef.current.pause();
+      try { audioRef.current.stop(); } catch { /* already stopped */ }
       audioRef.current = null;
+    }
+    // Close AudioContext
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
     }
     onClose();
   }, [onClose]);

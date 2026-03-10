@@ -18,7 +18,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { send, sendWithFile } = useChat();
@@ -86,10 +86,13 @@ export default function InputBar({ centered = false }: InputBarProps) {
     setText('');
     setPendingFile(null);
     resetUpload();
-    inputRef.current?.focus();
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.focus();
+    }
   }, [text, pendingFile, uploadResult, isThinking, send, sendWithFile, resetUpload, localPreviewUrl]);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
@@ -112,11 +115,21 @@ export default function InputBar({ centered = false }: InputBarProps) {
           aria-label="Attach file" title="Attach image, audio, PDF, document or video">
           <Paperclip size={15} />
         </button>
-        <input ref={inputRef} type="text" value={text} onChange={(e) => setText(e.target.value)}
+        <textarea
+          ref={inputRef}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            e.target.style.height = 'auto';
+            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+          }}
           onKeyDown={handleKeyDown}
           placeholder={hasFile ? 'Add a message (optional)...' : 'Ask Capivarex anything...'}
           disabled={isThinking}
-          className="flex-1 bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50" />
+          rows={1}
+          className="flex-1 resize-none bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50 overflow-hidden"
+          style={{ minHeight: '24px', maxHeight: '120px' }}
+        />
         {micSupported && (
           <button onClick={handleMic} disabled={micState === 'transcribing' || isThinking}
             className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${micState === 'recording' ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30' : micState === 'transcribing' ? 'bg-white/5 text-text-muted' : 'text-accent hover:text-accent/80 hover:bg-accent/5'}`}

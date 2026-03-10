@@ -17,7 +17,7 @@ export default function MessageList() {
   }, [messages, isThinking]);
 
   return (
-    <div className="flex-1 overflow-y-auto space-y-3 pt-6 pb-4">
+    <div className="flex-1 overflow-y-auto space-y-3 pt-6 pb-36 md:pb-24">
       {messages.map((msg) => (
         <Message
           key={msg.id}
