@@ -29,12 +29,30 @@ function FileChip({ attachment }: { attachment: Record<string, unknown> }) {
   const filename = (attachment.filename as string) || 'File';
   const mediaType = (attachment.mediaType as UploadMediaType) || 'unknown';
   const preview = (attachment.preview as string) || '';
+  const localPreviewUrl = attachment.localPreviewUrl as string | undefined;
+
+  if (mediaType === 'image' && localPreviewUrl) {
+    return (
+      <div className="mt-2 rounded-xl overflow-hidden border border-white/15 max-w-xs">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={localPreviewUrl}
+          alt={filename}
+          className="w-full max-h-48 object-cover rounded-xl"
+        />
+        <div className="px-3 py-1.5 bg-white/5">
+          <p className="text-text text-xs font-medium truncate">{filename}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-sm max-w-xs">
-      <span className="text-base">{mediaTypeIcon(mediaType)}</span>
+      <span className="text-base flex-shrink-0">{mediaTypeIcon(mediaType)}</span>
       <div className="min-w-0">
         <p className="text-text font-medium truncate">{filename}</p>
-        {preview && <p className="text-text-muted text-xs truncate">{preview}</p>}
+        {preview && <p className="text-text-muted text-xs truncate max-w-[180px]">{preview}</p>}
       </div>
     </div>
   );

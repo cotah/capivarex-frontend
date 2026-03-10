@@ -17,6 +17,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [text, setText] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,13 +33,22 @@ export default function InputBar({ centered = false }: InputBarProps) {
     if (!file) return;
     e.target.value = '';
     setPendingFile(file);
+    if (file.type.startsWith('image/')) {
+      setLocalPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setLocalPreviewUrl(null);
+    }
     await upload(file);
   }, [upload]);
 
   const handleRemoveFile = useCallback(() => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
     setPendingFile(null);
     resetUpload();
-  }, [resetUpload]);
+  }, [resetUpload, localPreviewUrl]);
 
   const handleMic = async () => {
     if (micState === 'recording') {
@@ -65,7 +75,10 @@ export default function InputBar({ centered = false }: InputBarProps) {
         mediaType: uploadResult.media_type,
         preview: uploadResult.preview,
         fileId: uploadResult.file_id,
+        localPreviewUrl: localPreviewUrl ?? undefined,
       });
+      // Don't revoke immediately — Message.tsx uses during session
+      setLocalPreviewUrl(null);
     } else if (trimmed) {
       send(trimmed);
     }
@@ -74,7 +87,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
     setPendingFile(null);
     resetUpload();
     inputRef.current?.focus();
-  }, [text, pendingFile, uploadResult, isThinking, send, sendWithFile, resetUpload]);
+  }, [text, pendingFile, uploadResult, isThinking, send, sendWithFile, resetUpload, localPreviewUrl]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }

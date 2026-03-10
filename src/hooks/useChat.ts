@@ -10,6 +10,7 @@ interface FileAttachmentMeta {
   mediaType: UploadMediaType;
   preview: string;
   fileId: string;
+  localPreviewUrl?: string;
 }
 
 export function useChat() {
@@ -31,6 +32,7 @@ export function useChat() {
           mediaType: attachmentMeta.mediaType,
           preview: attachmentMeta.preview,
           fileId: attachmentMeta.fileId,
+          localPreviewUrl: attachmentMeta.localPreviewUrl,
         },
       } : undefined,
     });
@@ -65,6 +67,14 @@ export function useChat() {
 
       if (response.conversation_title) {
         useConversationStore.getState().renameConversation(conversationId, response.conversation_title as string);
+      } else {
+        // Auto-rename with first 3 words of user text
+        const words = text.trim().split(/\s+/);
+        const autoTitle = words.slice(0, 3).join(' ')
+          || attachmentMeta?.filename?.split('.')[0]
+          || 'New conversation';
+        const suffix = words.length > 3 ? '...' : '';
+        useConversationStore.getState().renameConversation(conversationId, autoTitle + suffix);
       }
     } catch (error) {
       const isQuotaExceeded = error instanceof ApiError && error.status === 429;
