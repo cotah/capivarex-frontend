@@ -40,7 +40,7 @@ export async function apiClient<T>(
   // multipart boundary automatically. Keep Authorization intact.
   let headers: HeadersInit;
   if (isFormData) {
-    const { 'Content-Type': _ct, ...rest } = baseHeaders as Record<string, string>;
+    const { 'Content-Type': _, ...rest } = baseHeaders as Record<string, string>;
     headers = { ...rest, ...options?.headers };
   } else {
     headers = { ...baseHeaders, ...options?.headers };

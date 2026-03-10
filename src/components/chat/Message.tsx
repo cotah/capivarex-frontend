@@ -8,7 +8,7 @@ import { ChatMessage } from '@/lib/types';
 import MusicCard from './MusicCard';
 import CalendarCard from './CalendarCard';
 import { castYouTube } from '@/lib/cast';
-import { mediaTypeIcon, mediaTypeLabel, UploadMediaType } from '@/hooks/useFileUpload';
+import { mediaTypeIcon, UploadMediaType } from '@/hooks/useFileUpload';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
