@@ -1,136 +1,159 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Mic, MicOff } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { X, Mic, MicOff, Loader2, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
-import { sendMessage } from '@/lib/api';
+import { sendMessage, apiClient } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
 
-type VoiceState = 'idle' | 'listening' | 'speaking';
+type VoiceState = 'idle' | 'recording' | 'processing' | 'speaking';
 
 interface VoiceOverlayProps {
   onClose: () => void;
 }
 
-/* ── SpeechRecognition type shim ── */
-type SpeechRecognitionInstance = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  onresult: ((e: { results: SpeechRecognitionResultList }) => void) | null;
-  onend: (() => void) | null;
-  onerror: ((e: { error: string }) => void) | null;
-};
+interface TranscribeResponse {
+  text: string;
+  language?: string;
+}
 
-function getSpeechRecognition(): SpeechRecognitionInstance | null {
-  const SR =
-    (window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition ||
-    (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition;
-  if (!SR) return null;
-  return new SR();
+interface SynthesizeResponse {
+  audio_base64: string;
+  content_type?: string;
+}
+
+/** Pick the first supported mime type for MediaRecorder */
+function pickMimeType(): string {
+  const candidates = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/ogg',
+  ];
+  for (const mt of candidates) {
+    if (MediaRecorder.isTypeSupported(mt)) return mt;
+  }
+  return '';
 }
 
 export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
-  const [transcript, setTranscript] = useState('');
+  const [statusText, setStatusText] = useState('');
   const [botText, setBotText] = useState('');
-  const [supported, setSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [supported] = useState(
+    () => typeof window !== 'undefined' && typeof MediaRecorder !== 'undefined',
+  );
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const addMessage = useChatStore((s) => s.addMessage);
 
   const now = () =>
     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  /* Check browser support */
-  useEffect(() => {
-    const sr = getSpeechRecognition();
-    if (!sr) {
-      setSupported(false);
-      return;
+  /* ── Start recording ── */
+  const startRecording = useCallback(async () => {
+    // If speaking, interrupt and restart
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
-    sr.lang = navigator.language || 'pt-BR';
-    sr.continuous = false;
-    sr.interimResults = true;
-    recognitionRef.current = sr;
 
-    return () => {
-      sr.abort();
-      window.speechSynthesis.cancel();
-    };
-  }, []);
-
-  /* Start listening */
-  const startListening = useCallback(() => {
-    const sr = recognitionRef.current;
-    if (!sr) return;
-
-    window.speechSynthesis.cancel();
-    setTranscript('');
+    setStatusText('');
     setBotText('');
-    setVoiceState('listening');
-
-    sr.onresult = (e) => {
-      let interim = '';
-      for (let i = 0; i < e.results.length; i++) {
-        interim += e.results[i][0].transcript;
-      }
-      setTranscript(interim);
-    };
-
-    sr.onend = () => {
-      setVoiceState((prev) => (prev === 'listening' ? 'idle' : prev));
-    };
-
-    sr.onerror = (e) => {
-      if (e.error !== 'aborted') {
-        setVoiceState('idle');
-      }
-    };
+    chunksRef.current = [];
 
     try {
-      sr.start();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mimeType = pickMimeType();
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorderRef.current = mr;
+
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mr.start();
+      setVoiceState('recording');
+      setStatusText('Gravando...');
     } catch {
-      /* already started */
+      setVoiceState('idle');
+      setStatusText('Microfone não disponível');
     }
   }, []);
 
-  /* Stop listening and send */
-  const stopListening = useCallback(async () => {
-    const sr = recognitionRef.current;
-    if (sr) sr.stop();
+  /* ── Stop recording → transcribe → chat → TTS ── */
+  const stopAndProcess = useCallback(async () => {
+    const mr = mediaRecorderRef.current;
+    if (!mr || mr.state !== 'recording') return;
 
-    const finalText = transcript.trim();
-    if (!finalText) {
-      setVoiceState('idle');
-      return;
-    }
-
-    /* Add user message to chat */
-    addMessage({
-      id: nanoid(),
-      role: 'user',
-      text: finalText,
-      time: now(),
-      source: 'voice',
+    // Stop recording and collect blob
+    const blob = await new Promise<Blob>((resolve) => {
+      mr.onstop = () => {
+        const recorded = new Blob(chunksRef.current, { type: mr.mimeType });
+        chunksRef.current = [];
+        resolve(recorded);
+      };
+      mr.stop();
     });
 
-    setVoiceState('speaking');
-    setBotText('Thinking...');
+    // Release mic
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+
+    if (blob.size === 0) {
+      setVoiceState('idle');
+      setStatusText('');
+      return;
+    }
+
+    setVoiceState('processing');
+    setStatusText('Processando...');
 
     try {
+      /* ── Step 1: Whisper STT ── */
+      const formData = new FormData();
+      const ext = (mr.mimeType || '').includes('webm') ? 'webm' : 'mp4';
+      formData.append('audio', blob, `recording.${ext}`);
+
+      const transcription = await apiClient<TranscribeResponse>(
+        '/api/webapp/voice/transcribe',
+        { method: 'POST', body: formData },
+      );
+
+      const userText = (transcription.text || '').trim();
+      if (!userText) {
+        setVoiceState('idle');
+        setStatusText('Não consegui ouvir. Tente novamente.');
+        return;
+      }
+
+      setStatusText(userText);
+
+      /* Add user message to chat */
+      addMessage({
+        id: nanoid(),
+        role: 'user',
+        text: userText,
+        time: now(),
+        source: 'voice',
+      });
+
+      /* ── Step 2: Chat agent ── */
       let conversationId = useConversationStore.getState().activeConversationId;
       if (!conversationId) {
         conversationId = await useConversationStore.getState().createConversation();
       }
-      const response = await sendMessage(finalText, conversationId);
+
+      const response = await sendMessage(userText, conversationId);
       const reply =
         (response.response as string) ||
         (response.message as string) ||
@@ -147,17 +170,72 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         source: 'voice',
       });
 
+      // Update sidebar
+      if (conversationId) {
+        useConversationStore.getState().addMessageToConversation(conversationId, {
+          id: nanoid(),
+          role: 'assistant',
+          text: reply,
+          time: now(),
+        });
+      }
+
+      if (response.conversation_title) {
+        useConversationStore.getState().renameConversation(
+          conversationId,
+          response.conversation_title as string,
+        );
+      }
+
       setBotText(reply);
 
-      /* Speak the reply */
-      const utterance = new SpeechSynthesisUtterance(reply);
-      utterance.lang = navigator.language || 'pt-BR';
-      utterance.onend = () => setVoiceState('idle');
-      utterance.onerror = () => setVoiceState('idle');
-      synthRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      /* ── Step 3: ElevenLabs TTS ── */
+      setVoiceState('speaking');
+      setStatusText('');
+
+      try {
+        const synth = await apiClient<SynthesizeResponse>(
+          '/api/webapp/voice/synthesize',
+          {
+            method: 'POST',
+            body: JSON.stringify({ text: reply }),
+          },
+        );
+
+        if (synth.audio_base64) {
+          const contentType = synth.content_type || 'audio/mpeg';
+          const binaryStr = atob(synth.audio_base64);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          const audioBlob = new Blob([bytes], { type: contentType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audioRef.current = audio;
+
+          audio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            audioRef.current = null;
+            setVoiceState('idle');
+          };
+          audio.onerror = () => {
+            URL.revokeObjectURL(audioUrl);
+            audioRef.current = null;
+            setVoiceState('idle');
+          };
+
+          await audio.play();
+        } else {
+          // No audio returned, go idle
+          setVoiceState('idle');
+        }
+      } catch {
+        // TTS failed but chat response was shown — go idle
+        setVoiceState('idle');
+      }
     } catch {
-      const errMsg = 'Sorry, something went wrong.';
+      const errMsg = 'Desculpe, algo deu errado. Tente novamente.';
       addMessage({
         id: nanoid(),
         role: 'assistant',
@@ -168,24 +246,32 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       setBotText(errMsg);
       setVoiceState('idle');
     }
-  }, [transcript, addMessage]);
+  }, [addMessage]);
 
-  /* Toggle mic */
-  const toggleMic = () => {
-    if (voiceState === 'listening') {
-      stopListening();
-    } else if (voiceState === 'idle') {
-      startListening();
+  /* ── Toggle mic ── */
+  const toggleMic = useCallback(() => {
+    if (voiceState === 'recording') {
+      stopAndProcess();
+    } else if (voiceState === 'idle' || voiceState === 'speaking') {
+      // If speaking, interrupt and start new recording
+      startRecording();
     }
-    /* If speaking, do nothing — wait for bot to finish */
-  };
+  }, [voiceState, startRecording, stopAndProcess]);
 
-  /* Close handler */
-  const handleClose = () => {
-    recognitionRef.current?.abort();
-    window.speechSynthesis.cancel();
+  /* ── Close handler ── */
+  const handleClose = useCallback(() => {
+    // Stop recording
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    // Stop audio playback
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     onClose();
-  };
+  }, [onClose]);
 
   return (
     <AnimatePresence>
@@ -231,17 +317,27 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
 
               {/* State label */}
               <p className="text-sm text-text-muted">
-                {voiceState === 'listening'
-                  ? 'Listening...'
-                  : voiceState === 'speaking'
-                    ? 'Speaking...'
-                    : 'Tap the microphone to speak'}
+                {voiceState === 'recording'
+                  ? 'Ouvindo...'
+                  : voiceState === 'processing'
+                    ? 'Processando...'
+                    : voiceState === 'speaking'
+                      ? 'Falando...'
+                      : 'Toca para falar'}
               </p>
 
               {/* Transcript / Bot response */}
               <div className="min-h-[60px] max-w-md text-center">
-                {voiceState === 'listening' && transcript && (
-                  <p className="text-base text-text animate-pulse">{transcript}</p>
+                {voiceState === 'recording' && (
+                  <p className="text-base text-text animate-pulse">
+                    {statusText || 'Gravando...'}
+                  </p>
+                )}
+                {voiceState === 'processing' && (
+                  <p className="text-base text-text-muted flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    {statusText || 'Processando...'}
+                  </p>
                 )}
                 {voiceState === 'speaking' && botText && (
                   <p className="text-base text-accent">{botText}</p>
@@ -259,17 +355,33 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           <div className="flex justify-center pb-12 pt-4 shrink-0">
             <button
               onClick={toggleMic}
-              disabled={voiceState === 'speaking'}
+              disabled={voiceState === 'processing'}
               className={`flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200 ${
-                voiceState === 'listening'
+                voiceState === 'recording'
                   ? 'bg-error text-white shadow-lg shadow-error/30 scale-110'
-                  : voiceState === 'speaking'
+                  : voiceState === 'processing'
                     ? 'bg-white/5 text-text-muted cursor-not-allowed'
-                    : 'bg-amber-500 text-bg hover:bg-amber-400 shadow-lg shadow-amber-500/30'
+                    : voiceState === 'speaking'
+                      ? 'bg-amber-500/80 text-bg hover:bg-amber-400 shadow-lg shadow-amber-500/30'
+                      : 'bg-amber-500 text-bg hover:bg-amber-400 shadow-lg shadow-amber-500/30'
               }`}
-              aria-label={voiceState === 'listening' ? 'Stop listening' : 'Start listening'}
+              aria-label={
+                voiceState === 'recording'
+                  ? 'Stop recording'
+                  : voiceState === 'speaking'
+                    ? 'Interrupt and record'
+                    : 'Start recording'
+              }
             >
-              {voiceState === 'listening' ? <MicOff size={28} /> : <Mic size={28} />}
+              {voiceState === 'processing' ? (
+                <Loader2 size={28} className="animate-spin" />
+              ) : voiceState === 'recording' ? (
+                <MicOff size={28} />
+              ) : voiceState === 'speaking' ? (
+                <Volume2 size={28} />
+              ) : (
+                <Mic size={28} />
+              )}
             </button>
           </div>
         )}
