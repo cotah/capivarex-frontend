@@ -10,14 +10,20 @@ export default function MessageList() {
   const messages = useChatStore((s) => s.messages);
   const isThinking = useChatStore((s) => s.isThinking);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const tts = useTTS();
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = containerRef.current;
+    if (!container) return;
+    const timer = setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+    }, 50);
+    return () => clearTimeout(timer);
   }, [messages, isThinking]);
 
   return (
-    <div className="flex-1 overflow-y-auto space-y-3 pt-6 pb-36 md:pb-24">
+    <div ref={containerRef} className="flex-1 overflow-y-auto space-y-3 pt-6 pb-36 md:pb-24">
       {messages.map((msg) => (
         <Message
           key={msg.id}
