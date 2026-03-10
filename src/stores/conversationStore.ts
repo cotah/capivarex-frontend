@@ -85,7 +85,6 @@ export const useConversationStore = create<ConversationStore>((set) => ({
         conversations: [conv, ...s.conversations],
         activeConversationId: conv.id,
       }));
-      useChatStore.setState({ messages: [], isThinking: false });
       return conv.id;
     } catch (error) {
       set({ isLoading: false });

@@ -94,7 +94,7 @@ export default function ConversationItem({ id, title, active, onSelect }: Conver
             : 'text-text-muted hover:bg-white/5 hover:text-text'
         }`}
       >
-        <span className="truncate">{title}</span>
+        <span className="truncate">{title || 'New conversation'}</span>
       </button>
 
       {/* Three-dot menu — visible on hover */}
