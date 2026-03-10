@@ -20,7 +20,7 @@ export default function MessageList() {
       container.scrollTop = container.scrollHeight;
     }, 50);
     return () => clearTimeout(timer);
-  }, [messages, isThinking]);
+  }, [messages]);
 
   return (
     <div ref={containerRef} className="flex-1 overflow-y-auto space-y-3 pt-6 pb-36 md:pb-24">

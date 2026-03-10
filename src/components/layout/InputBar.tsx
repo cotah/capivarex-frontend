@@ -157,7 +157,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
         <div className="w-full px-4">{inputRow}</div>
       ) : (
         <div className="fixed bottom-[4.5rem] md:bottom-0 left-0 right-0 z-50">
-          <div className="h-8 bg-gradient-to-t from-bg to-transparent pointer-events-none" />
+          <div className="h-4 bg-gradient-to-t from-bg/60 to-transparent pointer-events-none" />
           <div className="bg-bg/80 backdrop-blur-xl pb-safe">
             <div className="mx-auto max-w-3xl px-4 pb-4">{inputRow}</div>
           </div>

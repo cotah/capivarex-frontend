@@ -74,9 +74,9 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
     <motion.div className={`flex ${isUser ? 'justify-end' : 'justify-start'} px-4`}
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       <div className={`max-w-[85%] sm:max-w-[70%] ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
-        <div className={`px-4 py-2.5 text-base leading-relaxed ${isUser ? `bg-accent/15 ${voiceBorderUser} text-text rounded-2xl rounded-br` : `glass ${voiceBorderBot} text-text rounded-2xl rounded-bl`}`}>
+        <div className={`px-4 py-2.5 text-base leading-relaxed break-words overflow-hidden ${isUser ? `bg-accent/15 ${voiceBorderUser} text-text rounded-2xl rounded-br` : `glass ${voiceBorderBot} text-text rounded-2xl rounded-bl`}`}>
           <ReactMarkdown components={{
-            a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent underline hover:text-accent/80 transition-colors">{children}</a>,
+            a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent underline break-all hover:text-accent/80 transition-colors">{children}</a>,
             p: ({ children }) => <span>{children}</span>,
             strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
             em: ({ children }) => <em>{children}</em>,
