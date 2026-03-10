@@ -4,6 +4,15 @@ export type MessageType = 'text' | 'music' | 'calendar' | 'shopping' | 'weather'
 
 export type MessageSource = 'text' | 'voice';
 
+export type FileMediaType = 'image' | 'audio' | 'pdf' | 'document' | 'video' | 'text' | 'unknown';
+
+export interface FileAttachment {
+  filename: string;
+  mediaType: FileMediaType;
+  preview: string;
+  fileId: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: MessageRole;

@@ -3,21 +3,36 @@ import { useConversationStore } from '@/stores/conversationStore';
 import { sendMessage, ApiError } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
+import type { UploadMediaType } from '@/hooks/useFileUpload';
+
+interface FileAttachmentMeta {
+  filename: string;
+  mediaType: UploadMediaType;
+  preview: string;
+  fileId: string;
+}
 
 export function useChat() {
   const { addMessage, setThinking } = useChatStore();
 
-  const send = async (text: string) => {
-    const now = new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const _doSend = async (text: string, attachmentMeta?: FileAttachmentMeta) => {
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     addMessage({
       id: nanoid(),
       role: 'user',
-      text,
+      text: attachmentMeta
+        ? (text.includes('\n\n') ? text.split('\n\n')[0] || text : text)
+        : text,
       time: now,
+      data: attachmentMeta ? {
+        attachment: {
+          filename: attachmentMeta.filename,
+          mediaType: attachmentMeta.mediaType,
+          preview: attachmentMeta.preview,
+          fileId: attachmentMeta.fileId,
+        },
+      } : undefined,
     });
 
     setThinking(true);
@@ -33,19 +48,12 @@ export function useChat() {
       addMessage({
         id: nanoid(),
         role: 'assistant',
-        text:
-          (response.response as string) ||
-          (response.message as string) ||
-          'No response',
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        text: (response.response as string) || (response.message as string) || 'No response',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         type: response.type as MessageType | undefined,
         data: response.data as Record<string, unknown> | undefined,
       });
 
-      // Update sidebar with latest message preview and timestamp
       if (conversationId) {
         useConversationStore.getState().addMessageToConversation(conversationId, {
           id: nanoid(),
@@ -56,10 +64,7 @@ export function useChat() {
       }
 
       if (response.conversation_title) {
-        useConversationStore.getState().renameConversation(
-          conversationId,
-          response.conversation_title as string,
-        );
+        useConversationStore.getState().renameConversation(conversationId, response.conversation_title as string);
       }
     } catch (error) {
       const isQuotaExceeded = error instanceof ApiError && error.status === 429;
@@ -67,17 +72,17 @@ export function useChat() {
         id: nanoid(),
         role: 'assistant',
         text: isQuotaExceeded
-          ? 'Daily limit reached. Upgrade your plan to continue. [Upgrade →](/pricing)'
+          ? 'Daily limit reached. Upgrade your plan to continue. [Upgrade \u2192](/pricing)'
           : 'Sorry, something went wrong. Please try again.',
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       });
     } finally {
       setThinking(false);
     }
   };
 
-  return { send };
+  const send = (text: string) => _doSend(text);
+  const sendWithFile = (text: string, attachmentMeta: FileAttachmentMeta) => _doSend(text, attachmentMeta);
+
+  return { send, sendWithFile };
 }
