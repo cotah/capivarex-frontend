@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { apiClient } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/stores/authStore';
 
 type RecorderState = 'idle' | 'recording' | 'transcribing' | 'error';
 
@@ -66,6 +68,21 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
           chunksRef.current = [];
 
           try {
+            // Validate JWT has 3 segments before calling transcribe
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            const storeToken = useAuthStore.getState().token;
+            const token = session?.access_token
+              || (storeToken && storeToken !== 'undefined' && storeToken !== 'null' ? storeToken : null);
+
+            if (!token || token.split('.').length !== 3) {
+              setState('error');
+              resolveRef.current?.(null);
+              resolveRef.current = null;
+              window.location.href = '/login';
+              return;
+            }
+
             const formData = new FormData();
             const ext = mr.mimeType.includes('webm') ? 'webm' : 'mp4';
             formData.append('audio', blob, `recording.${ext}`);
