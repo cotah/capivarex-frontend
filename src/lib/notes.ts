@@ -1,68 +1,43 @@
-import { createClient } from '@/lib/supabase/client';
-import { useAuthStore } from '@/stores/authStore';
+import { apiClient } from '@/lib/api';
 import type { Note, Reminder } from '@/lib/types';
-
-function getUserId(): string {
-  const user = useAuthStore.getState().user;
-  if (!user) throw new Error('Not authenticated');
-  return user.id;
-}
 
 /* ── Notes ── */
 
 export async function fetchNotes(): Promise<Note[]> {
-  const supabase = createClient();
-  const userId = getUserId();
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return (data || []) as Note[];
+  const data = await apiClient<Note[] | { notes: Note[] }>('/api/webapp/notes');
+  return Array.isArray(data) ? data : (data.notes || []);
 }
 
 export async function createNote(title: string, content: string): Promise<Note> {
-  const supabase = createClient();
-  const userId = getUserId();
-  const { data, error } = await supabase
-    .from('notes')
-    .insert({ title, content, user_id: userId })
-    .select()
-    .single();
+  return apiClient<Note>('/api/webapp/notes', {
+    method: 'POST',
+    body: JSON.stringify({ title, content }),
+  });
+}
 
-  if (error) throw error;
-  return data as Note;
+export async function updateNote(id: string, fields: { title?: string; content?: string }): Promise<Note> {
+  return apiClient<Note>(`/api/webapp/notes/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(fields),
+  });
 }
 
 export async function deleteNote(id: string): Promise<void> {
-  const supabase = createClient();
-  const { error } = await supabase.from('notes').delete().eq('id', id);
-  if (error) throw error;
+  return apiClient<void>(`/api/webapp/notes/${id}`, {
+    method: 'DELETE',
+  });
 }
 
 /* ── Reminders ── */
 
 export async function fetchReminders(): Promise<Reminder[]> {
-  const supabase = createClient();
-  const userId = getUserId();
-  const { data, error } = await supabase
-    .from('reminders')
-    .select('*')
-    .eq('user_id', userId)
-    .order('due_at', { ascending: true });
-
-  if (error) throw error;
-  return (data || []) as Reminder[];
+  const data = await apiClient<Reminder[] | { reminders: Reminder[] }>('/api/webapp/reminders');
+  return Array.isArray(data) ? data : (data.reminders || []);
 }
 
 export async function toggleReminder(id: string, completed: boolean): Promise<void> {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from('reminders')
-    .update({ completed })
-    .eq('id', id);
-
-  if (error) throw error;
+  return apiClient<void>(`/api/webapp/reminders/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ completed }),
+  });
 }

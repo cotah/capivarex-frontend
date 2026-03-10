@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/lib/api';
 
-const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY || '';
 const CACHE_KEY = 'capivarex_weather';
 const CITY_KEY = 'capivarex_weather_city';
 const CACHE_TTL = 15 * 60 * 1000; // 15 min
@@ -157,10 +157,9 @@ function mapResponse(json: Record<string, unknown>): WeatherData {
 }
 
 async function fetchWeatherByQuery(query: string): Promise<WeatherData> {
-  const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(query)}&days=6&aqi=no`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Weather API ${res.status}`);
-  const json = await res.json();
+  const json = await apiClient<Record<string, unknown>>(
+    `/api/webapp/weather?q=${encodeURIComponent(query)}`,
+  );
   const data = mapResponse(json);
   writeCache(data);
   return data;
@@ -176,11 +175,6 @@ export function useWeather() {
     if (cached) {
       setData(cached);
       setLoading(false);
-    }
-
-    if (!API_KEY) {
-      setLoading(false);
-      return;
     }
 
     function loadByCity(city: string) {
@@ -208,7 +202,7 @@ export function useWeather() {
 
   /* ── Search by city name ── */
   const searchCity = useCallback(async (city: string) => {
-    if (!API_KEY || !city.trim()) return;
+    if (!city.trim()) return;
     setLoading(true);
     try {
       const result = await fetchWeatherByQuery(city.trim());
