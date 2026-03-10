@@ -41,7 +41,7 @@ export const useConversationStore = create<ConversationStore>((set) => ({
   conversations: [],
   activeConversationId: null,
   isLoading: false,
-  sidebarOpen: true,
+  sidebarOpen: false,
 
   fetchConversations: async () => {
     set({ isLoading: true });
