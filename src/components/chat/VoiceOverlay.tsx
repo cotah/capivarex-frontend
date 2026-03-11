@@ -39,7 +39,7 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioElRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -77,9 +77,10 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
       try { mediaRecorderRef.current.stop(); } catch { /* ignore */ }
     }
     streamRef.current?.getTracks().forEach(t => t.stop());
-    if (sourceRef.current) {
-      try { sourceRef.current.stop(); } catch { /* ignore */ }
-      sourceRef.current = null;
+    if (audioElRef.current) {
+      audioElRef.current.pause();
+      audioElRef.current.src = '';
+      audioElRef.current = null;
     }
     if (audioCtxRef.current) {
       audioCtxRef.current.close().catch(() => {});
@@ -252,32 +253,33 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
 
       if (isClosingRef.current) return;
 
-      if (synth.audio_base64 && audioCtxRef.current) {
-        const ctx = audioCtxRef.current;
-        if (ctx.state === 'suspended') await ctx.resume();
+      if (synth.audio_base64) {
+        if (audioElRef.current) {
+          audioElRef.current.pause();
+          audioElRef.current.src = '';
+        }
 
         const bytes = Uint8Array.from(atob(synth.audio_base64), c => c.charCodeAt(0));
         const audioBlob = new Blob([bytes], { type: synth.content_type || 'audio/mpeg' });
         const url = URL.createObjectURL(audioBlob);
-        const arrayBuffer = await (await fetch(url)).arrayBuffer();
-        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        URL.revokeObjectURL(url);
+        const audio = new Audio(url);
+        audioElRef.current = audio;
 
-        if (isClosingRef.current) return;
-
-        if (sourceRef.current) {
-          try { sourceRef.current.stop(); } catch { /* ignore */ }
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(ctx.destination);
-        source.onended = () => {
-          sourceRef.current = null;
-          if (!isClosingRef.current) startListeningRef.current?.(); // auto-loop
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          audioElRef.current = null;
+          if (!isClosingRef.current) startListeningRef.current?.();
         };
-        source.start(0);
-        sourceRef.current = source;
+        audio.onerror = () => {
+          URL.revokeObjectURL(url);
+          audioElRef.current = null;
+          if (!isClosingRef.current) startListeningRef.current?.();
+        };
+        audio.play().catch(() => {
+          URL.revokeObjectURL(url);
+          audioElRef.current = null;
+          if (!isClosingRef.current) startListeningRef.current?.();
+        });
       } else {
         if (!isClosingRef.current) startListeningRef.current?.();
       }
