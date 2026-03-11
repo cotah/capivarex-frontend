@@ -20,6 +20,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const { send, sendWithFile } = useChat();
   const isThinking = useChatStore((s) => s.isThinking);
@@ -142,7 +143,19 @@ export default function InputBar({ centered = false }: InputBarProps) {
           aria-label="Send message">
           {uploadState === 'uploading' ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
         </button>
-        <button onClick={() => setVoiceOpen(true)}
+        <button onClick={() => {
+            try {
+              const AudioCtxClass = window.AudioContext ||
+                (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+              if (AudioCtxClass) {
+                if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+                  audioCtxRef.current = new AudioCtxClass();
+                }
+                audioCtxRef.current.resume().catch(() => {});
+              }
+            } catch { /* ignore */ }
+            setVoiceOpen(true);
+          }}
           className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 transition-all duration-200"
           aria-label="Voice conversation">
           <AudioLines size={16} />
@@ -162,7 +175,12 @@ export default function InputBar({ centered = false }: InputBarProps) {
           </div>
         </div>
       )}
-      {voiceOpen && <VoiceOverlay onClose={() => setVoiceOpen(false)} />}
+      {voiceOpen && (
+        <VoiceOverlay
+          onClose={() => setVoiceOpen(false)}
+          initialAudioCtx={audioCtxRef.current}
+        />
+      )}
     </>
   );
 }
