@@ -33,6 +33,7 @@ function pickMimeType(): string {
 export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('init');
   const [displayText, setDisplayText] = useState('');
+  const [progressLabel, setProgressLabel] = useState('');
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -90,6 +91,7 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
   const startListening = useCallback(async () => {
     if (isClosingRef.current) return;
     setDisplayText('');
+    setProgressLabel('');
     chunksRef.current = [];
 
     try {
@@ -170,6 +172,7 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
 
     try {
       /* ── Step 1: Whisper STT ── */
+      setProgressLabel('Transcrevendo...');
       const formData = new FormData();
       const ext = (mr.mimeType || '').includes('webm') ? 'webm' : 'mp4';
       formData.append('audio', blob, `recording.${ext}`);
@@ -189,9 +192,11 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
       addMessage({ id: nanoid(), role: 'user', text: userText, time: now(), source: 'voice' });
 
       /* ── Step 2: Chat agent ── */
-      let conversationId = useConversationStore.getState().activeConversationId;
+      setProgressLabel('Respondendo...');
+      const store = useConversationStore.getState();
+      let conversationId = store.activeConversationId;
       if (!conversationId) {
-        conversationId = await useConversationStore.getState().createConversation();
+        conversationId = await store.createConversation();
       }
 
       const response = await sendMessage(userText, conversationId);
@@ -237,6 +242,7 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
 
       /* ── Step 3: TTS + typewriter in parallel ── */
       setVoiceState('speaking');
+      setProgressLabel('Sintetizando...');
       startTypewriter(reply);
 
       const synth = await apiClient<{ audio_base64: string; content_type?: string }>(
@@ -315,7 +321,8 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
         <span className="text-base font-semibold text-text">Capivarex Voice</span>
         <button
           onClick={handleClose}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+          disabled={voiceState === 'processing'}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors ${voiceState === 'processing' ? 'opacity-30 cursor-not-allowed' : ''}`}
           aria-label="Close voice"
         >
           <X size={20} />
@@ -345,6 +352,9 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
                 ? 'Processando...'
                 : 'Falando...'}
         </p>
+        {voiceState === 'processing' && progressLabel && (
+          <p className="text-xs text-text-muted/60 mt-1 shrink-0">{progressLabel}</p>
+        )}
 
         {/* Bot response text with scroll */}
         <div className="flex-1 min-h-0 overflow-y-auto w-full max-w-md text-center py-4">
@@ -358,7 +368,8 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
       <div className="flex justify-center pb-12 pt-4 shrink-0">
         <button
           onClick={handleClose}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-error/20 text-error hover:bg-error/30 transition-all border border-error/30"
+          disabled={voiceState === 'processing'}
+          className={`flex h-16 w-16 items-center justify-center rounded-full bg-error/20 text-error hover:bg-error/30 transition-all border border-error/30 ${voiceState === 'processing' ? 'opacity-30 cursor-not-allowed' : ''}`}
           aria-label="End conversation"
         >
           <X size={28} />
