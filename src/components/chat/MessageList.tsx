@@ -19,7 +19,11 @@ export default function MessageList() {
     const anchor = messagesBottomRef.current;
     if (!container || !anchor) return;
     const timer = setTimeout(() => {
-      container.scrollTop = anchor.offsetTop;
+      const anchorTop =
+        anchor.getBoundingClientRect().top
+        - container.getBoundingClientRect().top
+        + container.scrollTop;
+      container.scrollTop = anchorTop;
     }, 50);
     return () => clearTimeout(timer);
   }, [messages]);
