@@ -1,6 +1,5 @@
-// v2
+// v3 — 4 bugs corrigidos: VAD race condition, iOS audio unlock, Whisper hallucination, interrupt typewriter
 'use client';
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Image from 'next/image';
@@ -30,6 +29,16 @@ function pickMimeType(): string {
   return '';
 }
 
+// Whisper known hallucination phrases (PT-BR + EN)
+const WHISPER_HALLUCINATIONS = new Set([
+  'tchau', 'tchau.', 'tchau tchau', 'tchau tchau.', 'tchau!',
+  'obrigado', 'obrigado.', 'obrigada', 'obrigada.',
+  'até logo', 'até logo.', 'até mais', 'até mais.',
+  'bye', 'bye.', 'goodbye', 'goodbye.',
+  'thank you', 'thank you.', 'thanks', 'thanks.',
+  'ok', 'ok.', '...', '. . .', 'sim.', 'não.',
+]);
+
 export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('init');
   const [displayText, setDisplayText] = useState('');
@@ -44,13 +53,12 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isClosingRef = useRef(false);
+  const isBotSpeakingRef = useRef(false); // FIX Bug 3: track bot speaking state
 
-  // Refs to break circular dependency between startListening <-> stopAndProcess
   const startListeningRef = useRef<() => Promise<void>>();
   const stopAndProcessRef = useRef<() => Promise<void>>();
 
   const addMessage = useChatStore((s) => s.addMessage);
-
   const now = () =>
     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -59,11 +67,9 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     setDisplayText('');
     let i = 0;
     if (typewriterRef.current) clearInterval(typewriterRef.current);
-    // Se temos duração, calcular velocidade para terminar com o áudio
-    // Mínimo 18ms, máximo 80ms por caracter
     const interval = durationMs
       ? Math.min(80, Math.max(18, Math.floor(durationMs / text.length)))
-      : 45; // sem áudio: 45ms (mais lento que antes)
+      : 45;
     typewriterRef.current = setInterval(() => {
       i++;
       setDisplayText(text.slice(0, i));
@@ -85,23 +91,25 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     if (audioElRef.current) {
       audioElRef.current.pause();
       audioElRef.current.src = '';
-      audioElRef.current = null;
+      // FIX Bug 2: não setar null no cleanup — preserva elemento desbloqueado
     }
     if (audioCtxRef.current) {
       audioCtxRef.current.close().catch(() => {});
       audioCtxRef.current = null;
     }
+    isBotSpeakingRef.current = false;
   }, []);
 
   /* ── Start listening (auto-record + VAD) ── */
   const startListening = useCallback(async () => {
     if (isClosingRef.current) return;
+    // FIX Bug 3: não iniciar escuta se bot ainda está falando
+    if (isBotSpeakingRef.current) return;
+
     setDisplayText('');
     setProgressLabel('');
     chunksRef.current = [];
-
     try {
-      // Create / reuse AudioContext
       const AudioCtxClass = window.AudioContext ||
         (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (AudioCtxClass && (!audioCtxRef.current || audioCtxRef.current.state === 'closed')) {
@@ -114,35 +122,13 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      // VAD — detect silence with AnalyserNode
+      // Setup analyser for VAD (will be started after mr.start())
       if (audioCtxRef.current) {
         const analyser = audioCtxRef.current.createAnalyser();
         analyser.fftSize = 512;
         const src = audioCtxRef.current.createMediaStreamSource(stream);
         src.connect(analyser);
         analyserRef.current = analyser;
-
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        let silenceStart: number | null = null;
-        let hasSpeech = false;
-
-        const checkSilence = () => {
-          if (isClosingRef.current || mediaRecorderRef.current?.state !== 'recording') return;
-          analyser.getByteFrequencyData(dataArray);
-          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          if (avg >= 8) {
-            hasSpeech = true;
-            silenceStart = null;
-          } else if (hasSpeech) {
-            if (!silenceStart) silenceStart = Date.now();
-            else if (Date.now() - silenceStart > 1500) {
-              stopAndProcessRef.current?.();
-              return;
-            }
-          }
-          requestAnimationFrame(checkSilence);
-        };
-        requestAnimationFrame(checkSilence);
       }
 
       const mimeType = pickMimeType();
@@ -151,6 +137,44 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mr.start();
       setVoiceState('listening');
+
+      // FIX Bug 1: iniciar VAD DEPOIS de mr.start() para evitar race condition
+      if (audioCtxRef.current && analyserRef.current) {
+        const analyser = analyserRef.current;
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        let silenceStart: number | null = null;
+        let hasSpeech = false;
+        let speechStartTime: number | null = null; // FIX Bug 3: min speech duration
+
+        const checkSilence = () => {
+          if (isClosingRef.current || mediaRecorderRef.current?.state !== 'recording') return;
+          // FIX Bug 3: parar VAD se bot começou a falar
+          if (isBotSpeakingRef.current) return;
+
+          analyser.getByteFrequencyData(dataArray);
+          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+
+          if (avg >= 18) { // FIX Bug 3: threshold aumentado de 8 para 18
+            if (!speechStartTime) speechStartTime = Date.now();
+            // FIX Bug 3: mínimo 500ms de voz contínua antes de marcar hasSpeech
+            if (Date.now() - speechStartTime > 500) {
+              hasSpeech = true;
+            }
+            silenceStart = null;
+          } else {
+            speechStartTime = null; // reset se som parar antes de 500ms
+            if (hasSpeech) {
+              if (!silenceStart) silenceStart = Date.now();
+              else if (Date.now() - silenceStart > 1500) {
+                stopAndProcessRef.current?.();
+                return;
+              }
+            }
+          }
+          requestAnimationFrame(checkSilence);
+        };
+        requestAnimationFrame(checkSilence);
+      }
     } catch {
       if (!isClosingRef.current) setVoiceState('init');
     }
@@ -161,12 +185,20 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     const mr = mediaRecorderRef.current;
     if (!mr || mr.state !== 'recording' || isClosingRef.current) return;
 
-    // Se o bot estava a falar, parar o áudio primeiro
-    if (audioElRef.current) {
+    // Para o áudio do bot se estava falando
+    if (audioElRef.current && !audioElRef.current.paused) {
       audioElRef.current.pause();
       audioElRef.current.src = '';
-      audioElRef.current = null;
+      // FIX Bug 2: NÃO setar null — preserva elemento desbloqueado iOS
     }
+    isBotSpeakingRef.current = false;
+
+    // FIX Bug 4: parar typewriter imediatamente na interrupção
+    if (typewriterRef.current) {
+      clearInterval(typewriterRef.current);
+      typewriterRef.current = null;
+    }
+    setDisplayText('');
 
     setVoiceState('processing');
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -179,7 +211,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       mr.stop();
     });
 
-    // Blob too small = no voice detected
     if (blob.size < 1000 || isClosingRef.current) {
       if (!isClosingRef.current) startListeningRef.current?.();
       return;
@@ -198,12 +229,14 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       );
 
       const userText = (transcription.text || '').trim();
-      if (!userText || isClosingRef.current) {
+      const userTextNorm = userText.toLowerCase().replace(/[!?,]/g, '').trim();
+
+      // FIX Bug 3: filtrar alucinações conhecidas do Whisper
+      if (!userText || isClosingRef.current || WHISPER_HALLUCINATIONS.has(userTextNorm)) {
         if (!isClosingRef.current) startListeningRef.current?.();
         return;
       }
 
-      // Add user message to chat
       addMessage({ id: nanoid(), role: 'user', text: userText, time: now(), source: 'voice' });
 
       /* ── Step 2: Chat agent ── */
@@ -214,7 +247,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         conversationId = await store.createConversation();
       }
 
-      console.error('[Voice] conversationId:', conversationId);
       const response = await sendMessage(userText, conversationId);
       if (isClosingRef.current) return;
 
@@ -227,14 +259,11 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         (response.reply as string) ||
         '';
 
-      console.error('[Voice] reply value:', JSON.stringify(reply), 'type:', typeof reply, 'all keys:', JSON.stringify(Object.keys(response)));
-
       if (!reply) {
         startListeningRef.current?.();
         return;
       }
 
-      // Add bot message to chat
       addMessage({
         id: nanoid(),
         role: 'assistant',
@@ -245,7 +274,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         source: 'voice',
       });
 
-      // Update sidebar
       if (conversationId) {
         useConversationStore.getState().addMessageToConversation(conversationId, {
           id: nanoid(),
@@ -274,36 +302,44 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       if (isClosingRef.current) return;
 
       if (synth.audio_base64) {
+        // FIX Bug 2: reutilizar elemento existente (desbloqueado no mount iOS)
         const audio = audioElRef.current ?? new Audio();
         audioElRef.current = audio;
+
+        isBotSpeakingRef.current = true; // FIX Bug 3: marcar bot como falando
+
         const dataUrl = `data:${synth.content_type || 'audio/mpeg'};base64,${synth.audio_base64}`;
         audio.src = dataUrl;
 
+        // FIX Bug 3: só iniciar escuta APÓS o áudio terminar (+ delay de eco)
         audio.onended = () => {
-          audioElRef.current = null;
-          if (!isClosingRef.current) startListeningRef.current?.();
+          isBotSpeakingRef.current = false;
+          if (!isClosingRef.current) {
+            // Delay de 400ms para eco do alto-falante decair
+            setTimeout(() => {
+              if (!isClosingRef.current) startListeningRef.current?.();
+            }, 400);
+          }
         };
         audio.onerror = () => {
-          audioElRef.current = null;
+          isBotSpeakingRef.current = false;
           if (!isClosingRef.current) startListeningRef.current?.();
         };
         audio.play().catch(() => {
-          audioElRef.current = null;
+          isBotSpeakingRef.current = false;
           if (!isClosingRef.current) startListeningRef.current?.();
         });
 
-        // Typewriter sincronizado: esperar que o áudio carregue para saber a duração
         audio.addEventListener('loadedmetadata', () => {
           const durationMs = (audio.duration || 3) * 1000;
           startTypewriter(reply, durationMs);
         }, { once: true });
-        // Fallback se loadedmetadata não disparar
+
         setTimeout(() => {
           if (!typewriterRef.current) startTypewriter(reply);
         }, 500);
 
-        // Começar a ouvir imediatamente em paralelo (interrupção)
-        if (!isClosingRef.current) startListeningRef.current?.();
+        // FIX Bug 3: REMOVIDO — não iniciar escuta paralela durante TTS
       } else {
         startTypewriter(reply);
         if (!isClosingRef.current) startListeningRef.current?.();
@@ -314,7 +350,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     }
   }, [addMessage, startTypewriter]);
 
-  // Keep refs in sync (breaks circular dependency)
   startListeningRef.current = startListening;
   stopAndProcessRef.current = stopAndProcess;
 
@@ -328,14 +363,18 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   /* ── Auto-start on mount ── */
   useEffect(() => {
     isClosingRef.current = false;
-    // Criar o audio element já no gesto (mount = dentro do clique)
-    // iOS: unlocks play() para este elemento
+    isBotSpeakingRef.current = false;
+
+    // iOS: criar e carregar elemento de áudio dentro do gesto do usuário (mount = clique)
     const el = new Audio();
     el.load();
     audioElRef.current = el;
+
+    // FIX Bug 1: reduzir delay de 1500ms para 300ms
     const timer = setTimeout(() => {
       if (!isClosingRef.current) startListeningRef.current?.();
-    }, 1500);
+    }, 300);
+
     return () => {
       clearTimeout(timer);
       isClosingRef.current = true;
@@ -345,7 +384,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col bg-bg">
-      {/* ── Header ── */}
       <div className="flex h-14 items-center justify-between px-6 border-b border-glass-border shrink-0">
         <span className="text-base font-semibold text-text">Capivarex Voice</span>
         <button
@@ -357,10 +395,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           <X size={20} />
         </button>
       </div>
-
-      {/* ── Center content ── */}
       <div className="flex flex-1 flex-col items-center px-6 pt-8 min-h-0">
-        {/* Avatar with pulse when listening */}
         <div className={`w-[150px] h-[150px] shrink-0 ${voiceState === 'listening' ? 'animate-pulse' : ''}`}>
           <Image
             src="/capivara-smart.png"
@@ -370,8 +405,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
             className="w-full h-full object-contain"
           />
         </div>
-
-        {/* State label */}
         <p className="text-sm text-text-muted mt-4 shrink-0">
           {voiceState === 'init'
             ? 'Preparando...'
@@ -384,16 +417,12 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         {voiceState === 'processing' && progressLabel && (
           <p className="text-xs text-text-muted/60 mt-1 shrink-0">{progressLabel}</p>
         )}
-
-        {/* Bot response text with scroll */}
         <div className="flex-1 min-h-0 overflow-y-auto w-full max-w-md text-center py-4">
           {(voiceState === 'speaking' || (voiceState === 'listening' && displayText)) && (
             <p className="text-base text-accent leading-relaxed">{displayText}</p>
           )}
         </div>
       </div>
-
-      {/* ── End button ── */}
       <div className="flex justify-center pb-12 pt-4 shrink-0">
         <button
           onClick={handleClose}
