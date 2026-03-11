@@ -54,10 +54,15 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   /* ── Typewriter effect ── */
-  const startTypewriter = useCallback((text: string) => {
+  const startTypewriter = useCallback((text: string, durationMs?: number) => {
     setDisplayText('');
     let i = 0;
     if (typewriterRef.current) clearInterval(typewriterRef.current);
+    // Se temos duração, calcular velocidade para terminar com o áudio
+    // Mínimo 18ms, máximo 80ms por caracter
+    const interval = durationMs
+      ? Math.min(80, Math.max(18, Math.floor(durationMs / text.length)))
+      : 45; // sem áudio: 45ms (mais lento que antes)
     typewriterRef.current = setInterval(() => {
       i++;
       setDisplayText(text.slice(0, i));
@@ -65,7 +70,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         clearInterval(typewriterRef.current!);
         typewriterRef.current = null;
       }
-    }, 18);
+    }, interval);
   }, []);
 
   /* ── Cleanup — stop everything ── */
@@ -118,12 +123,14 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         let silenceStart: number | null = null;
+        let hasSpeech = false;
 
         const checkSilence = () => {
           if (isClosingRef.current || mediaRecorderRef.current?.state !== 'recording') return;
           analyser.getByteFrequencyData(dataArray);
           const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          if (avg < 8) {
+          if (avg >= 8) hasSpeech = true;
+          if (avg < 8 && hasSpeech) {
             if (!silenceStart) silenceStart = Date.now();
             else if (Date.now() - silenceStart > 1500) {
               stopAndProcessRef.current?.();
@@ -152,6 +159,13 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const stopAndProcess = useCallback(async () => {
     const mr = mediaRecorderRef.current;
     if (!mr || mr.state !== 'recording' || isClosingRef.current) return;
+
+    // Se o bot estava a falar, parar o áudio primeiro
+    if (audioElRef.current) {
+      audioElRef.current.pause();
+      audioElRef.current.src = '';
+      audioElRef.current = null;
+    }
 
     setVoiceState('processing');
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -247,10 +261,9 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         );
       }
 
-      /* ── Step 3: TTS + typewriter in parallel ── */
+      /* ── Step 3: TTS + typewriter synced with audio ── */
       setVoiceState('speaking');
       setProgressLabel('Sintetizando...');
-      startTypewriter(reply);
 
       const synth = await apiClient<{ audio_base64: string; content_type?: string }>(
         '/api/webapp/voice/synthesize',
@@ -260,33 +273,38 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       if (isClosingRef.current) return;
 
       if (synth.audio_base64) {
-        if (audioElRef.current) {
-          audioElRef.current.pause();
-          audioElRef.current.src = '';
-        }
-
-        const bytes = Uint8Array.from(atob(synth.audio_base64), c => c.charCodeAt(0));
-        const audioBlob = new Blob([bytes], { type: synth.content_type || 'audio/mpeg' });
-        const url = URL.createObjectURL(audioBlob);
-        const audio = new Audio(url);
+        const audio = audioElRef.current ?? new Audio();
         audioElRef.current = audio;
+        const dataUrl = `data:${synth.content_type || 'audio/mpeg'};base64,${synth.audio_base64}`;
+        audio.src = dataUrl;
 
         audio.onended = () => {
-          URL.revokeObjectURL(url);
           audioElRef.current = null;
           if (!isClosingRef.current) startListeningRef.current?.();
         };
         audio.onerror = () => {
-          URL.revokeObjectURL(url);
           audioElRef.current = null;
           if (!isClosingRef.current) startListeningRef.current?.();
         };
         audio.play().catch(() => {
-          URL.revokeObjectURL(url);
           audioElRef.current = null;
           if (!isClosingRef.current) startListeningRef.current?.();
         });
+
+        // Typewriter sincronizado: esperar que o áudio carregue para saber a duração
+        audio.addEventListener('loadedmetadata', () => {
+          const durationMs = (audio.duration || 3) * 1000;
+          startTypewriter(reply, durationMs);
+        }, { once: true });
+        // Fallback se loadedmetadata não disparar
+        setTimeout(() => {
+          if (!typewriterRef.current) startTypewriter(reply);
+        }, 500);
+
+        // Começar a ouvir imediatamente em paralelo (interrupção)
+        if (!isClosingRef.current) startListeningRef.current?.();
       } else {
+        startTypewriter(reply);
         if (!isClosingRef.current) startListeningRef.current?.();
       }
     } catch (err) {
@@ -309,6 +327,11 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   /* ── Auto-start on mount ── */
   useEffect(() => {
     isClosingRef.current = false;
+    // Criar o audio element já no gesto (mount = dentro do clique)
+    // iOS: unlocks play() para este elemento
+    const el = new Audio();
+    el.load();
+    audioElRef.current = el;
     const timer = setTimeout(() => {
       if (!isClosingRef.current) startListeningRef.current?.();
     }, 1500);
