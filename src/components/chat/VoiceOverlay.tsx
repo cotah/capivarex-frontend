@@ -1,29 +1,18 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { X, Mic, MicOff, Loader2, Volume2 } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { X } from 'lucide-react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
 import { sendMessage, apiClient } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
 
-type VoiceState = 'idle' | 'recording' | 'processing' | 'speaking';
+type VoiceState = 'init' | 'listening' | 'processing' | 'speaking';
 
 interface VoiceOverlayProps {
   onClose: () => void;
-}
-
-interface TranscribeResponse {
-  text: string;
-  language?: string;
-}
-
-interface SynthesizeResponse {
-  audio_base64: string;
-  content_type?: string;
 }
 
 /** Pick the first supported mime type for MediaRecorder */
@@ -41,103 +30,142 @@ function pickMimeType(): string {
 }
 
 export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
-  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
-  const [statusText, setStatusText] = useState('');
-  const [botText, setBotText] = useState('');
+  const [voiceState, setVoiceState] = useState<VoiceState>('init');
   const [displayText, setDisplayText] = useState('');
-  const [supported] = useState(
-    () => typeof window !== 'undefined' && typeof MediaRecorder !== 'undefined',
-  );
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const audioRef = useRef<AudioBufferSourceNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isClosingRef = useRef(false);
+
+  // Refs to break circular dependency between startListening <-> stopAndProcess
+  const startListeningRef = useRef<() => Promise<void>>();
+  const stopAndProcessRef = useRef<() => Promise<void>>();
 
   const addMessage = useChatStore((s) => s.addMessage);
 
   const now = () =>
     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  /* ── Start recording ── */
-  const startRecording = useCallback(async () => {
-    // If speaking, interrupt and restart
-    if (audioRef.current && 'stop' in audioRef.current) {
-      try { audioRef.current.stop(); } catch { /* already stopped */ }
-      audioRef.current = null;
-    }
-
-    setStatusText('');
-    setBotText('');
-    chunksRef.current = [];
-
-    // Criar e desbloquear AudioContext dentro do gesto (iOS Safari requirement)
-    try {
-      const AudioCtxClass = window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtxClass) {
-        if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
-          audioCtxRef.current = new AudioCtxClass();
-        }
-        if (audioCtxRef.current.state === 'suspended') {
-          // fire-and-forget — apenas desbloqueia o contexto
-          audioCtxRef.current.resume().catch(() => {});
-        }
+  /* ── Typewriter effect ── */
+  const startTypewriter = useCallback((text: string) => {
+    setDisplayText('');
+    let i = 0;
+    if (typewriterRef.current) clearInterval(typewriterRef.current);
+    typewriterRef.current = setInterval(() => {
+      i++;
+      setDisplayText(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(typewriterRef.current!);
+        typewriterRef.current = null;
       }
-    } catch { /* ignore */ }
+    }, 18);
+  }, []);
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mimeType = pickMimeType();
-      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      mediaRecorderRef.current = mr;
-
-      mr.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
-      mr.start();
-      setVoiceState('recording');
-      setStatusText('Gravando...');
-    } catch {
-      setVoiceState('idle');
-      setStatusText('Microfone não disponível');
+  /* ── Cleanup — stop everything ── */
+  const cleanup = useCallback(() => {
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    if (typewriterRef.current) clearInterval(typewriterRef.current);
+    if (mediaRecorderRef.current?.state === 'recording') {
+      try { mediaRecorderRef.current.stop(); } catch { /* ignore */ }
+    }
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    if (sourceRef.current) {
+      try { sourceRef.current.stop(); } catch { /* ignore */ }
+      sourceRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
     }
   }, []);
 
-  /* ── Stop recording → transcribe → chat → TTS ── */
+  /* ── Start listening (auto-record + VAD) ── */
+  const startListening = useCallback(async () => {
+    if (isClosingRef.current) return;
+    setDisplayText('');
+    chunksRef.current = [];
+
+    try {
+      // Create / reuse AudioContext
+      const AudioCtxClass = window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtxClass && (!audioCtxRef.current || audioCtxRef.current.state === 'closed')) {
+        audioCtxRef.current = new AudioCtxClass();
+      }
+      if (audioCtxRef.current?.state === 'suspended') {
+        await audioCtxRef.current.resume();
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      // VAD — detect silence with AnalyserNode
+      if (audioCtxRef.current) {
+        const analyser = audioCtxRef.current.createAnalyser();
+        analyser.fftSize = 512;
+        const src = audioCtxRef.current.createMediaStreamSource(stream);
+        src.connect(analyser);
+        analyserRef.current = analyser;
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        let silenceStart: number | null = null;
+
+        const checkSilence = () => {
+          if (isClosingRef.current || mediaRecorderRef.current?.state !== 'recording') return;
+          analyser.getByteFrequencyData(dataArray);
+          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          if (avg < 8) {
+            if (!silenceStart) silenceStart = Date.now();
+            else if (Date.now() - silenceStart > 1500) {
+              stopAndProcessRef.current?.();
+              return;
+            }
+          } else {
+            silenceStart = null;
+          }
+          requestAnimationFrame(checkSilence);
+        };
+        requestAnimationFrame(checkSilence);
+      }
+
+      const mimeType = pickMimeType();
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorderRef.current = mr;
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.start();
+      setVoiceState('listening');
+    } catch {
+      if (!isClosingRef.current) setVoiceState('init');
+    }
+  }, []);
+
+  /* ── Stop recording → transcribe → chat → TTS → loop ── */
   const stopAndProcess = useCallback(async () => {
     const mr = mediaRecorderRef.current;
-    if (!mr || mr.state !== 'recording') return;
+    if (!mr || mr.state !== 'recording' || isClosingRef.current) return;
 
-    // AudioContext was already created & unlocked in startRecording() (iOS gesture requirement)
-    const audioCtx = audioCtxRef.current;
+    setVoiceState('processing');
+    streamRef.current?.getTracks().forEach(t => t.stop());
 
-    // Stop recording and collect blob
     const blob = await new Promise<Blob>((resolve) => {
       mr.onstop = () => {
-        const recorded = new Blob(chunksRef.current, { type: mr.mimeType });
+        resolve(new Blob(chunksRef.current, { type: mr.mimeType }));
         chunksRef.current = [];
-        resolve(recorded);
       };
       mr.stop();
     });
 
-    // Release mic
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-
-    if (blob.size === 0) {
-      setVoiceState('idle');
-      setStatusText('');
+    // Blob too small = no voice detected
+    if (blob.size < 1000 || isClosingRef.current) {
+      if (!isClosingRef.current) startListeningRef.current?.();
       return;
     }
-
-    setVoiceState('processing');
-    setStatusText('Processando...');
 
     try {
       /* ── Step 1: Whisper STT ── */
@@ -145,28 +173,19 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       const ext = (mr.mimeType || '').includes('webm') ? 'webm' : 'mp4';
       formData.append('audio', blob, `recording.${ext}`);
 
-      const transcription = await apiClient<TranscribeResponse>(
+      const transcription = await apiClient<{ text: string }>(
         '/api/webapp/voice/transcribe',
         { method: 'POST', body: formData },
       );
 
       const userText = (transcription.text || '').trim();
-      if (!userText) {
-        setVoiceState('idle');
-        setStatusText('Não consegui ouvir. Tente novamente.');
+      if (!userText || isClosingRef.current) {
+        if (!isClosingRef.current) startListeningRef.current?.();
         return;
       }
 
-      setStatusText(userText);
-
-      /* Add user message to chat */
-      addMessage({
-        id: nanoid(),
-        role: 'user',
-        text: userText,
-        time: now(),
-        source: 'voice',
-      });
+      // Add user message to chat
+      addMessage({ id: nanoid(), role: 'user', text: userText, time: now(), source: 'voice' });
 
       /* ── Step 2: Chat agent ── */
       let conversationId = useConversationStore.getState().activeConversationId;
@@ -175,12 +194,19 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       }
 
       const response = await sendMessage(userText, conversationId);
+      if (isClosingRef.current) return;
+
       const reply =
         (response.response as string) ||
         (response.message as string) ||
-        'No response';
+        '';
 
-      /* Add bot message to chat */
+      if (!reply) {
+        startListeningRef.current?.();
+        return;
+      }
+
+      // Add bot message to chat
       addMessage({
         id: nanoid(),
         role: 'assistant',
@@ -208,247 +234,131 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         );
       }
 
-      setBotText(reply);
-
-      // Typewriter effect
-      const startTypewriter = (text: string) => {
-        setDisplayText('');
-        let i = 0;
-        if (typewriterRef.current) clearInterval(typewriterRef.current);
-        typewriterRef.current = setInterval(() => {
-          i++;
-          setDisplayText(text.slice(0, i));
-          if (i >= text.length) {
-            clearInterval(typewriterRef.current!);
-            typewriterRef.current = null;
-          }
-        }, 18);
-      };
+      /* ── Step 3: TTS + typewriter in parallel ── */
+      setVoiceState('speaking');
       startTypewriter(reply);
 
-      /* ── Step 3: ElevenLabs TTS via AudioContext (iOS-safe) ── */
-      setVoiceState('speaking');
-      setStatusText('');
+      const synth = await apiClient<{ audio_base64: string; content_type?: string }>(
+        '/api/webapp/voice/synthesize',
+        { method: 'POST', body: JSON.stringify({ text: reply }) },
+      );
 
-      try {
-        const synth = await apiClient<SynthesizeResponse>(
-          '/api/webapp/voice/synthesize',
-          {
-            method: 'POST',
-            body: JSON.stringify({ text: reply }),
-          },
-        );
+      if (isClosingRef.current) return;
 
-        if (synth.audio_base64 && audioCtx) {
-          // FIX 1: Re-resume AudioContext — may have suspended after startRecording
-          if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-          }
+      if (synth.audio_base64 && audioCtxRef.current) {
+        const ctx = audioCtxRef.current;
+        if (ctx.state === 'suspended') await ctx.resume();
 
-          // FIX 2: Stop previous source to prevent overlap
-          if (audioRef.current) {
-            try { audioRef.current.stop(); } catch { /* já parou */ }
-            audioRef.current = null;
-          }
+        const bytes = Uint8Array.from(atob(synth.audio_base64), c => c.charCodeAt(0));
+        const audioBlob = new Blob([bytes], { type: synth.content_type || 'audio/mpeg' });
+        const url = URL.createObjectURL(audioBlob);
+        const arrayBuffer = await (await fetch(url)).arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        URL.revokeObjectURL(url);
 
-          const contentType = synth.content_type || 'audio/mpeg';
-          const binaryStr = atob(synth.audio_base64);
-          const bytes = new Uint8Array(binaryStr.length);
-          for (let i = 0; i < binaryStr.length; i++) {
-            bytes[i] = binaryStr.charCodeAt(i);
-          }
-          const audioBlob = new Blob([bytes], { type: contentType });
-          const audioUrl = URL.createObjectURL(audioBlob);
+        if (isClosingRef.current) return;
 
-          const arrayBuffer = await (await fetch(audioUrl)).arrayBuffer();
-          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-          const source = audioCtx.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(audioCtx.destination);
-          source.onended = () => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-            setVoiceState('idle');
-          };
-          source.start(0);
-          audioRef.current = source;
-        } else {
-          // No audio returned or no AudioContext, go idle
-          setVoiceState('idle');
+        if (sourceRef.current) {
+          try { sourceRef.current.stop(); } catch { /* ignore */ }
         }
-      } catch {
-        // TTS failed but chat response was shown — go idle
-        setVoiceState('idle');
+
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.onended = () => {
+          sourceRef.current = null;
+          if (!isClosingRef.current) startListeningRef.current?.(); // auto-loop
+        };
+        source.start(0);
+        sourceRef.current = source;
+      } else {
+        if (!isClosingRef.current) startListeningRef.current?.();
       }
     } catch {
-      const errMsg = 'Desculpe, algo deu errado. Tente novamente.';
-      addMessage({
-        id: nanoid(),
-        role: 'assistant',
-        text: errMsg,
-        time: now(),
-        source: 'voice',
-      });
-      setBotText(errMsg);
-      setVoiceState('idle');
+      if (!isClosingRef.current) startListeningRef.current?.();
     }
-  }, [addMessage]);
+  }, [addMessage, startTypewriter]);
 
-  /* ── Toggle mic ── */
-  const toggleMic = useCallback(() => {
-    if (voiceState === 'recording') {
-      stopAndProcess();
-    } else if (voiceState === 'idle' || voiceState === 'speaking') {
-      // If speaking, interrupt and start new recording
-      startRecording();
-    }
-  }, [voiceState, startRecording, stopAndProcess]);
+  // Keep refs in sync (breaks circular dependency)
+  startListeningRef.current = startListening;
+  stopAndProcessRef.current = stopAndProcess;
 
   /* ── Close handler ── */
   const handleClose = useCallback(() => {
-    // Stop recording
-    if (mediaRecorderRef.current?.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    // Stop audio playback
-    if (audioRef.current && 'stop' in audioRef.current) {
-      try { audioRef.current.stop(); } catch { /* already stopped */ }
-      audioRef.current = null;
-    }
-    // Close AudioContext
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close().catch(() => {});
-      audioCtxRef.current = null;
-    }
-    // Stop typewriter
-    if (typewriterRef.current) clearInterval(typewriterRef.current);
+    isClosingRef.current = true;
+    cleanup();
     onClose();
-  }, [onClose]);
+  }, [cleanup, onClose]);
+
+  /* ── Auto-start on mount ── */
+  useEffect(() => {
+    isClosingRef.current = false;
+    const timer = setTimeout(() => {
+      if (!isClosingRef.current) startListeningRef.current?.();
+    }, 1500);
+    return () => {
+      clearTimeout(timer);
+      isClosingRef.current = true;
+      cleanup();
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-[60] flex flex-col bg-bg"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
-      >
-        {/* ── Header ── */}
-        <div className="flex h-14 items-center justify-between px-6 border-b border-glass-border shrink-0">
-          <span className="text-base font-semibold text-text">Capivarex Voice</span>
-          <button
-            onClick={handleClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
-            aria-label="Close voice"
-          >
-            <X size={20} />
-          </button>
+    <div className="fixed inset-0 z-[60] flex flex-col bg-bg">
+      {/* ── Header ── */}
+      <div className="flex h-14 items-center justify-between px-6 border-b border-glass-border shrink-0">
+        <span className="text-base font-semibold text-text">Capivarex Voice</span>
+        <button
+          onClick={handleClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+          aria-label="Close voice"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* ── Center content ── */}
+      <div className="flex flex-1 flex-col items-center px-6 pt-8 min-h-0">
+        {/* Avatar with pulse when listening */}
+        <div className={`w-[150px] h-[150px] shrink-0 ${voiceState === 'listening' ? 'animate-pulse' : ''}`}>
+          <Image
+            src="/capivara-smart.png"
+            alt="Capivarex Voice"
+            width={150}
+            height={150}
+            className="w-full h-full object-contain"
+          />
         </div>
 
-        {/* ── Center content ── */}
-        <div className="flex flex-1 flex-col items-center px-6 pt-8 min-h-0">
-          {!supported ? (
-            <p className="text-center text-text-muted text-base">
-              Voice not supported in this browser.
-              <br />
-              Try Chrome or Edge.
-            </p>
-          ) : (
-            <>
-              {/* Capivara avatar */}
-              <div className="w-[150px] h-[150px] shrink-0">
-                <Image
-                  src="/capivara-smart.png"
-                  alt="Capivarex Voice"
-                  width={150}
-                  height={150}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+        {/* State label */}
+        <p className="text-sm text-text-muted mt-4 shrink-0">
+          {voiceState === 'init'
+            ? 'Preparando...'
+            : voiceState === 'listening'
+              ? 'Ouvindo... pode falar'
+              : voiceState === 'processing'
+                ? 'Processando...'
+                : 'Falando...'}
+        </p>
 
-              {/* State label */}
-              <p className="text-sm text-text-muted shrink-0">
-                {voiceState === 'recording'
-                  ? 'Ouvindo...'
-                  : voiceState === 'processing'
-                    ? 'Processando...'
-                    : voiceState === 'speaking'
-                      ? 'Falando...'
-                      : 'Toca para falar'}
-              </p>
-
-              {/* Transcript / Bot response */}
-              <div className="flex-1 min-h-0 overflow-y-auto max-w-md w-full text-center py-4">
-                {voiceState === 'recording' && (
-                  <p className="text-base text-text animate-pulse">
-                    {statusText || 'Gravando...'}
-                  </p>
-                )}
-                {voiceState === 'processing' && (
-                  <p className="text-base text-text-muted flex items-center justify-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    {statusText || 'Processando...'}
-                  </p>
-                )}
-                {voiceState === 'speaking' && displayText && (
-                  <p className="text-base text-accent">{displayText}</p>
-                )}
-                {voiceState === 'idle' && displayText && (
-                  <p className="text-base text-text-muted">{displayText}</p>
-                )}
-              </div>
-            </>
+        {/* Bot response text with scroll */}
+        <div className="flex-1 min-h-0 overflow-y-auto w-full max-w-md text-center py-4">
+          {(voiceState === 'speaking' || (voiceState === 'listening' && displayText)) && (
+            <p className="text-base text-accent leading-relaxed">{displayText}</p>
           )}
         </div>
+      </div>
 
-        {/* ── Bottom mic button ── */}
-        {supported && (
-          <div className="flex justify-center pb-12 pt-4 shrink-0">
-            <button
-              onClick={toggleMic}
-              disabled={voiceState === 'processing'}
-              className={`flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200 ${
-                voiceState === 'recording'
-                  ? 'bg-error text-white shadow-lg shadow-error/30 scale-110'
-                  : voiceState === 'processing'
-                    ? 'bg-white/5 text-text-muted cursor-not-allowed'
-                    : voiceState === 'speaking'
-                      ? 'bg-amber-500/80 text-bg hover:bg-amber-400 shadow-lg shadow-amber-500/30'
-                      : 'bg-amber-500 text-bg hover:bg-amber-400 shadow-lg shadow-amber-500/30'
-              }`}
-              aria-label={
-                voiceState === 'recording'
-                  ? 'Stop recording'
-                  : voiceState === 'speaking'
-                    ? 'Interrupt and record'
-                    : 'Start recording'
-              }
-            >
-              {voiceState === 'processing' ? (
-                <Loader2 size={28} className="animate-spin" />
-              ) : voiceState === 'recording' ? (
-                <MicOff size={28} />
-              ) : voiceState === 'speaking' ? (
-                <Volume2 size={28} />
-              ) : (
-                <Mic size={28} />
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* End button */}
-        <div className="flex justify-center pb-8 shrink-0">
-          <button
-            onClick={handleClose}
-            className="text-sm text-text-muted hover:text-text transition-colors"
-          >
-            End conversation
-          </button>
-        </div>
-      </motion.div>
-    </AnimatePresence>
+      {/* ── End button ── */}
+      <div className="flex justify-center pb-12 pt-4 shrink-0">
+        <button
+          onClick={handleClose}
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-error/20 text-error hover:bg-error/30 transition-all border border-error/30"
+          aria-label="End conversation"
+        >
+          <X size={28} />
+        </button>
+      </div>
+    </div>
   );
 }
