@@ -11,13 +11,15 @@ export default function MessageList() {
   const isThinking = useChatStore((s) => s.isThinking);
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const messagesBottomRef = useRef<HTMLDivElement>(null);
   const tts = useTTS();
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const anchor = messagesBottomRef.current;
+    if (!container || !anchor) return;
     const timer = setTimeout(() => {
-      container.scrollTop = container.scrollHeight;
+      container.scrollTop = anchor.offsetTop;
     }, 50);
     return () => clearTimeout(timer);
   }, [messages]);
@@ -32,6 +34,7 @@ export default function MessageList() {
           onTTSToggle={() => tts.play(msg.id, msg.text)}
         />
       ))}
+      <div ref={messagesBottomRef} />
       {isThinking && <ThinkingCapivara />}
       <div ref={bottomRef} />
     </div>

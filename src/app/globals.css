@@ -10,6 +10,12 @@
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  .bottom-safe-16 {
+    bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+  .h-chat-mobile {
+    height: calc(100dvh - 3.5rem - 4rem - env(safe-area-inset-bottom, 0px));
+  }
 }
 
 :root {
