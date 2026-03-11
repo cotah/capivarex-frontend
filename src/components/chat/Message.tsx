@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Tv, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { ChatMessage } from '@/lib/types';
 import MusicCard from './MusicCard';
 import CalendarCard from './CalendarCard';
@@ -75,7 +76,7 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       <div className={`max-w-[85%] sm:max-w-[70%] ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
         <div className={`px-4 py-2.5 text-base leading-relaxed break-words overflow-hidden ${isUser ? `bg-accent/15 ${voiceBorderUser} text-text rounded-2xl rounded-br` : `glass ${voiceBorderBot} text-text rounded-2xl rounded-bl`}`}>
-          <ReactMarkdown components={{
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
             a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent underline break-all hover:text-accent/80 transition-colors">{children}</a>,
             p: ({ children }) => <span>{children}</span>,
             strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
