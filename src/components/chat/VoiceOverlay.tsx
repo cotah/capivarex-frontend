@@ -44,6 +44,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [statusText, setStatusText] = useState('');
   const [botText, setBotText] = useState('');
+  const [displayText, setDisplayText] = useState('');
   const [supported] = useState(
     () => typeof window !== 'undefined' && typeof MediaRecorder !== 'undefined',
   );
@@ -53,6 +54,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const audioRef = useRef<AudioBufferSourceNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const addMessage = useChatStore((s) => s.addMessage);
 
@@ -208,6 +210,22 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
 
       setBotText(reply);
 
+      // Typewriter effect
+      const startTypewriter = (text: string) => {
+        setDisplayText('');
+        let i = 0;
+        if (typewriterRef.current) clearInterval(typewriterRef.current);
+        typewriterRef.current = setInterval(() => {
+          i++;
+          setDisplayText(text.slice(0, i));
+          if (i >= text.length) {
+            clearInterval(typewriterRef.current!);
+            typewriterRef.current = null;
+          }
+        }, 18);
+      };
+      startTypewriter(reply);
+
       /* ── Step 3: ElevenLabs TTS via AudioContext (iOS-safe) ── */
       setVoiceState('speaking');
       setStatusText('');
@@ -222,6 +240,17 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         );
 
         if (synth.audio_base64 && audioCtx) {
+          // FIX 1: Re-resume AudioContext — may have suspended after startRecording
+          if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+          }
+
+          // FIX 2: Stop previous source to prevent overlap
+          if (audioRef.current) {
+            try { audioRef.current.stop(); } catch { /* já parou */ }
+            audioRef.current = null;
+          }
+
           const contentType = synth.content_type || 'audio/mpeg';
           const binaryStr = atob(synth.audio_base64);
           const bytes = new Uint8Array(binaryStr.length);
@@ -292,6 +321,8 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       audioCtxRef.current.close().catch(() => {});
       audioCtxRef.current = null;
     }
+    // Stop typewriter
+    if (typewriterRef.current) clearInterval(typewriterRef.current);
     onClose();
   }, [onClose]);
 
@@ -317,7 +348,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         </div>
 
         {/* ── Center content ── */}
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
+        <div className="flex flex-1 flex-col items-center px-6 pt-8 min-h-0">
           {!supported ? (
             <p className="text-center text-text-muted text-base">
               Voice not supported in this browser.
@@ -327,7 +358,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           ) : (
             <>
               {/* Capivara avatar */}
-              <div className="w-[150px] h-[150px]">
+              <div className="w-[150px] h-[150px] shrink-0">
                 <Image
                   src="/capivara-smart.png"
                   alt="Capivarex Voice"
@@ -338,7 +369,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
               </div>
 
               {/* State label */}
-              <p className="text-sm text-text-muted">
+              <p className="text-sm text-text-muted shrink-0">
                 {voiceState === 'recording'
                   ? 'Ouvindo...'
                   : voiceState === 'processing'
@@ -349,7 +380,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
               </p>
 
               {/* Transcript / Bot response */}
-              <div className="min-h-[60px] max-w-md text-center">
+              <div className="flex-1 min-h-0 overflow-y-auto max-w-md w-full text-center py-4">
                 {voiceState === 'recording' && (
                   <p className="text-base text-text animate-pulse">
                     {statusText || 'Gravando...'}
@@ -361,11 +392,11 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
                     {statusText || 'Processando...'}
                   </p>
                 )}
-                {voiceState === 'speaking' && botText && (
-                  <p className="text-base text-accent">{botText}</p>
+                {voiceState === 'speaking' && displayText && (
+                  <p className="text-base text-accent">{displayText}</p>
                 )}
-                {voiceState === 'idle' && botText && (
-                  <p className="text-base text-text-muted">{botText}</p>
+                {voiceState === 'idle' && displayText && (
+                  <p className="text-base text-text-muted">{displayText}</p>
                 )}
               </div>
             </>
