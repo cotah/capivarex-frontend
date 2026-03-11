@@ -200,6 +200,7 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
         conversationId = await store.createConversation();
       }
 
+      console.error('[Voice] conversationId:', conversationId);
       const response = await sendMessage(userText, conversationId);
       if (isClosingRef.current) return;
 
@@ -212,7 +213,7 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
         (response.reply as string) ||
         '';
 
-      console.error('[Voice] sendMessage response keys:', Object.keys(response), 'reply:', reply);
+      console.error('[Voice] reply value:', JSON.stringify(reply), 'type:', typeof reply, 'all keys:', JSON.stringify(Object.keys(response)));
 
       if (!reply) {
         startListeningRef.current?.();
@@ -289,7 +290,8 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
       } else {
         if (!isClosingRef.current) startListeningRef.current?.();
       }
-    } catch {
+    } catch (err) {
+      console.error('[Voice] stopAndProcess error:', err);
       if (!isClosingRef.current) startListeningRef.current?.();
     }
   }, [addMessage, startTypewriter]);
