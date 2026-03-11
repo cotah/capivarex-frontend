@@ -192,6 +192,18 @@ export interface PortfolioResponse {
   crypto: CryptoItem[];
 }
 
+/* ── Memory ──────────────────────────── */
+
+export interface MemoryEntry {
+  id: string;
+  key: string;
+  value: string;
+  source?: string;
+  updated_at?: string;
+  created_at?: string;
+  category?: string;
+}
+
 /* ── Notes & Reminders ────────────────── */
 
 export interface Note {

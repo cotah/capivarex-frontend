@@ -1,5 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { apiClient } from '@/lib/api';
+import type { MemoryEntry } from '@/lib/types';
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -16,19 +21,45 @@ function timeAgo(dateStr: string): string {
 }
 
 interface MemoryCardProps {
-  memoryKey: string;
-  value: string;
-  createdAt: string;
+  memory: MemoryEntry;
+  onDelete: (id: string) => void;
 }
 
-export default function MemoryCard({ memoryKey, value, createdAt }: MemoryCardProps) {
+export default function MemoryCard({ memory, onDelete }: MemoryCardProps) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await apiClient('/api/webapp/memory/' + memory.id, { method: 'DELETE' });
+      onDelete(memory.id);
+    } catch {
+      // toast already shown by apiClient
+      setDeleting(false);
+    }
+  };
+
+  const displayDate = memory.updated_at || memory.created_at;
+
   return (
-    <div className="glass rounded-xl p-4">
-      <p className="text-sm font-semibold text-text mb-1">
-        {memoryKey.replace(/_/g, ' ')}
+    <div className="group relative glass rounded-xl p-4">
+      {/* Delete button — visible on hover */}
+      <button
+        onClick={handleDelete}
+        disabled={deleting}
+        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex h-7 w-7 items-center justify-center rounded-lg text-red-400 hover:text-red-300 hover:bg-white/5 disabled:opacity-30"
+        aria-label="Delete memory"
+      >
+        <Trash2 size={14} />
+      </button>
+
+      <p className="text-sm font-semibold text-text mb-1 pr-6">
+        {memory.key.replace(/_/g, ' ')}
       </p>
-      <p className="text-sm text-text-muted leading-relaxed">{value}</p>
-      <p className="text-xs text-text-muted/40 mt-2">{timeAgo(createdAt)}</p>
+      <p className="text-sm text-text-muted leading-relaxed">{memory.value}</p>
+      {displayDate && (
+        <p className="text-xs text-text-muted/40 mt-2">{timeAgo(displayDate)}</p>
+      )}
     </div>
   );
 }

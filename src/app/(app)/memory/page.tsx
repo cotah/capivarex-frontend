@@ -1,19 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Brain } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import MemoryCard from '@/components/memory/MemoryCard';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
-
-interface MemoryEntry {
-  key: string;
-  value: string;
-  created_at: string;
-  category?: string;
-}
+import type { MemoryEntry } from '@/lib/types';
 
 export default function MemoryPage() {
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
@@ -22,10 +16,11 @@ export default function MemoryPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await apiClient<MemoryEntry[] | { memories: MemoryEntry[] }>(
+        const data = await apiClient<{ memories: MemoryEntry[] }>(
           '/api/webapp/memory',
         );
-        setMemories(Array.isArray(data) ? data : (data.memories || []));
+        const entries = data.memories ?? [];
+        setMemories(entries);
       } catch {
         // toast already shown
       } finally {
@@ -34,6 +29,11 @@ export default function MemoryPage() {
     }
     load();
   }, []);
+
+  const handleDelete = useCallback(
+    (id: string) => setMemories((prev) => prev.filter((m) => m.id !== id)),
+    [],
+  );
 
   if (loading) return <LoadingSpinner />;
 
@@ -88,10 +88,9 @@ export default function MemoryPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {entries.map((entry: MemoryEntry) => (
                 <MemoryCard
-                  key={entry.key}
-                  memoryKey={entry.key}
-                  value={entry.value}
-                  createdAt={entry.created_at}
+                  key={entry.id}
+                  memory={entry}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>
