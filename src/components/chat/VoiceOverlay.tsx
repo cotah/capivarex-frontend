@@ -13,7 +13,6 @@ type VoiceState = 'init' | 'listening' | 'processing' | 'speaking';
 
 interface VoiceOverlayProps {
   onClose: () => void;
-  initialAudioCtx?: AudioContext | null;
 }
 
 /** Pick the first supported mime type for MediaRecorder */
@@ -30,7 +29,7 @@ function pickMimeType(): string {
   return '';
 }
 
-export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayProps) {
+export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('init');
   const [displayText, setDisplayText] = useState('');
   const [progressLabel, setProgressLabel] = useState('');
@@ -310,10 +309,6 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
   /* ── Auto-start on mount ── */
   useEffect(() => {
     isClosingRef.current = false;
-    // Use the AudioContext already unlocked by InputBar (iOS gesture)
-    if (initialAudioCtx && initialAudioCtx.state !== 'closed') {
-      audioCtxRef.current = initialAudioCtx;
-    }
     const timer = setTimeout(() => {
       if (!isClosingRef.current) startListeningRef.current?.();
     }, 1500);

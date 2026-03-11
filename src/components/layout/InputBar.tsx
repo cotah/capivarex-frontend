@@ -20,7 +20,6 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const { send, sendWithFile } = useChat();
   const isThinking = useChatStore((s) => s.isThinking);
@@ -144,15 +143,11 @@ export default function InputBar({ centered = false }: InputBarProps) {
           {uploadState === 'uploading' ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
         </button>
         <button onClick={() => {
+            // iOS Safari requer audio.play() dentro do gesto do utilizador
+            // Este silêncio desbloqueia audio.play() para toda a sessão
             try {
-              const AudioCtxClass = window.AudioContext ||
-                (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-              if (AudioCtxClass) {
-                if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
-                  audioCtxRef.current = new AudioCtxClass();
-                }
-                audioCtxRef.current.resume().catch(() => {});
-              }
+              const sil = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+              sil.play().catch(() => {});
             } catch { /* ignore */ }
             setVoiceOpen(true);
           }}
@@ -178,7 +173,6 @@ export default function InputBar({ centered = false }: InputBarProps) {
       {voiceOpen && (
         <VoiceOverlay
           onClose={() => setVoiceOpen(false)}
-          initialAudioCtx={audioCtxRef.current}
         />
       )}
     </>
