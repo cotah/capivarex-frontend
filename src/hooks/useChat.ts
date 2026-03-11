@@ -47,10 +47,21 @@ export function useChat() {
 
       const response = await sendMessage(text, conversationId);
 
+      const reply =
+        (response.text as string) ||
+        (response.response as string) ||
+        (response.message as string) ||
+        (response.content as string) ||
+        (response.answer as string) ||
+        (response.reply as string) ||
+        '';
+
+      console.error('[Chat] sendMessage response keys:', Object.keys(response), 'reply:', reply);
+
       addMessage({
         id: nanoid(),
         role: 'assistant',
-        text: (response.response as string) || (response.message as string) || 'No response',
+        text: reply || 'No response',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         type: response.type as MessageType | undefined,
         data: response.data as Record<string, unknown> | undefined,
@@ -60,7 +71,7 @@ export function useChat() {
         useConversationStore.getState().addMessageToConversation(conversationId, {
           id: nanoid(),
           role: 'assistant',
-          text: (response.response as string) || (response.message as string) || '',
+          text: reply,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         });
       }

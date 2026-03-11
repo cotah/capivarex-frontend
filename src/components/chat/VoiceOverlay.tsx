@@ -204,9 +204,15 @@ export default function VoiceOverlay({ onClose, initialAudioCtx }: VoiceOverlayP
       if (isClosingRef.current) return;
 
       const reply =
+        (response.text as string) ||
         (response.response as string) ||
         (response.message as string) ||
+        (response.content as string) ||
+        (response.answer as string) ||
+        (response.reply as string) ||
         '';
+
+      console.error('[Voice] sendMessage response keys:', Object.keys(response), 'reply:', reply);
 
       if (!reply) {
         startListeningRef.current?.();
