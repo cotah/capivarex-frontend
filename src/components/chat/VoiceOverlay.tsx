@@ -54,6 +54,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isClosingRef = useRef(false);
   const isBotSpeakingRef = useRef(false); // FIX Bug 3: track bot speaking state
+  const vadStartTimeRef = useRef<number>(0);
 
   const startListeningRef = useRef<() => Promise<void>>();
   const stopAndProcessRef = useRef<() => Promise<void>>();
@@ -137,6 +138,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mr.start();
       setVoiceState('listening');
+      vadStartTimeRef.current = Date.now();
 
       // FIX Bug 1: iniciar VAD DEPOIS de mr.start() para evitar race condition
       if (audioCtxRef.current && analyserRef.current) {
@@ -147,17 +149,23 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         let speechStartTime: number | null = null; // FIX Bug 3: min speech duration
 
         const checkSilence = () => {
+          // Grace period: skip first 100ms to let MediaRecorder fully enter 'recording' state
+          // Without this, the VAD exits silently on the very first frame on iOS/Chrome mobile
+          const elapsed = Date.now() - vadStartTimeRef.current;
+          if (elapsed < 100) {
+            requestAnimationFrame(checkSilence);
+            return;
+          }
           if (isClosingRef.current || mediaRecorderRef.current?.state !== 'recording') return;
-          // FIX Bug 3: parar VAD se bot começou a falar
           if (isBotSpeakingRef.current) return;
 
           analyser.getByteFrequencyData(dataArray);
           const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
 
-          if (avg >= 18) { // FIX Bug 3: threshold aumentado de 8 para 18
+          if (avg >= 18) {
             if (!speechStartTime) speechStartTime = Date.now();
-            // FIX Bug 3: mínimo 500ms de voz contínua antes de marcar hasSpeech
-            if (Date.now() - speechStartTime > 500) {
+            // Reduced from 500ms to 150ms — short Portuguese phrases trigger hasSpeech correctly
+            if (Date.now() - speechStartTime > 150) {
               hasSpeech = true;
             }
             silenceStart = null;
