@@ -156,7 +156,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
       {centered ? (
         <div className="w-full px-4">{inputRow}</div>
       ) : (
-        <div className="fixed bottom-[4.5rem] md:bottom-0 left-0 right-0 z-50">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-50">
           <div className="bg-bg/80 backdrop-blur-xl pb-safe">
             <div className="mx-auto max-w-3xl px-4 pb-4">{inputRow}</div>
           </div>

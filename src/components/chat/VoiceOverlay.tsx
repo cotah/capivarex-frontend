@@ -71,6 +71,21 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     setBotText('');
     chunksRef.current = [];
 
+    // Criar e desbloquear AudioContext dentro do gesto (iOS Safari requirement)
+    try {
+      const AudioCtxClass = window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtxClass) {
+        if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+          audioCtxRef.current = new AudioCtxClass();
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+          // fire-and-forget — apenas desbloqueia o contexto
+          audioCtxRef.current.resume().catch(() => {});
+        }
+      }
+    } catch { /* ignore */ }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -96,16 +111,8 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     const mr = mediaRecorderRef.current;
     if (!mr || mr.state !== 'recording') return;
 
-    // Unlock AudioContext INSIDE the user gesture, BEFORE any async work.
-    // iOS Safari blocks audio playback if AudioContext is created after a fetch.
-    const AudioCtxClass = window.AudioContext
-      || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    let audioCtx = audioCtxRef.current;
-    if (AudioCtxClass && (!audioCtx || audioCtx.state === 'closed')) {
-      audioCtx = new AudioCtxClass();
-      audioCtxRef.current = audioCtx;
-    }
-    if (audioCtx) await audioCtx.resume(); // unlock inside gesture
+    // AudioContext was already created & unlocked in startRecording() (iOS gesture requirement)
+    const audioCtx = audioCtxRef.current;
 
     // Stop recording and collect blob
     const blob = await new Promise<Blob>((resolve) => {
