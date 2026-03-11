@@ -14,6 +14,41 @@ const GROUP_LABELS: Record<string, string> = {
   this_week: 'This Week',
 };
 
+/** Derive date group key and display time from ISO 8601 timestamp */
+function normalizeEntry(entry: ActivityEntry): ActivityEntry {
+  // Backward compatible: if time and date already exist, keep them
+  if (entry.time && entry.date) return entry;
+  if (!entry.timestamp) return entry;
+
+  const parsed = new Date(entry.timestamp);
+  if (isNaN(parsed.getTime())) return entry;
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterdayStart = new Date(todayStart);
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - 7);
+
+  let dateGroup: string;
+  if (parsed >= todayStart) {
+    dateGroup = 'today';
+  } else if (parsed >= yesterdayStart) {
+    dateGroup = 'yesterday';
+  } else if (parsed >= weekStart) {
+    dateGroup = 'this_week';
+  } else {
+    dateGroup = 'this_week'; // fallback — still show older items
+  }
+
+  const displayTime = parsed.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return { ...entry, date: dateGroup, time: displayTime };
+}
+
 export default function ActivityFeedPage() {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +62,7 @@ export default function ActivityFeedPage() {
         const resp = await apiClient<{ activities: ActivityEntry[]; has_more?: boolean }>(
           `/api/webapp/activity?limit=${limit}`,
         );
-        const items = resp.activities || [];
+        const items = (resp.activities || []).map(normalizeEntry);
         setActivities(items);
         setHasMore(resp.has_more ?? items.length >= limit);
       } catch {
@@ -45,7 +80,7 @@ export default function ActivityFeedPage() {
       const resp = await apiClient<{ activities: ActivityEntry[]; has_more?: boolean }>(
         `/api/webapp/activity?limit=${limit}&offset=${newOffset}`,
       );
-      const items = resp.activities || [];
+      const items = (resp.activities || []).map(normalizeEntry);
       setActivities((prev) => [...prev, ...items]);
       setOffset(newOffset);
       setHasMore(resp.has_more ?? items.length >= limit);

@@ -137,6 +137,7 @@ export interface ActivityEntry {
   service: string;
   agent: string;
   date: string;
+  timestamp?: string;
 }
 
 /* ── Smarts ────────────────────────────── */
