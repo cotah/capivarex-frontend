@@ -83,3 +83,21 @@ export async function sendMessage(
     }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Quota
+// ---------------------------------------------------------------------------
+
+export interface QuotaInfo {
+  plan: string;
+  messages_used: number;
+  messages_limit: number;
+  quota_pct: number;
+  is_unlimited: boolean;
+  messages_remaining: number;
+}
+
+/** Fetch the current user's daily message quota from the backend. */
+export async function fetchQuota(): Promise<QuotaInfo> {
+  return apiClient<QuotaInfo>('/api/webapp/quota');
+}

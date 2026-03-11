@@ -6,6 +6,7 @@ import ProfileSection from '@/components/settings/ProfileSection';
 import BillingSection from '@/components/settings/BillingSection';
 import ConnectionsSection from '@/components/settings/ConnectionsSection';
 import NotificationSettings from '@/components/settings/NotificationSettings';
+import SecuritySection from '@/components/settings/SecuritySection';
 import { logout } from '@/lib/auth';
 
 export default function SettingsPage() {
@@ -23,6 +24,7 @@ export default function SettingsPage() {
 
         <ProfileSection />
         <BillingSection />
+        <SecuritySection />
         <ConnectionsSection />
         <NotificationSettings />
 
