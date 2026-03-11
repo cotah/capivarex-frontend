@@ -129,15 +129,15 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           if (isClosingRef.current || mediaRecorderRef.current?.state !== 'recording') return;
           analyser.getByteFrequencyData(dataArray);
           const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          if (avg >= 8) hasSpeech = true;
-          if (avg < 8 && hasSpeech) {
+          if (avg >= 8) {
+            hasSpeech = true;
+            silenceStart = null;
+          } else if (hasSpeech) {
             if (!silenceStart) silenceStart = Date.now();
             else if (Date.now() - silenceStart > 1500) {
               stopAndProcessRef.current?.();
               return;
             }
-          } else {
-            silenceStart = null;
           }
           requestAnimationFrame(checkSilence);
         };
