@@ -201,7 +201,9 @@ export interface MemoryEntry {
   id: string;
   key: string;
   value: string;
+  content?: string;
   source?: string;
+  confidence?: number;
   updated_at?: string;
   created_at?: string;
   category?: string;

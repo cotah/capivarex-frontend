@@ -57,9 +57,23 @@ export default function MemoryCard({ memory, onDelete }: MemoryCardProps) {
         {memory.key.replace(/_/g, ' ')}
       </p>
       <p className="text-sm text-text-muted leading-relaxed">{memory.value}</p>
-      {displayDate && (
-        <p className="text-xs text-text-muted/40 mt-2">{timeAgo(displayDate)}</p>
-      )}
+      <div className="flex items-center justify-between mt-2">
+        {displayDate && (
+          <p className="text-xs text-text-muted/40">{timeAgo(displayDate)}</p>
+        )}
+        <div className="flex items-center gap-1.5">
+          {memory.source && memory.source !== 'webapp_manual' && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/5 text-text-muted/50 uppercase tracking-wide">
+              {memory.source === 'rag_auto' ? 'auto' : memory.source}
+            </span>
+          )}
+          {memory.confidence != null && memory.confidence < 0.7 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-400/60">
+              ~
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
