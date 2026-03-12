@@ -1,6 +1,6 @@
 {
-  "name": "Capivarex — Your AI Life Assistant",
-  "short_name": "Capivarex",
+  "name": "CAPIVAREX — Your AI Life Assistant",
+  "short_name": "CAPIVAREX",
   "description": "AI-powered personal assistant for your daily tasks.",
   "start_url": "/chat",
   "display": "standalone",
@@ -24,14 +24,14 @@
       "sizes": "375x812",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Capivarex on mobile"
+      "label": "CAPIVAREX on mobile"
     },
     {
       "src": "/screenshots/desktop.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Capivarex on desktop"
+      "label": "CAPIVAREX on desktop"
     }
   ]
 }

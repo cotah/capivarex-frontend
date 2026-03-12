@@ -67,7 +67,7 @@ const ALL_SERVICES: ServiceDefinition[] = [
 
   // ── Coming Soon ──
   { id: 'canva', name: 'Canva', icon: 'Palette', description: 'Create designs, posts, social media art', category: 'Media', plans: ['me', 'everywhere'], comingSoon: true },
-  { id: 'whatsapp', name: 'WhatsApp', icon: 'MessageCircle', description: 'Use Capivarex via WhatsApp', category: 'Communication', plans: ['everywhere'], comingSoon: true },
+  { id: 'whatsapp', name: 'WhatsApp', icon: 'MessageCircle', description: 'Use CAPIVAREX via WhatsApp', category: 'Communication', plans: ['everywhere'], comingSoon: true },
   { id: 'outlook', name: 'Outlook', icon: 'Mail', description: 'Microsoft email integration', category: 'Communication', plans: ['me', 'everywhere'], comingSoon: true },
   { id: 'uber', name: 'Uber', icon: 'Car', description: 'Request rides', category: 'Transport', plans: ['everywhere'], comingSoon: true },
   { id: 'ev_charging', name: 'EV Charging', icon: 'Zap', description: 'Find charging stations nearby', category: 'Transport', plans: ['me', 'everywhere'], comingSoon: true },

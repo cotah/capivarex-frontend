@@ -20,7 +20,7 @@ export default function FinalCTA() {
           Ready to simplify your life?
         </h2>
         <p className="text-text-muted text-sm mb-8 max-w-md mx-auto">
-          Join thousands of users who let Capivarex handle the details
+          Join thousands of users who let CAPIVAREX handle the details
           so they can focus on what matters.
         </p>
         <Link

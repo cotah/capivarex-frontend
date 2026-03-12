@@ -1,7 +1,7 @@
 import ForgotForm from '@/components/auth/ForgotForm';
 
 export const metadata = {
-  title: 'Reset Password — Capivarex',
+  title: 'Reset Password — CAPIVAREX',
 };
 
 export default function ForgotPasswordPage() {

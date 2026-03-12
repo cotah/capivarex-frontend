@@ -15,7 +15,7 @@ export default function StockList({ stocks }: StockListProps) {
       <EmptyState
         icon={TrendingUp}
         title="No stocks in your watchlist"
-        description="Ask Capivarex to add stocks to your watchlist."
+        description="Ask CAPIVAREX to add stocks to your watchlist."
       />
     );
   }

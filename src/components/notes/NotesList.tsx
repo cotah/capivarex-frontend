@@ -33,7 +33,7 @@ export default function NotesList() {
       <EmptyState
         icon={StickyNote}
         title="No notes yet"
-        description="Ask Capivarex to take a note or create one yourself."
+        description="Ask CAPIVAREX to take a note or create one yourself."
       />
     );
   }

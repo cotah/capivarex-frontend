@@ -30,7 +30,7 @@ export default function CastReceiverPage() {
       <div className="flex flex-col items-center gap-4">
         <Image
           src="/logo-horizontal.png"
-          alt="Capivarex"
+          alt="CAPIVAREX"
           width={280}
           height={80}
           priority

@@ -17,13 +17,13 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Capivarex — Your AI Life Assistant',
+  title: 'CAPIVAREX — Your AI Life Assistant',
   description: 'AI-powered personal assistant for your daily tasks.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Capivarex',
+    title: 'CAPIVAREX',
     startupImage: '/icon-512.png',
   },
   icons: {

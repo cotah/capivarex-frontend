@@ -53,7 +53,7 @@ export default function TopBar() {
           <Link href="/chat" className="flex items-center">
             <Image
               src="/logo-horizontal.png"
-              alt="Capivarex"
+              alt="CAPIVAREX"
               width={160}
               height={40}
               priority

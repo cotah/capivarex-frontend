@@ -18,7 +18,7 @@ export default function ThinkingCapivara() {
       <div className="w-20 h-20">
         <Image
           src="/capivara-smart.png"
-          alt="Capivarex thinking"
+          alt="CAPIVAREX thinking"
           width={80}
           height={80}
           className="w-full h-full object-contain"

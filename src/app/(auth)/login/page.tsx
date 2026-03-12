@@ -1,7 +1,7 @@
 import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata = {
-  title: 'Sign In — Capivarex',
+  title: 'Sign In — CAPIVAREX',
 };
 
 export default function LoginPage() {

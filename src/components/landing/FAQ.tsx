@@ -6,8 +6,8 @@ import { ChevronDown } from 'lucide-react';
 
 const faqs = [
   {
-    q: 'What is Capivarex?',
-    a: 'Capivarex is an AI-powered life assistant that connects your music, calendar, smart home, shopping, car, and more into one intelligent conversation.',
+    q: 'What is CAPIVAREX?',
+    a: 'CAPIVAREX is an AI-powered life assistant that connects your music, calendar, smart home, shopping, car, and more into one intelligent conversation.',
   },
   {
     q: 'Is my data safe?',
@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: 'Can I use it on my phone?',
-    a: 'Absolutely. Capivarex is a PWA — install it directly from your browser on iOS or Android for a native app experience.',
+    a: 'Absolutely. CAPIVAREX is a PWA — install it directly from your browser on iOS or Android for a native app experience.',
   },
   {
     q: 'How does the free plan work?',

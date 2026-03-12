@@ -1,7 +1,7 @@
 import RegisterForm from '@/components/auth/RegisterForm';
 
 export const metadata = {
-  title: 'Create Account — Capivarex',
+  title: 'Create Account — CAPIVAREX',
 };
 
 export default function RegisterPage() {

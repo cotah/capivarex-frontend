@@ -19,7 +19,7 @@ export default function AuthLayout({
       >
         <Image
           src="/logo-horizontal.png"
-          alt="Capivarex"
+          alt="CAPIVAREX"
           width={320}
           height={120}
           priority

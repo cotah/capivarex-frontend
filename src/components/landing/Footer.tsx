@@ -41,7 +41,7 @@ export default function Footer() {
           <div className="col-span-2 sm:col-span-1">
             <Image
               src="/logo-horizontal.png"
-              alt="Capivarex"
+              alt="CAPIVAREX"
               width={120}
               height={30}
               className="h-8 w-auto object-contain mb-3"
@@ -76,7 +76,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-white/5 pt-6 text-center">
           <p className="text-sm text-text-muted/50">
-            &copy; 2026 Capivarex. All rights reserved.
+            &copy; 2026 CAPIVAREX. All rights reserved.
           </p>
         </div>
       </div>

@@ -35,7 +35,7 @@ export default function LandingNav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-2 sm:py-2">
         <Image
           src="/logo-horizontal.png"
-          alt="Capivarex"
+          alt="CAPIVAREX"
           width={200}
           height={50}
           priority

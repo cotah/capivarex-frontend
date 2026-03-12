@@ -36,7 +36,7 @@ export default function LandingPage() {
       <div className="fixed inset-0 flex items-center justify-center bg-bg">
         <Image
           src="/icons/icon-192.png"
-          alt="Capivarex"
+          alt="CAPIVAREX"
           width={80}
           height={80}
           priority

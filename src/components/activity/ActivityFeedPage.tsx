@@ -96,7 +96,7 @@ export default function ActivityFeedPage() {
       <EmptyState
         icon={Clock}
         title="No activity yet"
-        description="Your activity history will appear here as you use Capivarex."
+        description="Your activity history will appear here as you use CAPIVAREX."
       />
     );
   }

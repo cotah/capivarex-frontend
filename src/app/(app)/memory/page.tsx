@@ -73,7 +73,7 @@ export default function MemoryPage() {
             <h2 className="text-3xl font-semibold text-text">Memory</h2>
           </div>
           <p className="text-sm text-text-muted">
-            What Capivarex remembers about you
+            What CAPIVAREX remembers about you
           </p>
         </div>
 

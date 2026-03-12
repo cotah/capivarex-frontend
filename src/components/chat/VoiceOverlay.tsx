@@ -393,7 +393,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   return (
     <div className="fixed inset-0 z-[60] flex flex-col bg-bg">
       <div className="flex h-14 items-center justify-between px-6 border-b border-glass-border shrink-0">
-        <span className="text-base font-semibold text-text">Capivarex Voice</span>
+        <span className="text-base font-semibold text-text">CAPIVAREX Voice</span>
         <button
           onClick={handleClose}
           disabled={voiceState === 'processing'}
@@ -407,7 +407,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         <div className={`w-[150px] h-[150px] shrink-0 ${voiceState === 'listening' ? 'animate-pulse' : ''}`}>
           <Image
             src="/capivara-smart.png"
-            alt="Capivarex Voice"
+            alt="CAPIVAREX Voice"
             width={150}
             height={150}
             className="w-full h-full object-contain"

@@ -13,13 +13,13 @@ const steps = [
     number: '02',
     title: 'Talk naturally',
     description:
-      'Ask Capivarex anything — play music, schedule events, control your home.',
+      'Ask CAPIVAREX anything — play music, schedule events, control your home.',
   },
   {
     number: '03',
     title: 'Let AI handle it',
     description:
-      'Capivarex orchestrates multiple services to get things done for you.',
+      'CAPIVAREX orchestrates multiple services to get things done for you.',
   },
 ];
 

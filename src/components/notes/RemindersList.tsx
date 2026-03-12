@@ -47,7 +47,7 @@ export default function RemindersList() {
       <EmptyState
         icon={Bell}
         title="No reminders"
-        description="Ask Capivarex to set one for you."
+        description="Ask CAPIVAREX to set one for you."
       />
     );
   }

@@ -15,7 +15,7 @@ export default function CryptoList({ crypto }: CryptoListProps) {
       <EmptyState
         icon={TrendingUp}
         title="No crypto in your watchlist"
-        description="Ask Capivarex to track your favorite cryptocurrencies."
+        description="Ask CAPIVAREX to track your favorite cryptocurrencies."
       />
     );
   }

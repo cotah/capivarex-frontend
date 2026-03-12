@@ -116,7 +116,7 @@ export async function castMedia(
 
   const info = new MediaInfo(mediaUrl, contentType);
   const meta = new GenericMediaMetadata();
-  meta['title'] = title ?? 'Capivarex Media';
+  meta['title'] = title ?? 'CAPIVAREX Media';
   if (imageUrl) meta['images'] = [{ url: imageUrl }];
   info['metadata'] = meta;
 

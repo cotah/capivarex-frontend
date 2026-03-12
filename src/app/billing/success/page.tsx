@@ -30,7 +30,7 @@ export default function BillingSuccessPage() {
           Subscription activated!
         </h1>
         <p className="text-text-muted mb-8">
-          Welcome to Capivarex <span className="text-accent font-semibold">{planName}</span>.
+          Welcome to CAPIVAREX <span className="text-accent font-semibold">{planName}</span>.
         </p>
 
         <button

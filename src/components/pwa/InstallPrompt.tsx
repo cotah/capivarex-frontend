@@ -61,7 +61,7 @@ function InstallTutorial({
             },
             {
               icon: <Check size={22} className="text-accent" />,
-              text: 'Tap "Add" to install Capivarex',
+              text: 'Tap "Add" to install CAPIVAREX',
             },
           ]
         : [
@@ -80,7 +80,7 @@ function InstallTutorial({
             },
             {
               icon: <Check size={22} className="text-accent" />,
-              text: 'Tap "Add" to install Capivarex',
+              text: 'Tap "Add" to install CAPIVAREX',
             },
           ]
       : [
@@ -94,7 +94,7 @@ function InstallTutorial({
           },
           {
             icon: <Check size={22} className="text-accent" />,
-            text: 'Confirm to install Capivarex',
+            text: 'Confirm to install CAPIVAREX',
           },
         ];
 
@@ -128,10 +128,10 @@ function InstallTutorial({
 
         {/* Title */}
         <h3 className="text-lg font-semibold text-text mb-1">
-          Install Capivarex
+          Install CAPIVAREX
         </h3>
         <p className="text-sm text-text-muted mb-6">
-          Follow these steps to add Capivarex to your home screen
+          Follow these steps to add CAPIVAREX to your home screen
         </p>
 
         {/* Steps */}
@@ -262,7 +262,7 @@ export default function InstallPrompt() {
 
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text">
-                  Install Capivarex
+                  Install CAPIVAREX
                 </p>
                 {mode === 'ios' ? (
                   <p className="text-sm text-text-muted">

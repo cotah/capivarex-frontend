@@ -51,7 +51,7 @@ export default function Demo() {
           {/* Mockup header */}
           <div className="flex items-center gap-2 mb-5 pb-3 border-b border-white/5">
             <div className="h-2 w-2 rounded-full bg-accent/60" />
-            <span className="text-sm text-text-muted">Capivarex Chat</span>
+            <span className="text-sm text-text-muted">CAPIVAREX Chat</span>
           </div>
 
           <div className="space-y-3">

@@ -186,7 +186,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
             e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
           }}
           onKeyDown={handleKeyDown}
-          placeholder={hasFile ? 'Add a message (optional)...' : 'Ask Capivarex anything...'}
+          placeholder={hasFile ? 'Add a message (optional)...' : 'Ask CAPIVAREX anything...'}
           disabled={isThinking}
           rows={1}
           className="flex-1 resize-none bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50 overflow-hidden"
