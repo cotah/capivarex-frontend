@@ -89,6 +89,19 @@ export async function fetchCurrentUser(): Promise<User | null> {
   const { data: { session } } = await supabase.auth.getSession();
 
   const user = mapSupabaseUser(supabaseUser);
+
+  // Fetch the real plan from the users table (source of truth after Stripe webhooks).
+  // user_metadata.plan is NOT updated when the webhook writes to the users table,
+  // so we always read plan from the DB to keep the frontend in sync.
+  const { data: dbUser } = await supabase
+    .from('users')
+    .select('plan')
+    .eq('id', supabaseUser.id)
+    .single();
+
+  const currentPlan = (dbUser?.plan as User['plan']) ?? user.plan;
+  user.plan = currentPlan;
+
   useAuthStore.getState().setUser(user);
   if (session) {
     useAuthStore.getState().setToken(session.access_token);
