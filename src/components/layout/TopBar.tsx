@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Zap,
   StickyNote,
-  Brain,
   Home,
   TrendingUp,
   BarChart3,
@@ -26,12 +25,10 @@ const navItems = [
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/services', label: 'Services', icon: Zap },
   { href: '/notes', label: 'Notes', icon: StickyNote },
-  { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/smarts', label: 'Smarts', icon: Home },
   { href: '/finance', label: 'Finance', icon: TrendingUp },
   { href: '/insights', label: 'Insights', icon: BarChart3 },
   { href: '/activity', label: 'Activity', icon: Clock },
-  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function TopBar() {
@@ -100,6 +97,13 @@ export default function TopBar() {
           <span className="text-sm text-text-muted hidden md:inline">
             Online
           </span>
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+          >
+            <Settings size={16} />
+          </Link>
         </div>
       </div>
     </header>

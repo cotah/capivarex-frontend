@@ -134,3 +134,21 @@ body::before {
   opacity: 0.9;
   box-shadow: 0 0 12px #F6B93B, 0 0 24px rgba(246, 185, 59, 0.3);
 }
+
+/* Memory FAB — brain pulse when AI is memorising */
+@keyframes brainPulse {
+  0%, 100% {
+    opacity: 0.7;
+    box-shadow: 0 0 0px transparent;
+    color: #c9a461;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 12px #c9a461, 0 0 28px rgba(201, 164, 97, 0.35);
+    color: #e8c97a;
+  }
+}
+.animate-brain-pulse {
+  animation: brainPulse 1.4s ease-in-out infinite;
+  border-color: rgba(201, 164, 97, 0.4);
+}
