@@ -143,6 +143,17 @@ export interface ActivityEntry {
   timestamp?: string;
 }
 
+export interface ProactivityItem {
+  id: string;
+  type: 'calendar' | 'traffic' | 'weather' | 'email' | 'reminder' | 'price_alert' | string;
+  title: string;
+  message: string;
+  metadata?: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
+  read_at?: string;
+}
+
 /* ── Smarts ────────────────────────────── */
 
 export interface SmartDevice {

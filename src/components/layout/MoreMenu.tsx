@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, TrendingUp, BarChart3, Clock, Settings, X, Phone } from 'lucide-react';
+import { apiClient } from '@/lib/api';
 
 const moreItems = [
   { href: '/memory', label: 'Memory', icon: Brain },
@@ -23,8 +24,16 @@ interface MoreMenuProps {
 export default function MoreMenu({ open, onClose }: MoreMenuProps) {
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+  const [alertCount, setAlertCount] = useState(0);
 
   const isActive = (href: string) => pathname.startsWith(href);
+
+  useEffect(() => {
+    if (!open) return;
+    apiClient<{ unread_count: number }>('/api/webapp/proactivity/feed?limit=1')
+      .then((d) => setAlertCount(d.unread_count ?? 0))
+      .catch(() => {});
+  }, [open]);
 
   // Close on outside click
   useEffect(() => {
@@ -106,6 +115,11 @@ export default function MoreMenu({ open, onClose }: MoreMenuProps) {
                 >
                   <Icon size={22} />
                   {label}
+                  {href === '/activity' && alertCount > 0 && (
+                    <span className="ml-auto h-5 w-5 rounded-full bg-accent text-bg text-[10px] font-bold flex items-center justify-center">
+                      {alertCount > 9 ? '9+' : alertCount}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
