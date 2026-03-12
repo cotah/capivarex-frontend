@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback, KeyboardEvent } from 'react';
-import { Send, Mic, MicOff, AudioLines, Loader2, Paperclip } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react';
+import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/chatStore';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
@@ -18,15 +18,16 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const attachMenuRef = useRef<HTMLDivElement>(null);
 
   const { send, sendWithFile } = useChat();
   const isThinking = useChatStore((s) => s.isThinking);
   const { state: micState, supported: micSupported, startRecording, stopRecording } = useVoiceRecorder();
   const { uploadState, uploadResult, uploadError, upload, reset: resetUpload } = useFileUpload();
-
-  const handleFileClick = useCallback(() => { fileInputRef.current?.click(); }, []);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,6 +50,32 @@ export default function InputBar({ centered = false }: InputBarProps) {
     setPendingFile(null);
     resetUpload();
   }, [resetUpload, localPreviewUrl]);
+
+  const handleAttachClick = useCallback(() => {
+    setAttachMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleFileFromGallery = useCallback(() => {
+    setAttachMenuOpen(false);
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileFromCamera = useCallback(() => {
+    setAttachMenuOpen(false);
+    cameraInputRef.current?.click();
+  }, []);
+
+  // Close attach menu when clicking outside
+  useEffect(() => {
+    if (!attachMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
+        setAttachMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [attachMenuOpen]);
 
   const handleMic = async () => {
     if (micState === 'recording') {
@@ -110,11 +137,46 @@ export default function InputBar({ centered = false }: InputBarProps) {
         <input ref={fileInputRef} type="file" className="hidden"
           accept="image/*,audio/*,video/*,.pdf,.docx,.doc,.txt,.md"
           onChange={handleFileChange} aria-label="Attach file" />
-        <button onClick={handleFileClick} disabled={isThinking || hasFile}
-          className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${hasFile ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-accent hover:bg-accent/5'} disabled:opacity-40`}
-          aria-label="Attach file" title="Attach image, audio, PDF, document or video">
-          <Paperclip size={15} />
-        </button>
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment"
+          className="hidden" onChange={handleFileChange} aria-label="Take photo" />
+
+        {/* Attach menu */}
+        <div className="relative" ref={attachMenuRef}>
+          <button
+            type="button"
+            onClick={handleAttachClick}
+            disabled={isThinking || hasFile}
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${hasFile ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-accent hover:bg-accent/5'} disabled:opacity-40`}
+            aria-label="Attach file or photo"
+          >
+            <Plus
+              size={18}
+              className={`transition-transform duration-200 ${attachMenuOpen ? 'rotate-45' : ''}`}
+            />
+          </button>
+
+          {attachMenuOpen && (
+            <div className="absolute bottom-10 left-0 z-50 flex flex-col gap-1 rounded-xl border border-glass-border bg-bg/95 backdrop-blur-xl p-1 shadow-xl min-w-[140px]">
+              <button
+                type="button"
+                onClick={handleFileFromGallery}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
+              >
+                <FileText size={15} />
+                Arquivo
+              </button>
+              <button
+                type="button"
+                onClick={handleFileFromCamera}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
+              >
+                <Camera size={15} />
+                Câmera
+              </button>
+            </div>
+          )}
+        </div>
+
         <textarea
           ref={inputRef}
           value={text}
