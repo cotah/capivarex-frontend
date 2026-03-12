@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react';
-import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText } from 'lucide-react';
+import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText, Phone } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/chatStore';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
 import VoiceOverlay from '@/components/chat/VoiceOverlay';
+import CallModal from '@/components/chat/CallModal';
 import FilePreview from '@/components/chat/FilePreview';
 import { useFileUpload } from '@/hooks/useFileUpload';
 
@@ -19,6 +20,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [callModalOpen, setCallModalOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -63,6 +65,11 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const handleFileFromCamera = useCallback(() => {
     setAttachMenuOpen(false);
     cameraInputRef.current?.click();
+  }, []);
+
+  const handleCallClick = useCallback(() => {
+    setAttachMenuOpen(false);
+    setCallModalOpen(true);
   }, []);
 
   // Close attach menu when clicking outside
@@ -173,6 +180,14 @@ export default function InputBar({ centered = false }: InputBarProps) {
                 <Camera size={15} />
                 Câmera
               </button>
+              <button
+                type="button"
+                onClick={handleCallClick}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
+              >
+                <Phone size={15} />
+                Ligar
+              </button>
             </div>
           )}
         </div>
@@ -231,6 +246,9 @@ export default function InputBar({ centered = false }: InputBarProps) {
             <div className="mx-auto max-w-3xl px-4 pb-2">{inputRow}</div>
           </div>
         </div>
+      )}
+      {callModalOpen && (
+        <CallModal onClose={() => setCallModalOpen(false)} />
       )}
       {voiceOpen && (
         <VoiceOverlay

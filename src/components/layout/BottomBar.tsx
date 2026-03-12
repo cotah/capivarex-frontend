@@ -20,7 +20,7 @@ const bottomTabs = [
 ];
 
 // Routes covered by the "More" menu
-const moreRoutes = ['/memory', '/finance', '/insights', '/activity', '/settings'];
+const moreRoutes = ['/memory', '/finance', '/insights', '/activity', '/settings', '/calls'];
 
 export default function BottomBar() {
   const pathname = usePathname();
