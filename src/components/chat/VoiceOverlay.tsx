@@ -1,13 +1,13 @@
-// v3 — 4 bugs corrigidos: VAD race condition, iOS audio unlock, Whisper hallucination, interrupt typewriter
+// v4 — WebSocket voice pipeline (latência ~500ms vs ~3s HTTP)
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
-import { sendMessage, apiClient } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
+import { useVoiceWebSocket } from '@/hooks/useVoiceWebSocket';
 
 type VoiceState = 'init' | 'listening' | 'processing' | 'speaking';
 
@@ -80,6 +80,97 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       }
     }, interval);
   }, []);
+
+  /* ── WebSocket voice pipeline ── */
+  const activeConversationId = useConversationStore((s) => s.activeConversationId);
+  const lastReplyRef = useRef('');
+  const skipWsRef = useRef(false);
+
+  const { connect, disconnect, sendAudioBlob } = useVoiceWebSocket({
+    onTranscription: (text) => {
+      if (isClosingRef.current) return;
+      const norm = text.toLowerCase().replace(/[!?,]/g, '').trim();
+      if (!text || WHISPER_HALLUCINATIONS.has(norm)) {
+        skipWsRef.current = true;
+        startListeningRef.current?.();
+        return;
+      }
+      skipWsRef.current = false;
+      addMessage({ id: nanoid(), role: 'user', text, time: now(), source: 'voice' });
+      setProgressLabel('Respondendo...');
+    },
+    onResponseText: (text, meta) => {
+      if (isClosingRef.current || skipWsRef.current) return;
+      if (!text) {
+        startListeningRef.current?.();
+        return;
+      }
+      lastReplyRef.current = text;
+      addMessage({
+        id: nanoid(),
+        role: 'assistant',
+        text,
+        time: now(),
+        type: meta.type as MessageType | undefined,
+        data: meta.data,
+        source: 'voice',
+      });
+      const convId = useConversationStore.getState().activeConversationId;
+      if (convId) {
+        useConversationStore.getState().addMessageToConversation(convId, {
+          id: nanoid(), role: 'assistant', text, time: now(),
+        });
+      }
+      if (meta.conversation_title && convId) {
+        useConversationStore.getState().renameConversation(convId, meta.conversation_title);
+      }
+      setVoiceState('speaking');
+      setProgressLabel('');
+    },
+    onResponseAudio: (audioBase64, contentType) => {
+      if (isClosingRef.current || skipWsRef.current) {
+        skipWsRef.current = false;
+        return;
+      }
+      const reply = lastReplyRef.current;
+      if (audioBase64) {
+        const audio = audioElRef.current ?? new Audio();
+        audioElRef.current = audio;
+        isBotSpeakingRef.current = true;
+        audio.src = `data:${contentType};base64,${audioBase64}`;
+        audio.onended = () => {
+          isBotSpeakingRef.current = false;
+          if (!isClosingRef.current) {
+            setTimeout(() => {
+              if (!isClosingRef.current) startListeningRef.current?.();
+            }, 400);
+          }
+        };
+        audio.onerror = () => {
+          isBotSpeakingRef.current = false;
+          if (!isClosingRef.current) startListeningRef.current?.();
+        };
+        audio.play().catch(() => {
+          isBotSpeakingRef.current = false;
+          if (!isClosingRef.current) startListeningRef.current?.();
+        });
+        audio.addEventListener('loadedmetadata', () => {
+          const durationMs = (audio.duration || 3) * 1000;
+          startTypewriter(reply, durationMs);
+        }, { once: true });
+        setTimeout(() => {
+          if (!typewriterRef.current) startTypewriter(reply);
+        }, 500);
+      } else {
+        startTypewriter(reply);
+        if (!isClosingRef.current) startListeningRef.current?.();
+      }
+    },
+    onError: (error) => {
+      console.error('[Voice] WS error:', error);
+      if (!isClosingRef.current) startListeningRef.current?.();
+    },
+  });
 
   /* ── Cleanup — stop everything ── */
   const cleanup = useCallback(() => {
@@ -188,7 +279,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     }
   }, []);
 
-  /* ── Stop recording → transcribe → chat → TTS → loop ── */
+  /* ── Stop recording → send blob via WS ── */
   const stopAndProcess = useCallback(async () => {
     const mr = mediaRecorderRef.current;
     if (!mr || mr.state !== 'recording' || isClosingRef.current) return;
@@ -224,139 +315,11 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       return;
     }
 
-    try {
-      /* ── Step 1: Whisper STT ── */
-      setProgressLabel('Transcrevendo...');
-      const formData = new FormData();
-      const ext = (mr.mimeType || '').includes('webm') ? 'webm' : 'mp4';
-      formData.append('audio', blob, `recording.${ext}`);
-
-      const transcription = await apiClient<{ text: string }>(
-        '/api/webapp/voice/transcribe',
-        { method: 'POST', body: formData },
-      );
-
-      const userText = (transcription.text || '').trim();
-      const userTextNorm = userText.toLowerCase().replace(/[!?,]/g, '').trim();
-
-      // FIX Bug 3: filtrar alucinações conhecidas do Whisper
-      if (!userText || isClosingRef.current || WHISPER_HALLUCINATIONS.has(userTextNorm)) {
-        if (!isClosingRef.current) startListeningRef.current?.();
-        return;
-      }
-
-      addMessage({ id: nanoid(), role: 'user', text: userText, time: now(), source: 'voice' });
-
-      /* ── Step 2: Chat agent ── */
-      setProgressLabel('Respondendo...');
-      const store = useConversationStore.getState();
-      let conversationId = store.activeConversationId;
-      if (!conversationId) {
-        conversationId = await store.createConversation();
-      }
-
-      const response = await sendMessage(userText, conversationId);
-      if (isClosingRef.current) return;
-
-      const reply =
-        (response.text as string) ||
-        (response.response as string) ||
-        (response.message as string) ||
-        (response.content as string) ||
-        (response.answer as string) ||
-        (response.reply as string) ||
-        '';
-
-      if (!reply) {
-        startListeningRef.current?.();
-        return;
-      }
-
-      addMessage({
-        id: nanoid(),
-        role: 'assistant',
-        text: reply,
-        time: now(),
-        type: response.type as MessageType | undefined,
-        data: response.data as Record<string, unknown> | undefined,
-        source: 'voice',
-      });
-
-      if (conversationId) {
-        useConversationStore.getState().addMessageToConversation(conversationId, {
-          id: nanoid(),
-          role: 'assistant',
-          text: reply,
-          time: now(),
-        });
-      }
-
-      if (response.conversation_title) {
-        useConversationStore.getState().renameConversation(
-          conversationId,
-          response.conversation_title as string,
-        );
-      }
-
-      /* ── Step 3: TTS + typewriter synced with audio ── */
-      setVoiceState('speaking');
-      setProgressLabel('Sintetizando...');
-
-      const synth = await apiClient<{ audio_base64: string; content_type?: string }>(
-        '/api/webapp/voice/synthesize',
-        { method: 'POST', body: JSON.stringify({ text: reply }) },
-      );
-
-      if (isClosingRef.current) return;
-
-      if (synth.audio_base64) {
-        // FIX Bug 2: reutilizar elemento existente (desbloqueado no mount iOS)
-        const audio = audioElRef.current ?? new Audio();
-        audioElRef.current = audio;
-
-        isBotSpeakingRef.current = true; // FIX Bug 3: marcar bot como falando
-
-        const dataUrl = `data:${synth.content_type || 'audio/mpeg'};base64,${synth.audio_base64}`;
-        audio.src = dataUrl;
-
-        // FIX Bug 3: só iniciar escuta APÓS o áudio terminar (+ delay de eco)
-        audio.onended = () => {
-          isBotSpeakingRef.current = false;
-          if (!isClosingRef.current) {
-            // Delay de 400ms para eco do alto-falante decair
-            setTimeout(() => {
-              if (!isClosingRef.current) startListeningRef.current?.();
-            }, 400);
-          }
-        };
-        audio.onerror = () => {
-          isBotSpeakingRef.current = false;
-          if (!isClosingRef.current) startListeningRef.current?.();
-        };
-        audio.play().catch(() => {
-          isBotSpeakingRef.current = false;
-          if (!isClosingRef.current) startListeningRef.current?.();
-        });
-
-        audio.addEventListener('loadedmetadata', () => {
-          const durationMs = (audio.duration || 3) * 1000;
-          startTypewriter(reply, durationMs);
-        }, { once: true });
-
-        setTimeout(() => {
-          if (!typewriterRef.current) startTypewriter(reply);
-        }, 500);
-
-        // FIX Bug 3: REMOVIDO — não iniciar escuta paralela durante TTS
-      } else {
-        startTypewriter(reply);
-        if (!isClosingRef.current) startListeningRef.current?.();
-      }
-    } catch (err) {
-      console.error('[Voice] stopAndProcess error:', err);
+    setProgressLabel('Transcrevendo...');
+    if (!sendAudioBlob(blob)) {
       if (!isClosingRef.current) startListeningRef.current?.();
     }
-  }, [addMessage, startTypewriter]);
+  }, [sendAudioBlob]);
 
   startListeningRef.current = startListening;
   stopAndProcessRef.current = stopAndProcess;
@@ -364,9 +327,17 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   /* ── Close handler ── */
   const handleClose = useCallback(() => {
     isClosingRef.current = true;
+    disconnect();
     cleanup();
     onClose();
-  }, [cleanup, onClose]);
+  }, [disconnect, cleanup, onClose]);
+
+  /* ── Connect WS when conversationId becomes available ── */
+  useEffect(() => {
+    if (activeConversationId && !isClosingRef.current) {
+      connect(activeConversationId);
+    }
+  }, [activeConversationId, connect]);
 
   /* ── Auto-start on mount ── */
   useEffect(() => {
@@ -378,7 +349,12 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     el.load();
     audioElRef.current = el;
 
-    // FIX Bug 1: reduzir delay de 1500ms para 300ms
+    // Ensure a conversation exists for the WS pipeline
+    const store = useConversationStore.getState();
+    if (!store.activeConversationId) {
+      store.createConversation().catch(() => {});
+    }
+
     const timer = setTimeout(() => {
       if (!isClosingRef.current) startListeningRef.current?.();
     }, 300);
@@ -386,6 +362,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     return () => {
       clearTimeout(timer);
       isClosingRef.current = true;
+      disconnect();
       cleanup();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
