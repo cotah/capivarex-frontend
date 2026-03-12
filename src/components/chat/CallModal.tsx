@@ -14,7 +14,7 @@ interface CallStatus {
   created_at: string;
 }
 
-interface CallHistoryItem extends CallStatus {}
+type CallHistoryItem = CallStatus;
 
 interface CallModalProps {
   onClose: () => void;
