@@ -8,6 +8,7 @@ import PlanBadge from '@/components/billing/PlanBadge';
 import CastButton from '@/components/cast/CastButton';
 import WeatherChip from '@/components/weather/WeatherChip';
 import { useConversationStore } from '@/stores/conversationStore';
+import NotificationBell from '@/components/layout/NotificationBell';
 import {
   MessageSquare,
   Zap,
@@ -15,7 +16,6 @@ import {
   Home,
   TrendingUp,
   BarChart3,
-  Clock,
   Settings,
   Circle,
   PanelLeft,
@@ -28,7 +28,6 @@ const navItems = [
   { href: '/smarts', label: 'Smarts', icon: Home },
   { href: '/finance', label: 'Finance', icon: TrendingUp },
   { href: '/insights', label: 'Insights', icon: BarChart3 },
-  { href: '/activity', label: 'Activity', icon: Clock },
 ];
 
 export default function TopBar() {
@@ -93,6 +92,7 @@ export default function TopBar() {
             </button>
           )}
           <CastButton size={14} />
+          <NotificationBell />
           <Circle size={6} className="fill-success text-success" />
           <span className="text-sm text-text-muted hidden md:inline">
             Online
@@ -100,7 +100,11 @@ export default function TopBar() {
           <Link
             href="/settings"
             aria-label="Settings"
-            className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+            className={`hidden md:flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 ${
+              pathname.startsWith('/settings')
+                ? 'text-accent bg-accent-soft'
+                : 'text-text-muted hover:text-text hover:bg-white/5'
+            }`}
           >
             <Settings size={16} />
           </Link>
