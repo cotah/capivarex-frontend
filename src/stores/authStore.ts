@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { PlanType, User } from '@/lib/types';
+import { apiClient } from '@/lib/api';
 
 interface AuthStore {
   user: User | null;
@@ -11,6 +12,7 @@ interface AuthStore {
   setLoading: (v: boolean) => void;
   setPlan: (plan: PlanType) => void;
   fetchBillingStatus: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => void;
 }
 
@@ -36,6 +38,23 @@ export const useAuthStore = create<AuthStore>()(
           if (user) set({ user: { ...user, plan } });
         } catch {
           // keep current plan on failure
+        }
+      },
+      refreshUser: async () => {
+        try {
+          const data = await apiClient<{
+            name?: string;
+            email?: string;
+            phone_number?: string;
+            language?: string;
+            plan?: string;
+          }>('/api/webapp/user/me');
+          const plan = (data.plan as PlanType) || 'free';
+          set((state) => ({
+            user: state.user ? { ...state.user, ...data, plan } : null,
+          }));
+        } catch {
+          // keep current user on failure
         }
       },
       logout: () => set({ user: null, token: null, isLoading: false }),

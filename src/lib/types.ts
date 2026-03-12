@@ -39,6 +39,7 @@ export interface User {
   plan: PlanType;
   telegramChatId?: string;
   language?: string;
+  phone_number?: string;
   messages_used?: number;
   messages_limit?: number;
   use_own_apis?: boolean;
