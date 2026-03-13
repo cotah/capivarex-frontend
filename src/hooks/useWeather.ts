@@ -191,7 +191,8 @@ export function useWeather() {
           setTimeout(() => {
             fetchWeatherByQuery(city)
               .then(setData)
-              .catch(() => { /* keep cached */ });
+              .catch(() => { /* keep cached */ })
+              .finally(() => setLoading(false));
           }, 5000);
         })
         .finally(() => setLoading(false));
