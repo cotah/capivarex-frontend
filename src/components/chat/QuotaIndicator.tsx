@@ -5,8 +5,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/lib/api';
 
 interface QuotaData {
-  used: number;
-  limit: number;
+  messages_used: number;
+  messages_limit: number;
 }
 
 export default function QuotaIndicator() {
@@ -32,13 +32,13 @@ export default function QuotaIndicator() {
     );
   }
 
-  const pct = quota.limit > 0 ? Math.min((quota.used / quota.limit) * 100, 100) : 0;
+  const pct = quota.messages_limit > 0 ? Math.min((quota.messages_used / quota.messages_limit) * 100, 100) : 0;
   const isLow = pct >= 80;
 
   return (
     <div className="px-4 py-2 space-y-1">
       <div className="flex items-center justify-between text-xs text-text-muted">
-        <span>{quota.used}/{quota.limit} messages</span>
+        <span>{quota.messages_used}/{quota.messages_limit} messages</span>
         {isLow && <span className="text-amber-500">Low</span>}
       </div>
       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">

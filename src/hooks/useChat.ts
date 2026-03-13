@@ -56,7 +56,7 @@ export function useChat() {
         (response.reply as string) ||
         '';
 
-      console.error('[Chat] sendMessage response keys:', Object.keys(response), 'reply:', reply);
+      console.debug('[Chat] sendMessage response keys:', Object.keys(response), 'reply:', reply);
 
       addMessage({
         id: nanoid(),
