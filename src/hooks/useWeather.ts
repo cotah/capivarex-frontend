@@ -186,7 +186,14 @@ export function useWeather() {
     function loadByCity(city: string) {
       fetchWeatherByQuery(city)
         .then(setData)
-        .catch(() => { /* keep cached */ })
+        .catch(() => {
+          // Retry once after 5s (covers race condition with token/backend startup)
+          setTimeout(() => {
+            fetchWeatherByQuery(city)
+              .then(setData)
+              .catch(() => { /* keep cached */ });
+          }, 5000);
+        })
         .finally(() => setLoading(false));
     }
 

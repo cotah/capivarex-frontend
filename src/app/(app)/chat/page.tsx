@@ -33,12 +33,14 @@ export default function ChatPage() {
           sidebarOpen ? 'md:ml-[280px]' : 'md:ml-0'
         }`}
       >
-        {/* ═══ Empty state — centered welcome + input ═══ */}
+        {/* Weather chip — mobile only, always visible regardless of messages */}
+      <div className="md:hidden flex justify-center pt-3 pb-1">
+        <WeatherChip />
+      </div>
+
+      {/* ═══ Empty state — centered welcome + input ═══ */}
         {!hasMessages ? (
           <div className="mx-auto flex h-[calc(100vh-3.5rem-6rem)] md:h-[calc(100vh-3.5rem)] max-w-3xl flex-col items-center justify-center">
-            <div className="mb-4 md:hidden">
-              <WeatherChip />
-            </div>
             <h1 className="mb-8 text-center text-3xl font-light tracking-wide text-text md:text-5xl">
               Anywhere. Anytime.
             </h1>
