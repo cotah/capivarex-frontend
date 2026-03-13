@@ -16,7 +16,8 @@ interface InputBarProps {
 
 export default function InputBar({ centered = false }: InputBarProps) {
   const [text, setText] = useState('');
-  const [voiceOpen, setVoiceOpen] = useState(false);
+  const voiceOpen = useChatStore((s) => s.voiceOpen);
+  const setVoiceOpen = useChatStore((s) => s.setVoiceOpen);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
