@@ -7,10 +7,13 @@ import MessageList from '@/components/chat/MessageList';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import { PanelLeft } from 'lucide-react';
 import WeatherChip from '@/components/weather/WeatherChip';
+import VoiceOverlay from '@/components/chat/VoiceOverlay';
 
 export default function ChatPage() {
   const messages = useChatStore((s) => s.messages);
   const hasMessages = messages.length > 0;
+  const voiceOpen = useChatStore((s) => s.voiceOpen);
+  const setVoiceOpen = useChatStore((s) => s.setVoiceOpen);
   const sidebarOpen = useConversationStore((s) => s.sidebarOpen);
   const toggleSidebar = useConversationStore((s) => s.toggleSidebar);
 
@@ -56,6 +59,11 @@ export default function ChatPage() {
           </>
         )}
       </div>
+
+      {/* VoiceOverlay rendered at page level — survives InputBar remounts */}
+      {voiceOpen && (
+        <VoiceOverlay onClose={() => setVoiceOpen(false)} />
+      )}
     </>
   );
 }

@@ -5,7 +5,6 @@ import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText, Phone }
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/chatStore';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
-import VoiceOverlay from '@/components/chat/VoiceOverlay';
 import CallModal from '@/components/chat/CallModal';
 import FilePreview from '@/components/chat/FilePreview';
 import { useFileUpload } from '@/hooks/useFileUpload';
@@ -16,7 +15,6 @@ interface InputBarProps {
 
 export default function InputBar({ centered = false }: InputBarProps) {
   const [text, setText] = useState('');
-  const voiceOpen = useChatStore((s) => s.voiceOpen);
   const setVoiceOpen = useChatStore((s) => s.setVoiceOpen);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
@@ -250,11 +248,6 @@ export default function InputBar({ centered = false }: InputBarProps) {
       )}
       {callModalOpen && (
         <CallModal onClose={() => setCallModalOpen(false)} />
-      )}
-      {voiceOpen && (
-        <VoiceOverlay
-          onClose={() => setVoiceOpen(false)}
-        />
       )}
     </>
   );
