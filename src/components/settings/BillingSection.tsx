@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import PlanBadge from '@/components/billing/PlanBadge';
 import UsageBar from '@/components/billing/UsageBar';
-import { CreditCard, RefreshCw } from 'lucide-react';
+import { CreditCard, RefreshCw, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { fetchQuota, type QuotaInfo } from '@/lib/api';
+import { openBillingPortal } from '@/lib/stripe';
+import toast from 'react-hot-toast';
 
 export default function BillingSection() {
   const user = useAuthStore((s) => s.user);
@@ -14,6 +16,7 @@ export default function BillingSection() {
 
   const [quota, setQuota] = useState<QuotaInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +89,24 @@ export default function BillingSection() {
             </Link>
           )}
           {plan !== 'free' && (
-            <button className="flex-1 flex items-center justify-center rounded-xl glass py-2 text-base text-text-muted hover:text-text transition-colors">
+            <button
+              onClick={async () => {
+                setPortalLoading(true);
+                try {
+                  await openBillingPortal();
+                } catch {
+                  toast.error('Unable to open billing portal. Try again later.');
+                  setPortalLoading(false);
+                }
+              }}
+              disabled={portalLoading}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl glass py-2 text-base text-text-muted hover:text-text transition-colors disabled:opacity-50"
+            >
+              {portalLoading ? (
+                <RefreshCw size={14} className="animate-spin" />
+              ) : (
+                <ExternalLink size={14} />
+              )}
               Manage Subscription
             </button>
           )}
