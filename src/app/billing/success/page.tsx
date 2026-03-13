@@ -29,17 +29,17 @@ export default function BillingSuccessPage() {
         <div className="text-5xl mb-4">🎉</div>
 
         <h1 className="text-2xl font-bold text-text mb-2">
-          Subscription activated!
+          {t('billing.subscription_activated')}
         </h1>
         <p className="text-text-muted mb-8">
-          Welcome to CAPIVAREX <span className="text-accent font-semibold">{planName}</span>.
+          {t('billing.welcome_plan', { plan: planName })}
         </p>
 
         <button
           onClick={() => router.push('/chat')}
           className="w-full rounded-xl bg-accent py-3 text-sm font-medium text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
         >
-          Go to Chat
+          {t('billing.go_to_chat')}
         </button>
       </motion.div>
     </div>

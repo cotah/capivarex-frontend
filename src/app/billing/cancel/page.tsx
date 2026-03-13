@@ -19,10 +19,10 @@ export default function BillingCancelPage() {
         <div className="text-5xl mb-4">👋</div>
 
         <h1 className="text-2xl font-bold text-text mb-2">
-          No worries
+          {t('billing.no_worries')}
         </h1>
         <p className="text-text-muted mb-8">
-          You can upgrade anytime from the pricing page.
+          {t('billing.upgrade_anytime')}
         </p>
 
         <div className="flex flex-col gap-3">
@@ -30,13 +30,13 @@ export default function BillingCancelPage() {
             onClick={() => router.push('/pricing')}
             className="w-full rounded-xl bg-accent py-3 text-sm font-medium text-bg hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
           >
-            Back to Pricing
+            {t('billing.back_to_pricing')}
           </button>
           <button
             onClick={() => router.push('/chat')}
             className="w-full rounded-xl glass py-3 text-sm font-medium text-text-muted hover:text-text transition-colors"
           >
-            Go to Chat
+            {t('billing.go_to_chat')}
           </button>
         </div>
       </motion.div>

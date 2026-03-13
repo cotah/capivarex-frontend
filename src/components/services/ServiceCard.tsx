@@ -39,6 +39,7 @@ function ServiceIcon({ name }: { name: string }) {
 }
 
 export default function ServiceCard({
+  const t = useT();
   service,
   connected,
   status,
@@ -46,7 +47,6 @@ export default function ServiceCard({
   onConnect,
   onDisconnect,
 }: ServiceCardProps) {
-  const t = useT();
   const minPlan = getMinPlan(service);
   const needsUpgrade = PLAN_RANK[userPlan] < PLAN_RANK[minPlan];
 

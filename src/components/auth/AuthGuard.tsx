@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 function LoadingSkeleton() {
+  const t = useT();
   return (
     <div className="flex h-screen items-center justify-center bg-bg">
       <div className="flex flex-col items-center gap-4">
@@ -18,7 +19,6 @@ function LoadingSkeleton() {
 }
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const t = useT();
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
   const router = useRouter();
