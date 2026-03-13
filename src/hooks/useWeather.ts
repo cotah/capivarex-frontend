@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
 
 const CACHE_KEY = 'capivarex_weather';
 const CITY_KEY = 'capivarex_weather_city';
@@ -168,9 +169,14 @@ async function fetchWeatherByQuery(query: string): Promise<WeatherData> {
 export function useWeather() {
   const [data, setData] = useState<WeatherData | null>(readCache);
   const [loading, setLoading] = useState(!readCache());
+  // Wait for the auth token before fetching. Without this, the fetch can fire
+  // before the Supabase session is available, resulting in a silenced 401.
+  const token = useAuthStore((s) => s.token);
 
   /* ── Initial load: geolocation → last city → fallback ── */
   useEffect(() => {
+    if (!token) return;  // don't fetch without auth token
+
     const cached = readCache();
     if (cached) {
       setData(cached);
@@ -198,7 +204,7 @@ export function useWeather() {
     } else {
       loadByCity(readLastCity() || FALLBACK_CITY);
     }
-  }, []);
+  }, [token]);
 
   /* ── Search by city name ── */
   const searchCity = useCallback(async (city: string) => {
