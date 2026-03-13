@@ -82,7 +82,6 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   }, []);
 
   /* ── WebSocket voice pipeline ── */
-  const activeConversationId = useConversationStore((s) => s.activeConversationId);
   const lastReplyRef = useRef('');
   const skipWsRef = useRef(false);
 
@@ -332,17 +331,9 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     onClose();
   }, [disconnect, cleanup, onClose]);
 
-  /* ── Connect WS when conversationId becomes available ── */
-  useEffect(() => {
-    if (activeConversationId && !isClosingRef.current) {
-      connect(activeConversationId);
-    }
-  }, [activeConversationId, connect]);
-
   /* ── Start listening only when WS is connected ── */
   useEffect(() => {
     if (isConnected && !isClosingRef.current && !isBotSpeakingRef.current) {
-      // Small delay to let WS stabilize
       const timer = setTimeout(() => {
         if (!isClosingRef.current) startListeningRef.current?.();
       }, 200);
@@ -350,21 +341,31 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     }
   }, [isConnected]);
 
-  /* ── Auto-start on mount ── */
+  /* ── Single mount effect: create conversation → connect WS ── */
   useEffect(() => {
     isClosingRef.current = false;
     isBotSpeakingRef.current = false;
 
-    // iOS: criar e carregar elemento de áudio dentro do gesto do usuário (mount = clique)
+    // iOS: unlock audio element inside user gesture (mount = click)
     const el = new Audio();
     el.load();
     audioElRef.current = el;
 
-    // Ensure a conversation exists for the WS pipeline
-    const store = useConversationStore.getState();
-    if (!store.activeConversationId) {
-      store.createConversation().catch(() => {});
-    }
+    // Sequential init: get/create conversation, then connect WS
+    (async () => {
+      try {
+        const store = useConversationStore.getState();
+        let convId = store.activeConversationId;
+        if (!convId) {
+          convId = await store.createConversation();
+        }
+        if (convId && !isClosingRef.current) {
+          connect(convId);
+        }
+      } catch {
+        // conversation creation failed — WS won't connect
+      }
+    })();
 
     return () => {
       isClosingRef.current = true;
