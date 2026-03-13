@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { motion } from 'framer-motion';
 import { Music } from 'lucide-react';
@@ -25,6 +26,7 @@ const messages = [
 ];
 
 export default function Demo() {
+  const t = useT();
   return (
     <section id="demo" className="px-4 sm:px-6 py-24">
       <div className="mx-auto max-w-2xl">
@@ -51,7 +53,7 @@ export default function Demo() {
           {/* Mockup header */}
           <div className="flex items-center gap-2 mb-5 pb-3 border-b border-white/5">
             <div className="h-2 w-2 rounded-full bg-accent/60" />
-            <span className="text-sm text-text-muted">CAPIVAREX Chat</span>
+            <span className="text-sm text-text-muted">{t('landing.demo_title')}</span>
           </div>
 
           <div className="space-y-3">

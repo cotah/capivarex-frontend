@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useEffect, useState } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
@@ -56,6 +57,7 @@ function formatTime(iso: string): string {
 }
 
 export default function SecuritySection() {
+  const t = useT();
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [summary, setSummary] = useState<SecuritySummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,13 +121,13 @@ export default function SecuritySection() {
       {!loading && !error && summary && (
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="glass rounded-xl p-3 space-y-1">
-            <p className="text-text-muted text-xs">Failed logins (24h)</p>
+            <p className="text-text-muted text-xs">{t('settings.failed_logins')}</p>
             <p className={`font-semibold ${summary.auth_failures_24h > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
               {summary.auth_failures_24h}
             </p>
           </div>
           <div className="glass rounded-xl p-3 space-y-1">
-            <p className="text-text-muted text-xs">Last login</p>
+            <p className="text-text-muted text-xs">{t('settings.last_login')}</p>
             <p className="font-semibold text-text text-xs">
               {summary.last_login ? formatTime(summary.last_login) : '—'}
             </p>

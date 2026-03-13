@@ -1,8 +1,10 @@
 'use client';
+import { useT } from '@/i18n';
 import { useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function Error({
+  const t = useT();
   error,
   reset,
 }: {
@@ -19,7 +21,7 @@ export default function Error({
         <AlertTriangle size={28} className="text-red-400/70" />
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-text">Something went wrong</h2>
+        <h2 className="text-xl font-semibold text-text">{t('common.something_wrong')}</h2>
         <p className="text-sm text-text-muted max-w-xs">
           An unexpected error occurred. Please try again.
         </p>
@@ -29,7 +31,7 @@ export default function Error({
         className="flex items-center gap-2 rounded-xl bg-accent/10 px-5 py-2.5 text-sm font-medium text-accent hover:bg-accent/20 transition-colors"
       >
         <RefreshCw size={14} />
-        Try again
+        {t('common.try_again')}
       </button>
     </div>
   );

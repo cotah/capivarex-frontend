@@ -1,9 +1,11 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 export default function AppError({
+  const t = useT();
   error,
   reset,
 }: {
@@ -20,7 +22,7 @@ export default function AppError({
         <div className="flex justify-center">
           <AlertTriangle size={40} className="text-amber-500" />
         </div>
-        <h2 className="text-lg font-semibold text-text">Something went wrong</h2>
+        <h2 className="text-lg font-semibold text-text">{t('common.something_wrong')}</h2>
         <p className="text-sm text-text-muted">
           An unexpected error occurred. Please try again.
         </p>

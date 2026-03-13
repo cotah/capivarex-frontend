@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -7,6 +8,7 @@ import { ArrowRight, Play } from 'lucide-react';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 
 export default function Hero() {
+  const t = useT();
   return (
     <section className="relative min-h-screen overflow-hidden">
       {/* Video background */}
@@ -32,7 +34,7 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           Your AI{' '}
-          <span className="text-accent">Life Assistant</span>
+          <span className="text-accent">{t('landing.life_assistant')}</span>
         </motion.h1>
 
         <motion.p

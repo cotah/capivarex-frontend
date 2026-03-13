@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { Circle, Lock } from 'lucide-react';
 import * as Icons from 'lucide-react';
@@ -38,6 +39,7 @@ function ServiceIcon({ name }: { name: string }) {
 }
 
 export default function ServiceCard({
+  const t = useT();
   service,
   connected,
   status,
@@ -98,7 +100,7 @@ export default function ServiceCard({
           <ServiceIcon name={service.icon} />
           <div className="flex items-center gap-1.5">
             <Circle size={6} className="fill-blue-400 text-blue-400" />
-            <span className="text-sm text-blue-400/80">Available</span>
+            <span className="text-sm text-blue-400/80">{t('services.available')}</span>
           </div>
         </div>
         <p className="text-base font-medium text-text mb-1">{service.name}</p>

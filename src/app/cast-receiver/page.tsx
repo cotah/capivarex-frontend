@@ -1,9 +1,11 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useEffect } from 'react';
 import Image from 'next/image';
 
 export default function CastReceiverPage() {
+  const t = useT();
   useEffect(() => {
     /* Load CAF Receiver SDK */
     const script = document.createElement('script');
@@ -36,7 +38,7 @@ export default function CastReceiverPage() {
           priority
           className="h-20 w-auto object-contain"
         />
-        <p className="text-sm text-text-muted">Ready to cast...</p>
+        <p className="text-sm text-text-muted">{t('common.ready_to_cast')}</p>
       </div>
     </div>
   );

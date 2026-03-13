@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { Calendar } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface CalendarCardProps {
 }
 
 export default function CalendarCard({ data }: CalendarCardProps) {
+  const t = useT();
   const events = (data?.events as CalendarEvent[]) || [];
 
   if (events.length === 0) {
@@ -20,7 +22,7 @@ export default function CalendarCard({ data }: CalendarCardProps) {
       <div className="mt-2 glass rounded-2xl p-4 max-w-xs">
         <div className="flex items-center gap-2 text-text-muted">
           <Calendar size={16} />
-          <span className="text-sm">No upcoming events</span>
+          <span className="text-sm">{t('chat.no_upcoming_events')}</span>
         </div>
       </div>
     );

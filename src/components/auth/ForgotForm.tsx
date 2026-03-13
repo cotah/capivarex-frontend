@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useState } from 'react';
 import { z } from 'zod';
@@ -12,6 +13,7 @@ const forgotSchema = z.object({
 });
 
 export default function ForgotForm() {
+  const t = useT();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -46,7 +48,7 @@ export default function ForgotForm() {
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 mx-auto">
           <Mail size={24} className="text-accent" />
         </div>
-        <p className="text-sm text-text">Check your email</p>
+        <p className="text-sm text-text">{t('auth.check_email')}</p>
         <p className="text-sm text-text-muted">
           We sent a password reset link to <strong className="text-text">{email}</strong>
         </p>

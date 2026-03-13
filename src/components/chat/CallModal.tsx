@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, PhoneOff, X, Clock, ChevronDown, ChevronUp } from 'lucide-react';
@@ -46,6 +47,7 @@ function timeAgo(iso: string): string {
 }
 
 export default function CallModal({ onClose }: CallModalProps) {
+  const t = useT();
   const user = useAuthStore((s) => s.user);
   const canCall = user?.plan === 'everywhere';
 
@@ -137,7 +139,7 @@ export default function CallModal({ onClose }: CallModalProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Phone size={16} className="text-accent" />
-              <span className="font-semibold text-text">Chamada de Voz</span>
+              <span className="font-semibold text-text">{t('calls.voice_call')}</span>
             </div>
             <button onClick={onClose} className="p-1 text-text-muted hover:text-text transition-colors">
               <X size={18} />
@@ -148,7 +150,7 @@ export default function CallModal({ onClose }: CallModalProps) {
           {!canCall ? (
             <div className="rounded-xl bg-accent/5 border border-accent/20 p-4 text-center space-y-2">
               <p className="text-sm text-text-muted">
-                Chamadas de voz requerem o plano <span className="text-accent font-semibold">Everywhere</span>.
+                Chamadas de voz requerem o plano <span className="text-accent font-semibold">{t('billing.everywhere')}</span>.
               </p>
               <a
                 href="/pricing"

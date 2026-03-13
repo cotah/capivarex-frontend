@@ -25,7 +25,14 @@
     "this_week": "Esta semana",
     "no_results": "No se encontraron resultados",
     "error": "Error",
-    "success": "Éxito"
+    "success": "Éxito",
+    "page_not_found": "Página no encontrada",
+    "page_not_found_desc": "La página que buscas no existe.",
+    "something_wrong": "Algo salió mal",
+    "something_wrong_desc": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "try_again": "Reintentar",
+    "go_to_chat": "Ir al Chat",
+    "ready_to_cast": "Listo para transmitir..."
   },
   "nav": {
     "chat": "Chat",
@@ -60,7 +67,8 @@
     "read_aloud": "Leer en voz alta",
     "stop_speaking": "Dejar de hablar",
     "copy": "Copiar",
-    "copied": "¡Copiado!"
+    "copied": "¡Copiado!",
+    "no_upcoming_events": "Sin eventos próximos"
   },
   "voice": {
     "title": "CAPIVAREX Voice",
@@ -159,7 +167,9 @@
     "connections": "Conexiones",
     "notifications": "Notificaciones",
     "enable_push": "Activar notificaciones push",
-    "save_changes": "Guardar cambios"
+    "save_changes": "Guardar cambios",
+    "failed_logins": "Inicios fallidos (24h)",
+    "last_login": "Último inicio de sesión"
   },
   "services": {
     "title": "Servicios",
@@ -168,7 +178,8 @@
     "spotify": "Spotify",
     "smart_home": "Smart Home",
     "github": "GitHub",
-    "gmail": "Gmail"
+    "gmail": "Gmail",
+    "available": "Disponible"
   },
   "notes": {
     "title": "Notas",
@@ -250,6 +261,8 @@
     "data_safe_a": "Sí. Todos los datos están cifrados de extremo a extremo y cumplimos con el GDPR.",
     "changelog": "Changelog",
     "privacy": "Privacidad",
-    "terms": "Términos"
+    "terms": "Términos",
+    "life_assistant": "Asistente de Vida",
+    "demo_title": "CAPIVAREX Chat"
   }
 }

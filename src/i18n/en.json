@@ -25,7 +25,14 @@
     "this_week": "This week",
     "no_results": "No results found",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "page_not_found": "Page not found",
+    "page_not_found_desc": "The page you're looking for doesn't exist.",
+    "something_wrong": "Something went wrong",
+    "something_wrong_desc": "An unexpected error occurred. Please try again.",
+    "try_again": "Try again",
+    "go_to_chat": "Go to Chat",
+    "ready_to_cast": "Ready to cast..."
   },
   "nav": {
     "chat": "Chat",
@@ -60,7 +67,8 @@
     "read_aloud": "Read aloud",
     "stop_speaking": "Stop speaking",
     "copy": "Copy",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "no_upcoming_events": "No upcoming events"
   },
   "voice": {
     "title": "CAPIVAREX Voice",
@@ -159,7 +167,9 @@
     "connections": "Connections",
     "notifications": "Notifications",
     "enable_push": "Enable push notifications",
-    "save_changes": "Save changes"
+    "save_changes": "Save changes",
+    "failed_logins": "Failed logins (24h)",
+    "last_login": "Last login"
   },
   "services": {
     "title": "Services",
@@ -168,7 +178,8 @@
     "spotify": "Spotify",
     "smart_home": "Smart Home",
     "github": "GitHub",
-    "gmail": "Gmail"
+    "gmail": "Gmail",
+    "available": "Available"
   },
   "notes": {
     "title": "Notes",
@@ -250,6 +261,8 @@
     "data_safe_a": "Yes. All data is encrypted end-to-end and we comply with GDPR.",
     "changelog": "Changelog",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "life_assistant": "Life Assistant",
+    "demo_title": "CAPIVAREX Chat"
   }
 }
