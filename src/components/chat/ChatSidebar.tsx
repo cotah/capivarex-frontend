@@ -40,7 +40,7 @@ export default function ChatSidebar() {
 
       {/* ══ Sidebar panel ══ */}
       <aside
-        className={`fixed top-14 bottom-0 left-0 z-50 flex w-[85vw] md:w-[280px] flex-col border-r border-glass-border bg-bg transition-transform duration-300 ease-in-out ${
+        className={`fixed top-14 bottom-0 left-0 z-50 flex w-[85vw] md:w-[280px] flex-col overflow-hidden border-r border-glass-border bg-bg transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
