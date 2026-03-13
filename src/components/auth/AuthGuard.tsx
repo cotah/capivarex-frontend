@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useAuthStore } from '@/stores/authStore';
 import { fetchCurrentUser } from '@/lib/auth';
@@ -10,13 +11,14 @@ function LoadingSkeleton() {
     <div className="flex h-screen items-center justify-center bg-bg">
       <div className="flex flex-col items-center gap-4">
         <div className="h-10 w-10 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
-        <p className="text-sm text-text-muted">Loading...</p>
+        <p className="text-sm text-text-muted">{t('common.loading')}</p>
       </div>
     </div>
   );
 }
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
+  const t = useT();
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
   const router = useRouter();

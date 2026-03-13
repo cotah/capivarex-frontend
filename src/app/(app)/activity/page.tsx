@@ -30,6 +30,7 @@ function timeAgo(iso: string): string {
 }
 
 export default function ActivityPage() {
+  const t = useT();
   const [tab, setTab] = useState<'feed' | 'alerts'>('feed');
   const [alerts, setAlerts] = useState<ProactivityItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);

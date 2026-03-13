@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { motion } from 'framer-motion';
 import { Settings, Trash2 } from 'lucide-react';
@@ -10,6 +11,7 @@ import SecuritySection from '@/components/settings/SecuritySection';
 import { logout } from '@/lib/auth';
 
 export default function SettingsPage() {
+  const t = useT();
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -19,7 +21,7 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="flex items-center gap-2">
           <Settings size={18} className="text-accent" />
-          <h2 className="text-3xl font-semibold text-text">Settings</h2>
+          <h2 className="text-3xl font-semibold text-text">{t('settings.title')}</h2>
         </div>
 
         <ProfileSection />

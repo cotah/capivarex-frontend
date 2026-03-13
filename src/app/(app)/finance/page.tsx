@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -18,6 +19,7 @@ const tabs = [
 ];
 
 export default function FinancePage() {
+  const t = useT();
   const [activeTab, setActiveTab] = useState('stocks');
   const [stocks, setStocks] = useState<StockItem[]>([]);
   const [crypto, setCrypto] = useState<CryptoItem[]>([]);
@@ -51,7 +53,7 @@ export default function FinancePage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center gap-2">
             <TrendingUp size={18} className="text-accent" />
-            <h2 className="text-3xl font-semibold text-text">Finance</h2>
+            <h2 className="text-3xl font-semibold text-text">{t('nav.finance')}</h2>
           </div>
           <SubTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>

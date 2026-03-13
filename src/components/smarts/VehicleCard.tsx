@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useState, useEffect } from 'react';
 import { Car, MapPin, Battery, Gauge } from 'lucide-react';
@@ -27,6 +28,7 @@ interface VehicleListProps {
 }
 
 export default function VehicleList({ connected = true }: VehicleListProps) {
+  const t = useT();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -103,7 +105,7 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm text-text">{v.battery}%</span>
                 {v.isCharging && (
-                  <span className="text-sm text-success">Charging</span>
+                  <span className="text-sm text-success">{t('smarts.charging')}</span>
                 )}
               </div>
               <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">

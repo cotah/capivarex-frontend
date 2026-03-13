@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -13,6 +14,7 @@ const tabs = [
 ];
 
 export default function NotesPage() {
+  const t = useT();
   const [activeTab, setActiveTab] = useState('notes');
 
   return (
@@ -26,7 +28,7 @@ export default function NotesPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <StickyNote size={18} className="text-accent" />
-            <h2 className="text-3xl font-semibold text-text">Notes</h2>
+            <h2 className="text-3xl font-semibold text-text">{t('notes.title')}</h2>
           </div>
           <SubTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>

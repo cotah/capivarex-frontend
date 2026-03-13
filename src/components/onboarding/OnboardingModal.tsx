@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Brain, Globe, Phone, ArrowRight, Check } from 'lucide-react';
@@ -17,6 +18,7 @@ type Step = (typeof STEPS)[number];
 
 export default function OnboardingModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<Step>('welcome');
+  const t = useT();
   const [language, setLanguage] = useState('en');
   const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
@@ -58,7 +60,7 @@ export default function OnboardingModal({ onClose }: { onClose: () => void }) {
               <Brain size={36} className="text-accent" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-text">Welcome to CAPIVAREX</h2>
+              <h2 className="text-2xl font-bold text-text">{t('onboarding.welcome')}</h2>
               <p className="text-sm text-text-muted leading-relaxed">
                 Your AI-powered life assistant. Let&apos;s set up your experience in 2 quick steps.
               </p>
@@ -77,7 +79,7 @@ export default function OnboardingModal({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-3">
               <Globe size={20} className="text-accent" />
-              <h2 className="text-lg font-semibold text-text">Preferred language</h2>
+              <h2 className="text-lg font-semibold text-text">{t('onboarding.language')}</h2>
             </div>
             <p className="text-sm text-text-muted -mt-2">
               CAPIVAREX will respond in this language by default.
@@ -113,7 +115,7 @@ export default function OnboardingModal({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-3">
               <Phone size={20} className="text-accent" />
-              <h2 className="text-lg font-semibold text-text">Phone number</h2>
+              <h2 className="text-lg font-semibold text-text">{t('onboarding.phone')}</h2>
             </div>
             <p className="text-sm text-text-muted -mt-2">
               Optional. Needed for CAPIVAREX to make calls on your behalf.

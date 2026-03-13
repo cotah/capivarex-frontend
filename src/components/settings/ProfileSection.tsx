@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 import { useState } from 'react';
 import { User, Globe, Check, X, Pencil } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
@@ -21,6 +22,7 @@ interface EditableFieldProps {
 }
 
 function EditableField({ label, value, onSave, type = 'text', placeholder }: EditableFieldProps) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [saving, setSaving] = useState(false);
@@ -53,7 +55,7 @@ function EditableField({ label, value, onSave, type = 'text', placeholder }: Edi
             className="mt-0.5 w-full bg-white/5 border border-accent/30 rounded-lg px-2 py-1 text-base text-text outline-none focus:border-accent/60 transition-colors"
           />
         ) : (
-          <p className="text-base text-text truncate">{value || <span className="text-text-muted/50 italic">Not set</span>}</p>
+          <p className="text-base text-text truncate">{value || <span className="text-text-muted/50 italic">{t('common.not_set')}</span>}</p>
         )}
       </div>
       {editing ? (
@@ -120,7 +122,7 @@ export default function ProfileSection() {
         />
         <div className="border-t border-white/5" />
         <div>
-          <p className="text-sm text-text-muted">Email</p>
+          <p className="text-sm text-text-muted">{t('settings.email')}</p>
           <p className="text-base text-text">{user?.email || 'Not set'}</p>
         </div>
         <div className="border-t border-white/5" />
@@ -135,7 +137,7 @@ export default function ProfileSection() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Globe size={14} className="text-text-muted" />
-            <p className="text-sm text-text-muted">Language</p>
+            <p className="text-sm text-text-muted">{t('settings.language')}</p>
           </div>
           <select
             value={lang}

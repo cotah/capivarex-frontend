@@ -39,6 +39,7 @@ function getMonthLabel(month: string): string {
 }
 
 export default function InsightsPage() {
+  const t = useT();
   const [month, setMonth] = useState(getCurrentMonth());
   const [showPicker, setShowPicker] = useState(false);
 
