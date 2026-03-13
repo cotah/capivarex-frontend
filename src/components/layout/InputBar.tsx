@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react';
-import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText, Phone } from 'lucide-react';
+import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText, Phone, MapPin } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useChatStore } from '@/stores/chatStore';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
@@ -20,6 +20,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [callModalOpen, setCallModalOpen] = useState(false);
+  const [sharingLocation, setSharingLocation] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -70,6 +71,27 @@ export default function InputBar({ centered = false }: InputBarProps) {
     setAttachMenuOpen(false);
     setCallModalOpen(true);
   }, []);
+
+  const handleShareLocation = useCallback(() => {
+    setAttachMenuOpen(false);
+    if (!navigator.geolocation) {
+      send('📍 Meu dispositivo não suporta geolocalização.');
+      return;
+    }
+    setSharingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        send(`📍 Minha localização atual: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        setSharingLocation(false);
+      },
+      () => {
+        send('📍 Não consegui obter sua localização. Verifique as permissões do navegador.');
+        setSharingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }, [send]);
 
   // Close attach menu when clicking outside
   useEffect(() => {
@@ -186,6 +208,15 @@ export default function InputBar({ centered = false }: InputBarProps) {
               >
                 <Phone size={15} />
                 Ligar
+              </button>
+              <button
+                type="button"
+                onClick={handleShareLocation}
+                disabled={sharingLocation}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text disabled:opacity-50"
+              >
+                {sharingLocation ? <Loader2 size={15} className="animate-spin" /> : <MapPin size={15} />}
+                {sharingLocation ? 'Obtendo...' : 'Localização'}
               </button>
             </div>
           )}
