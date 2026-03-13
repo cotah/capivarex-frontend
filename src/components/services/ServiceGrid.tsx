@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useServicesStore } from '@/stores/servicesStore';
+import { createClient } from '@/lib/supabase/client';
 import ServiceCard from './ServiceCard';
 import type { ServiceDefinition, PlanType } from '@/lib/types';
 
@@ -92,7 +93,13 @@ export default function ServiceGrid() {
 
   useEffect(() => {
     if (user?.id) {
-      fetchAll();
+      // Só chama se a sessão Supabase estiver ativa
+      const supabase = createClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.access_token) {
+          fetchAll();
+        }
+      });
     }
   }, [user?.id, fetchAll]);
 
