@@ -77,6 +77,7 @@ function EditableField({ label, value, onSave, type = 'text', placeholder }: Edi
 }
 
 export default function ProfileSection() {
+  const t = useT();
   const user = useAuthStore((s) => s.user);
   const refreshUser = useAuthStore((s) => s.refreshUser);
 
