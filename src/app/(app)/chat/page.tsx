@@ -2,12 +2,27 @@
 
 import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
+import { useAuthStore } from '@/stores/authStore';
 import InputBar from '@/components/layout/InputBar';
 import MessageList from '@/components/chat/MessageList';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import { PanelLeft } from 'lucide-react';
 import WeatherChip from '@/components/weather/WeatherChip';
 import VoiceOverlay from '@/components/chat/VoiceOverlay';
+import { useT } from '@/i18n';
+
+function useGreeting(): string {
+  const t = useT();
+  const user = useAuthStore((s) => s.user);
+  const name = user?.name || user?.full_name || '';
+
+  if (!name) return 'Anywhere. Anytime.';
+
+  const hour = new Date().getHours();
+  if (hour < 12) return t('chat.greeting_morning', { name });
+  if (hour < 18) return t('chat.greeting_afternoon', { name });
+  return t('chat.greeting_evening', { name });
+}
 
 export default function ChatPage() {
   const messages = useChatStore((s) => s.messages);
@@ -16,6 +31,7 @@ export default function ChatPage() {
   const setVoiceOpen = useChatStore((s) => s.setVoiceOpen);
   const sidebarOpen = useConversationStore((s) => s.sidebarOpen);
   const toggleSidebar = useConversationStore((s) => s.toggleSidebar);
+  const greeting = useGreeting();
 
   return (
     <>
@@ -43,7 +59,7 @@ export default function ChatPage() {
               <WeatherChip />
             </div>
             <h1 className="mb-8 text-center text-3xl font-light tracking-wide text-text md:text-5xl">
-              Anywhere. Anytime.
+              {greeting}
             </h1>
             <div className="w-full">
               <InputBar centered />

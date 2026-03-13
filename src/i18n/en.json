@@ -48,7 +48,7 @@
     "calls": "Calls"
   },
   "chat": {
-    "ask_placeholder": "Ask CAPIVAREX anything...",
+    "ask_placeholder": "Ready when you are...",
     "add_message_optional": "Add a message (optional)...",
     "anywhere_anytime": "Anywhere. Anytime.",
     "history": "History",
@@ -68,7 +68,11 @@
     "stop_speaking": "Stop speaking",
     "copy": "Copy",
     "copied": "Copied!",
-    "no_upcoming_events": "No upcoming events"
+    "no_upcoming_events": "No upcoming events",
+    "greeting_morning": "Good morning, {name}.",
+    "greeting_afternoon": "Good afternoon, {name}.",
+    "greeting_evening": "Good evening, {name}.",
+    "ready_when_you_are": "Ready when you are..."
   },
   "voice": {
     "title": "CAPIVAREX Voice",
