@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,6 +10,7 @@ export default function BillingSuccessPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const fetchBillingStatus = useAuthStore((s) => s.fetchBillingStatus);
+  const t = useT();
 
   useEffect(() => {
     fetchBillingStatus();

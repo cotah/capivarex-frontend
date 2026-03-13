@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, BellOff, CheckCheck, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '@/lib/api';
+import { useT } from '@/i18n';
 import type { ProactivityItem } from '@/lib/types';
 
 const PROACTIVITY_ICONS: Record<string, string> = {
@@ -32,6 +33,7 @@ export default function NotificationBell() {
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const t = useT();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Fetch unread count on mount (lightweight)
@@ -102,7 +104,7 @@ export default function NotificationBell() {
             ? 'text-accent bg-accent-soft'
             : 'text-text-muted hover:text-text hover:bg-white/5'
         }`}
-        aria-label="Notifications"
+        aria-label={t('notifications.notifications')}
       >
         <Bell size={16} />
         {unread > 0 && (
@@ -127,7 +129,7 @@ export default function NotificationBell() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <Bell size={14} className="text-accent" />
-                <span className="text-sm font-semibold text-text">Alerts</span>
+                <span className="text-sm font-semibold text-text">{t('notifications.title')}</span>
                 {unread > 0 && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/15 text-accent font-medium">
                     {unread} new
@@ -162,7 +164,7 @@ export default function NotificationBell() {
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 gap-2 text-text-muted">
                   <BellOff size={24} className="opacity-30" />
-                  <p className="text-xs">No alerts yet</p>
+                  <p className="text-xs">{t('notifications.no_alerts')}</p>
                 </div>
               ) : (
                 <div className="py-1">

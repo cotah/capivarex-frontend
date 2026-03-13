@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
@@ -10,6 +11,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import type { MemoryEntry } from '@/lib/types';
 
 export default function MemoryPage() {
+  const t = useT();
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,7 +72,7 @@ export default function MemoryPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Brain size={18} className="text-accent" />
-            <h2 className="text-3xl font-semibold text-text">Memory</h2>
+            <h2 className="text-3xl font-semibold text-text">{t('memory.title')}</h2>
           </div>
           <p className="text-sm text-text-muted">
             What CAPIVAREX remembers about you

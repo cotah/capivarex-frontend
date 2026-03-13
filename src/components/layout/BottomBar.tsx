@@ -11,16 +11,22 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import MoreMenu from './MoreMenu';
-
-const bottomTabs = [
-  { href: '/chat', label: 'Chat', icon: MessageSquare },
-  { href: '/services', label: 'Services', icon: Zap },
-  { href: '/notes', label: 'Notes', icon: StickyNote },
-  { href: '/smarts', label: 'Smarts', icon: Home },
-];
+import { useT } from '@/i18n';
 
 // Routes covered by the "More" menu
 const moreRoutes = ['/memory', '/finance', '/insights', '/settings', '/calls'];
+
+export default function BottomBar() {
+  const pathname = usePathname();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const t = useT();
+
+  const bottomTabs = [
+    { href: '/chat', label: t('nav.chat'), icon: MessageSquare },
+    { href: '/services', label: t('nav.services'), icon: Zap },
+    { href: '/notes', label: t('nav.notes'), icon: StickyNote },
+    { href: '/smarts', label: t('nav.smarts'), icon: Home },
+  ];
 
 export default function BottomBar() {
   const pathname = usePathname();
@@ -65,7 +71,7 @@ export default function BottomBar() {
             }`}
           >
             <MoreHorizontal size={22} />
-            <span className="text-[11px] font-medium leading-tight">More</span>
+            <span className="text-[11px] font-medium leading-tight">{t('nav.more')}</span>
           </button>
         </div>
       </nav>

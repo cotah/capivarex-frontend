@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { motion } from 'framer-motion';
 import PricingCards from '@/components/billing/PricingCards';
@@ -6,6 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export default function PricingPage() {
+  const t = useT();
   return (
     <div className="relative z-10 min-h-screen px-4 py-12">
       <div className="mx-auto max-w-4xl">
@@ -20,7 +22,7 @@ export default function PricingPage() {
             className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors"
           >
             <ArrowLeft size={14} />
-            Back to app
+            {t('common.back')}
           </Link>
         </motion.div>
 
@@ -54,7 +56,7 @@ export default function PricingPage() {
           transition={{ delay: 0.3 }}
           className="text-center text-sm text-text-muted/50 mt-8"
         >
-          All plans include end-to-end encryption and GDPR compliance.
+          {t('billing.all_plans_note')}
           Cancel anytime.
         </motion.p>
       </div>

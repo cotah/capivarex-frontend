@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { fetchQuota, type QuotaInfo } from '@/lib/api';
 import { openBillingPortal } from '@/lib/stripe';
 import toast from 'react-hot-toast';
+import { useT } from '@/i18n';
 
 export default function BillingSection() {
   const user = useAuthStore((s) => s.user);
@@ -17,6 +18,7 @@ export default function BillingSection() {
   const [quota, setQuota] = useState<QuotaInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     let cancelled = false;
@@ -53,13 +55,13 @@ export default function BillingSection() {
     <section className="glass rounded-2xl p-5 space-y-4">
       <h3 className="flex items-center gap-2 text-base font-semibold text-text">
         <CreditCard size={16} className="text-accent" />
-        Plan &amp; Billing
+        {t('billing.plan_billing')}
       </h3>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-base text-text">Current plan:</span>
+            <span className="text-base text-text">{t('billing.current_plan')}:</span>
             <PlanBadge plan={plan} />
           </div>
           {loading && (
@@ -69,7 +71,7 @@ export default function BillingSection() {
 
         {isUnlimited ? (
           <p className="text-sm text-text-muted">
-            Unlimited messages — no daily cap.
+            {t('billing.unlimited')}
           </p>
         ) : (
           <UsageBar
@@ -85,7 +87,7 @@ export default function BillingSection() {
               href="/pricing"
               className="flex-1 flex items-center justify-center rounded-xl bg-accent py-2 text-base font-medium text-bg hover:bg-accent/90 transition-colors"
             >
-              {plan === 'free' ? 'Upgrade Plan' : 'Upgrade to Everywhere'}
+              {plan === 'free' ? t('billing.upgrade_plan') : t('billing.upgrade_everywhere')}
             </Link>
           )}
           {plan !== 'free' && (
@@ -95,7 +97,7 @@ export default function BillingSection() {
                 try {
                   await openBillingPortal();
                 } catch {
-                  toast.error('Unable to open billing portal. Try again later.');
+                  toast.error(t('billing.portal_error'));
                   setPortalLoading(false);
                 }
               }}
@@ -107,7 +109,7 @@ export default function BillingSection() {
               ) : (
                 <ExternalLink size={14} />
               )}
-              Manage Subscription
+              {t('billing.manage_subscription')}
             </button>
           )}
         </div>

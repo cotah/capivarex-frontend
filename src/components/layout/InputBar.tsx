@@ -8,6 +8,7 @@ import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
 import CallModal from '@/components/chat/CallModal';
 import FilePreview from '@/components/chat/FilePreview';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { useT } from '@/i18n';
 
 interface InputBarProps {
   centered?: boolean;
@@ -30,6 +31,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const isThinking = useChatStore((s) => s.isThinking);
   const { state: micState, supported: micSupported, startRecording, stopRecording } = useVoiceRecorder();
   const { uploadState, uploadResult, uploadError, upload, reset: resetUpload } = useFileUpload();
+  const t = useT();
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -164,9 +166,9 @@ export default function InputBar({ centered = false }: InputBarProps) {
       <div className="flex items-center gap-2 rounded-2xl glass px-4 py-3">
         <input ref={fileInputRef} type="file" className="hidden"
           accept="image/*,audio/*,video/*,.pdf,.docx,.doc,.txt,.md"
-          onChange={handleFileChange} aria-label="Attach file" />
+          onChange={handleFileChange} aria-label={t('attach.attach_file')} />
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment"
-          className="hidden" onChange={handleFileChange} aria-label="Take photo" />
+          className="hidden" onChange={handleFileChange} aria-label={t('attach.take_photo')} />
 
         {/* Attach menu */}
         <div className="relative" ref={attachMenuRef}>
@@ -175,7 +177,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
             onClick={handleAttachClick}
             disabled={isThinking || hasFile}
             className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${hasFile ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-accent hover:bg-accent/5'} disabled:opacity-40`}
-            aria-label="Attach file or photo"
+            aria-label={t('attach.attach_file_or_photo')}
           >
             <Plus
               size={18}
@@ -191,7 +193,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
               >
                 <FileText size={15} />
-                Arquivo
+                {t('attach.file')}
               </button>
               <button
                 type="button"
@@ -199,7 +201,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
               >
                 <Camera size={15} />
-                Câmera
+                {t('attach.camera')}
               </button>
               <button
                 type="button"
@@ -207,7 +209,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
               >
                 <Phone size={15} />
-                Ligar
+                {t('attach.call')}
               </button>
               <button
                 type="button"
@@ -216,7 +218,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text disabled:opacity-50"
               >
                 {sharingLocation ? <Loader2 size={15} className="animate-spin" /> : <MapPin size={15} />}
-                {sharingLocation ? 'Obtendo...' : 'Localização'}
+                {sharingLocation ? t('attach.getting_location') : t('attach.location')}
               </button>
             </div>
           )}
@@ -231,7 +233,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
             e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
           }}
           onKeyDown={handleKeyDown}
-          placeholder={hasFile ? 'Add a message (optional)...' : 'Ask CAPIVAREX anything...'}
+          placeholder={hasFile ? t('chat.add_message_optional') : t('chat.ask_placeholder')}
           disabled={isThinking}
           rows={1}
           className="flex-1 resize-none bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50 overflow-hidden"
@@ -240,13 +242,13 @@ export default function InputBar({ centered = false }: InputBarProps) {
         {micSupported && (
           <button onClick={handleMic} disabled={micState === 'transcribing' || isThinking}
             className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${micState === 'recording' ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30' : micState === 'transcribing' ? 'bg-white/5 text-text-muted' : 'text-accent hover:text-accent/80 hover:bg-accent/5'}`}
-            aria-label={micState === 'recording' ? 'Stop recording' : 'Voice input'}>
+            aria-label={micState === 'recording' ? t('chat.stop_recording') : t('chat.voice_input')}>
             {micState === 'transcribing' ? <Loader2 size={16} className="animate-spin" /> : micState === 'recording' ? <MicOff size={16} /> : <Mic size={16} />}
           </button>
         )}
         <button onClick={handleSend} disabled={!canSend}
           className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${canSend ? 'bg-accent text-bg hover:bg-accent/90 shadow-lg shadow-accent/20' : 'bg-white/5 text-text-muted'}`}
-          aria-label="Send message">
+          aria-label={t('chat.send_message')}>
           {uploadState === 'uploading' ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
         </button>
         <button onClick={() => {
@@ -259,7 +261,7 @@ export default function InputBar({ centered = false }: InputBarProps) {
             setVoiceOpen(true);
           }}
           className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 transition-all duration-200"
-          aria-label="Voice conversation">
+          aria-label={t('chat.voice_conversation')}>
           <AudioLines size={16} />
         </button>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X, Search } from 'lucide-react';
 import { useConversationStore } from '@/stores/conversationStore';
+import { useT } from '@/i18n';
 import NewChatButton from './NewChatButton';
 import ConversationList from './ConversationList';
 import QuotaIndicator from './QuotaIndicator';
@@ -14,6 +15,7 @@ export default function ChatSidebar() {
   const isLoading = useConversationStore((s) => s.isLoading);
   const fetchConversations = useConversationStore((s) => s.fetchConversations);
   const [searchQuery, setSearchQuery] = useState('');
+  const t = useT();
 
   useEffect(() => {
     fetchConversations();
@@ -46,11 +48,11 @@ export default function ChatSidebar() {
       >
         {/* Header — close button + title */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-glass-border">
-          <span className="text-sm font-semibold text-text-muted">History</span>
+          <span className="text-sm font-semibold text-text-muted">{t('chat.history')}</span>
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors"
-            aria-label="Close sidebar"
+            aria-label={t('chat.close_sidebar')}
           >
             <X size={16} />
           </button>
@@ -67,7 +69,7 @@ export default function ChatSidebar() {
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted/50" />
             <input
               type="text"
-              placeholder="Search conversations…"
+              placeholder={t('chat.search_conversations')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-lg bg-white/5 border border-glass-border pl-8 pr-3 py-1.5 text-xs text-text placeholder:text-text-muted/40 focus:outline-none focus:border-accent/30 transition-colors"

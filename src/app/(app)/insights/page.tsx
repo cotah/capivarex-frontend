@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -101,7 +102,7 @@ export default function InsightsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingCart size={18} className="text-accent" />
-            <h2 className="text-3xl font-semibold text-text">Shopping Insights</h2>
+            <h2 className="text-3xl font-semibold text-text">{t('insights.title')}</h2>
           </div>
 
           {/* Month picker */}

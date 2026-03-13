@@ -5,14 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, TrendingUp, BarChart3, Settings, X, Phone } from 'lucide-react';
-
-const moreItems = [
-  { href: '/memory', label: 'Memory', icon: Brain },
-  { href: '/finance', label: 'Finance', icon: TrendingUp },
-  { href: '/insights', label: 'Insights', icon: BarChart3 },
-  { href: '/calls', label: 'Calls', icon: Phone },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
+import { useT } from '@/i18n';
 
 interface MoreMenuProps {
   open: boolean;
@@ -22,6 +15,15 @@ interface MoreMenuProps {
 export default function MoreMenu({ open, onClose }: MoreMenuProps) {
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+  const t = useT();
+
+  const moreItems = [
+    { href: '/memory', label: t('nav.memory'), icon: Brain },
+    { href: '/finance', label: t('nav.finance'), icon: TrendingUp },
+    { href: '/insights', label: t('nav.insights'), icon: BarChart3 },
+    { href: '/calls', label: t('nav.calls'), icon: Phone },
+    { href: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
 
   const isActive = (href: string) => pathname.startsWith(href);
 
@@ -85,7 +87,7 @@ export default function MoreMenu({ open, onClose }: MoreMenuProps) {
             <button
               onClick={onClose}
               className="absolute top-3 right-4 p-1 text-text-muted hover:text-text transition-colors"
-              aria-label="Close menu"
+              aria-label={t('common.close')}
             >
               <X size={20} />
             </button>

@@ -7,59 +7,65 @@ import { redirectToCheckout } from '@/lib/stripe';
 import type { PlanInfo, PlanType } from '@/lib/types';
 import { Check, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useT } from '@/i18n';
 
-const plans: PlanInfo[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '0',
-    priceValue: 0,
-    features: [
-      '30 messages/day',
-      '5 agents',
-      'Text only',
-      'Telegram',
-    ],
-  },
-  {
-    id: 'me',
-    name: 'Me',
-    price: '15.99',
-    priceValue: 15.99,
-    highlighted: true,
-    features: [
-      '300 messages/day',
-      'All agents',
-      'Voice input',
-      'Telegram + WebApp',
-      'Spotify integration',
-      'Google Calendar',
-    ],
-  },
-  {
-    id: 'everywhere',
-    name: 'Everywhere',
-    price: '49.99',
-    priceValue: 49.99,
-    features: [
-      'Unlimited messages',
-      'All agents',
-      'Voice + real-time',
-      'All channels',
-      'Smart Home',
-      'Cast to TV',
-      'RAG Memory',
-      'Multi-agent chains',
-      'Priority support',
-    ],
-  },
-];
+function usePlans(): PlanInfo[] {
+  const t = useT();
+  return [
+    {
+      id: 'free',
+      name: t('billing.free'),
+      price: '0',
+      priceValue: 0,
+      features: [
+        t('billing_features.free_1'),
+        t('billing_features.free_2'),
+        t('billing_features.free_3'),
+        t('billing_features.free_4'),
+      ],
+    },
+    {
+      id: 'me',
+      name: t('billing.me'),
+      price: '15.99',
+      priceValue: 15.99,
+      highlighted: true,
+      features: [
+        t('billing_features.me_1'),
+        t('billing_features.me_2'),
+        t('billing_features.me_3'),
+        t('billing_features.me_4'),
+        t('billing_features.me_5'),
+        t('billing_features.me_6'),
+      ],
+    },
+    {
+      id: 'everywhere',
+      name: t('billing.everywhere'),
+      price: '49.99',
+      priceValue: 49.99,
+      features: [
+        t('billing_features.everywhere_1'),
+        t('billing_features.everywhere_2'),
+        t('billing_features.everywhere_3'),
+        t('billing_features.everywhere_4'),
+        t('billing_features.everywhere_5'),
+        t('billing_features.everywhere_6'),
+        t('billing_features.everywhere_7'),
+        t('billing_features.everywhere_8'),
+        t('billing_features.everywhere_9'),
+      ],
+    },
+  ];
+}
 
 export default function PricingCards() {
   const user = useAuthStore((s) => s.user);
   const router = useRouter();
   const currentPlan = user?.plan || 'free';
   const [loadingPlan, setLoadingPlan] = useState<PlanType | null>(null);
+  const t = useT();
+  const plans = usePlans();
 
   const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free' || planId === currentPlan) return;
@@ -73,7 +79,7 @@ export default function PricingCards() {
     try {
       await redirectToCheckout(planId as 'me' | 'everywhere');
     } catch {
-      toast.error('Unable to start checkout. Please try again later.');
+      toast.error(t('billing.checkout_error'));
       setLoadingPlan(null);
     }
   };
@@ -154,7 +160,7 @@ export default function PricingCards() {
                 {loadingPlan === plan.id ? (
                   <div className="h-4 w-4 rounded-full border-2 border-bg/30 border-t-bg animate-spin" />
                 ) : (
-                  'Upgrade'
+                  t('common.upgrade')
                 )}
               </button>
             )}

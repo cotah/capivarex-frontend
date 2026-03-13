@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Clock } from 'lucide-react';
@@ -28,6 +29,7 @@ function formatDuration(s?: number) {
 }
 
 export default function CallsPage() {
+  const t = useT();
   const [calls, setCalls] = useState<CallHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,13 +51,13 @@ export default function CallsPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="flex items-center gap-2">
           <Phone size={18} className="text-accent" />
-          <h2 className="text-3xl font-semibold text-text">Calls</h2>
+          <h2 className="text-3xl font-semibold text-text">{t('calls.title')}</h2>
         </div>
 
         {calls.length === 0 ? (
           <EmptyState
             icon={Clock}
-            title="No calls yet"
+            title={t('calls.no_calls')}
             description="Use the + button in chat to make your first AI call."
           />
         ) : (

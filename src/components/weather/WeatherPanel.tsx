@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import type { WeatherData } from '@/hooks/useWeather';
+import { useT } from '@/i18n';
 
 interface WeatherPanelProps {
   data: WeatherData;
@@ -12,6 +13,7 @@ interface WeatherPanelProps {
 
 export default function WeatherPanel({ data: d, searching, onSearch }: WeatherPanelProps) {
   const [query, setQuery] = useState('');
+  const t = useT();
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' && query.trim()) {
@@ -35,10 +37,10 @@ export default function WeatherPanel({ data: d, searching, onSearch }: WeatherPa
       {/* Info grid */}
       <div className="grid grid-cols-2 gap-2 mx-4 mb-4">
         {[
-          { label: 'Feels like', value: `${d.feelsLike}°` },
-          { label: 'High / Low', value: `${d.high}° / ${d.low}°` },
-          { label: 'Humidity', value: `${d.humidity}%` },
-          { label: 'Wind', value: d.wind },
+          { label: t('weather.feels_like'), value: `${d.feelsLike}°` },
+          { label: t('weather.high_low'), value: `${d.high}° / ${d.low}°` },
+          { label: t('weather.humidity'), value: `${d.humidity}%` },
+          { label: t('weather.wind'), value: d.wind },
         ].map((item) => (
           <div
             key={item.label}
@@ -52,7 +54,7 @@ export default function WeatherPanel({ data: d, searching, onSearch }: WeatherPa
 
       {/* Hourly */}
       <div className="px-4 mb-4">
-        <p className="text-xs text-amber-400 mb-2">Next hours</p>
+        <p className="text-xs text-amber-400 mb-2">{t('weather.next_hours')}</p>
         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
           {d.hours.map((h) => (
             <div
@@ -69,7 +71,7 @@ export default function WeatherPanel({ data: d, searching, onSearch }: WeatherPa
 
       {/* 5-day */}
       <div className="px-4 mb-3">
-        <p className="text-xs text-amber-400 mb-2">5-day forecast</p>
+        <p className="text-xs text-amber-400 mb-2">{t('weather.five_day')}</p>
         <div className="space-y-1.5">
           {d.days.map((day) => (
             <div key={day.day} className="flex items-center gap-3">
@@ -99,7 +101,7 @@ export default function WeatherPanel({ data: d, searching, onSearch }: WeatherPa
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search location..."
+            placeholder={t('weather.search_location')}
             className="flex-1 bg-transparent text-sm text-white placeholder:text-amber-200/30 outline-none"
           />
         </div>

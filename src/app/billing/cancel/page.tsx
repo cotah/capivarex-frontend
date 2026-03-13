@@ -1,10 +1,12 @@
 'use client';
+import { useT } from '@/i18n';
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 export default function BillingCancelPage() {
   const router = useRouter();
+  const t = useT();
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-bg">

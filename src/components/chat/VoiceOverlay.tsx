@@ -8,6 +8,7 @@ import { useConversationStore } from '@/stores/conversationStore';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
 import { useVoiceWebSocket } from '@/hooks/useVoiceWebSocket';
+import { useT } from '@/i18n';
 
 type VoiceState = 'init' | 'listening' | 'processing' | 'speaking';
 
@@ -40,6 +41,7 @@ const WHISPER_HALLUCINATIONS = new Set([
 ]);
 
 export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
+  const t = useT();
   const [voiceState, setVoiceState] = useState<VoiceState>('init');
   const [displayText, setDisplayText] = useState('');
   const [progressLabel, setProgressLabel] = useState('');
@@ -377,12 +379,12 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   return (
     <div className="fixed inset-0 z-[60] flex flex-col bg-bg">
       <div className="flex h-14 items-center justify-between px-6 border-b border-glass-border shrink-0">
-        <span className="text-base font-semibold text-text">CAPIVAREX Voice</span>
+        <span className="text-base font-semibold text-text">{t('voice.title')}</span>
         <button
           onClick={handleClose}
           disabled={voiceState === 'processing'}
           className={`flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-white/5 transition-colors ${voiceState === 'processing' ? 'opacity-30 cursor-not-allowed' : ''}`}
-          aria-label="Close voice"
+          aria-label={t('voice.close')}
         >
           <X size={20} />
         </button>
@@ -399,12 +401,12 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
         </div>
         <p className="text-sm text-text-muted mt-4 shrink-0">
           {voiceState === 'init'
-            ? 'Preparando...'
+            ? t('voice.preparing')
             : voiceState === 'listening'
-              ? 'Ouvindo... pode falar'
+              ? t('voice.listening')
               : voiceState === 'processing'
-                ? 'Processando...'
-                : 'Falando...'}
+                ? t('voice.processing')
+                : t('voice.speaking')}
         </p>
         {voiceState === 'processing' && progressLabel && (
           <p className="text-xs text-text-muted/60 mt-1 shrink-0">{progressLabel}</p>
@@ -420,7 +422,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
           onClick={handleClose}
           disabled={voiceState === 'processing'}
           className={`flex h-16 w-16 items-center justify-center rounded-full bg-error/20 text-error hover:bg-error/30 transition-all border border-error/30 ${voiceState === 'processing' ? 'opacity-30 cursor-not-allowed' : ''}`}
-          aria-label="End conversation"
+          aria-label={t('voice.end_conversation')}
         >
           <X size={28} />
         </button>

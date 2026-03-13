@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/i18n';
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, BellOff, CheckCheck } from 'lucide-react';
@@ -90,7 +91,7 @@ export default function ActivityPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-accent" />
-            <h2 className="text-3xl font-semibold text-text">Activity</h2>
+            <h2 className="text-3xl font-semibold text-text">{t('activity.title')}</h2>
           </div>
           {tab === 'alerts' && unreadCount > 0 && (
             <button
@@ -140,7 +141,7 @@ export default function ActivityPage() {
         ) : alerts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-text-muted">
             <BellOff size={32} className="opacity-30" />
-            <p className="text-sm">No alerts yet</p>
+            <p className="text-sm">{t('activity.no_alerts')}</p>
             <p className="text-xs opacity-60">
               CAPIVAREX will notify you about important events here.
             </p>
