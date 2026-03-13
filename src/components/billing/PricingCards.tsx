@@ -24,8 +24,8 @@ const plans: PlanInfo[] = [
   {
     id: 'me',
     name: 'Me',
-    price: '9.99',
-    priceValue: 9.99,
+    price: '15.99',
+    priceValue: 15.99,
     highlighted: true,
     features: [
       '300 messages/day',
@@ -39,8 +39,8 @@ const plans: PlanInfo[] = [
   {
     id: 'everywhere',
     name: 'Everywhere',
-    price: '29.99',
-    priceValue: 29.99,
+    price: '49.99',
+    priceValue: 49.99,
     features: [
       'Unlimited messages',
       'All agents',
