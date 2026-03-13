@@ -28,10 +28,6 @@ export default function BottomBar() {
     { href: '/smarts', label: t('nav.smarts'), icon: Home },
   ];
 
-export default function BottomBar() {
-  const pathname = usePathname();
-  const [moreOpen, setMoreOpen] = useState(false);
-
   const isActive = (href: string) => {
     if (href === '/chat') return pathname === '/chat';
     return pathname.startsWith(href);

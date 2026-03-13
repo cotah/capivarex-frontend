@@ -4,13 +4,13 @@ import { useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function Error({
-  const t = useT();
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useT();
   useEffect(() => {
     console.error(error);
   }, [error]);

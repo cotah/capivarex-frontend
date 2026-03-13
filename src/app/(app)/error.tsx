@@ -5,13 +5,13 @@ import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 export default function AppError({
-  const t = useT();
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useT();
   useEffect(() => {
     console.error('[AppError]', error);
   }, [error]);
