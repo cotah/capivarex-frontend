@@ -14,7 +14,7 @@ import { useT } from '@/i18n';
 function useGreeting(): string {
   const t = useT();
   const user = useAuthStore((s) => s.user);
-  const name = user?.name || user?.full_name || '';
+  const name = user?.name || '';
 
   if (!name) return 'Anywhere. Anytime.';
 
