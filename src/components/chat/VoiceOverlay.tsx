@@ -86,7 +86,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
   const lastReplyRef = useRef('');
   const skipWsRef = useRef(false);
 
-  const { connect, disconnect, sendAudioBlob } = useVoiceWebSocket({
+  const { connect, disconnect, sendAudioBlob, isConnected } = useVoiceWebSocket({
     onTranscription: (text) => {
       if (isClosingRef.current) return;
       const norm = text.toLowerCase().replace(/[!?,]/g, '').trim();
@@ -339,6 +339,17 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     }
   }, [activeConversationId, connect]);
 
+  /* ── Start listening only when WS is connected ── */
+  useEffect(() => {
+    if (isConnected && !isClosingRef.current && !isBotSpeakingRef.current) {
+      // Small delay to let WS stabilize
+      const timer = setTimeout(() => {
+        if (!isClosingRef.current) startListeningRef.current?.();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
+
   /* ── Auto-start on mount ── */
   useEffect(() => {
     isClosingRef.current = false;
@@ -355,12 +366,7 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       store.createConversation().catch(() => {});
     }
 
-    const timer = setTimeout(() => {
-      if (!isClosingRef.current) startListeningRef.current?.();
-    }, 300);
-
     return () => {
-      clearTimeout(timer);
       isClosingRef.current = true;
       disconnect();
       cleanup();
