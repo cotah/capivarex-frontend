@@ -19,7 +19,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const STATIC_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
   { id: 'google',       name: 'Google',         icon: '📅', oauth_path: '/api/auth/google/connect' },
   { id: 'spotify',      name: 'Spotify',        icon: '🎵', oauth_path: '/api/auth/spotify/connect' },
-  { id: 'smartthings',  name: 'SmartThings',    icon: '🏠', oauth_path: '/api/v1/smartthings/connect' },
   { id: 'smartcar',     name: 'Connected Car',  icon: '🚗', oauth_path: '/api/v1/car/connect' },
 ];
 

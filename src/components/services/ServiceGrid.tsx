@@ -30,7 +30,7 @@ const ALL_SERVICES: ServiceDefinition[] = [
   { id: 'media_cast', name: 'Cast to TV', icon: 'Tv', description: 'Send content to your TV via Chromecast', category: 'Entertainment', plans: ['everywhere'] },
 
   // ── Smart Home ──
-  { id: 'smarthome', name: 'SmartThings', icon: 'Home', description: 'Control lights, locks, thermostat, sensors', category: 'Smart Home', plans: ['me', 'everywhere'], oauth: 'smartthings' },
+  { id: 'smarthome', name: 'SmartThings', icon: 'Home', description: 'Control lights, locks, thermostat, sensors', category: 'Smart Home', plans: ['me', 'everywhere'] },
 
   // ── Transport & Navigation ──
   { id: 'traffic', name: 'Traffic', icon: 'Navigation', description: 'Real-time traffic and route info', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
@@ -79,7 +79,6 @@ const PLAN_RANK: Record<PlanType, number> = { free: 0, me: 1, everywhere: 2 };
 const OAUTH_MAP: Record<string, string> = {
   google: '/api/auth/google/connect',
   spotify: '/api/auth/spotify/connect',
-  smartthings: '/api/v1/smartthings/connect',
   smartcar: '/api/v1/car/connect',
   github: '/api/auth/github/connect',
 };
