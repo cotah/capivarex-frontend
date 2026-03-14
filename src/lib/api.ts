@@ -92,6 +92,7 @@ export async function sendMessageStream(
   message: string,
   conversationId: string | undefined,
   callbacks: {
+    onThinking?: (data: { conversation_id: string }) => void;
     onStart?: (data: { agent: string; conversation_id: string }) => void;
     onToken?: (token: string) => void;
     onData?: (data: Record<string, unknown>) => void;
@@ -143,6 +144,9 @@ export async function sendMessageStream(
           const data = JSON.parse(dataLine.slice(6));
 
           switch (data.type) {
+            case 'thinking':
+              callbacks.onThinking?.(data);
+              break;
             case 'start':
               callbacks.onStart?.(data);
               break;

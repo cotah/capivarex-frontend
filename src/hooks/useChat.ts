@@ -53,8 +53,8 @@ export function useChat() {
 
       try {
         await sendMessageStream(text, conversationId, {
-          onStart: (data) => {
-            // Remove thinking indicator, show empty assistant message
+          onThinking: (data) => {
+            // Show empty assistant message IMMEDIATELY — user sees activity
             setThinking(false);
             addMessage({
               id: assistantMsgId,
@@ -62,9 +62,20 @@ export function useChat() {
               text: '',
               time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             });
-            // Update conversation_id if it was created by backend
             if (data.conversation_id && !useConversationStore.getState().activeConversationId) {
               useConversationStore.getState().setActiveConversation(data.conversation_id);
+            }
+          },
+          onStart: () => {
+            // Agent selected — if thinking didn't fire, create message now
+            if (!streamedText && !useChatStore.getState().messages.find(m => m.id === assistantMsgId)) {
+              setThinking(false);
+              addMessage({
+                id: assistantMsgId,
+                role: 'assistant',
+                text: '',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              });
             }
           },
           onToken: (token) => {
