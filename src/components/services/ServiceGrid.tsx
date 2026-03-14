@@ -30,13 +30,13 @@ const ALL_SERVICES: ServiceDefinition[] = [
   { id: 'media_cast', name: 'Cast to TV', icon: 'Tv', description: 'Send content to your TV via Chromecast', category: 'Entertainment', plans: ['everywhere'] },
 
   // ── Smart Home ──
-  { id: 'smarthome', name: 'SmartThings', icon: 'Home', description: 'Control lights, locks, thermostat, sensors', category: 'Smart Home', plans: ['everywhere'], oauth: 'smartthings', comingSoon: true },
+  { id: 'smarthome', name: 'SmartThings', icon: 'Home', description: 'Control lights, locks, thermostat, sensors', category: 'Smart Home', plans: ['me', 'everywhere'], oauth: 'smartthings' },
 
   // ── Transport & Navigation ──
   { id: 'traffic', name: 'Traffic', icon: 'Navigation', description: 'Real-time traffic and route info', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
   { id: 'transport', name: 'Public Transport', icon: 'Bus', description: 'Bus, train, metro schedules and routes', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
   { id: 'maps', name: 'Maps', icon: 'Map', description: 'Directions, places, navigation', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
-  { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['everywhere'], oauth: 'smartcar', comingSoon: true },
+  { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['me', 'everywhere'], oauth: 'smartcar' },
   { id: 'leaving_now', name: 'Smart Departure', icon: 'Navigation', description: 'Traffic + weather + calendar combined', category: 'Transport', plans: ['me', 'everywhere'] },
 
   // ── Travel ──
