@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     q: 'Which services are supported?',
-    a: 'Currently we support Spotify, Google Calendar, Gmail, SmartThings, Smartcar, and GitHub. WhatsApp, Outlook, and Canva integrations are coming soon.',
+    a: 'Currently we support Spotify, Google Calendar, Gmail, Tuya Smart Home, Smartcar, and GitHub. WhatsApp, Outlook, and Canva integrations are coming soon.',
   },
   {
     q: 'Can I use it on my phone?',

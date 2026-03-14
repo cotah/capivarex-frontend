@@ -79,7 +79,7 @@ export default function CallModal({ onClose }: CallModalProps) {
   const initiateCall = async () => {
     setError('');
     if (!phone.match(/^\+[1-9]\d{7,14}$/)) {
-      setError('Use o formato internacional: +5511999999999');
+      setError('Use international format: +353 89 123 4567');
       return;
     }
     setLoading(true);
@@ -192,7 +192,7 @@ export default function CallModal({ onClose }: CallModalProps) {
                 type="tel"
                 value={phone}
                 onChange={(e) => { setPhone(e.target.value); setError(''); }}
-                placeholder="+5511999999999"
+                placeholder="+353 89 123 4567"
                 className="w-full rounded-xl bg-white/5 border border-glass-border px-4 py-3 text-text placeholder:text-text-muted/50 text-sm outline-none focus:border-accent/40 transition-colors"
               />
               {error && <p className="text-xs text-red-400">{error}</p>}

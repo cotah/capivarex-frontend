@@ -39,9 +39,9 @@ export default function DeviceGrid({ connected = true }: DeviceGridProps) {
       <EmptyState
         icon={Home}
         title="No smart home connected"
-        description="Connect your SmartThings account to control devices"
+        description="Connect your Tuya Smart / Smart Life account to control devices"
         actionLabel="Connect"
-        actionHref="/services"
+        actionHref="/settings"
       />
     );
   }

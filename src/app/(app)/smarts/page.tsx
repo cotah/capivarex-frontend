@@ -19,7 +19,7 @@ export default function SmartsPage() {
   const [activeTab, setActiveTab] = useState('devices');
   const connections = useServicesStore((s) => s.connections);
 
-  const smartthingsConnected = connections.find((c) => c.provider === 'smartthings')?.connected ?? false;
+  const smartHomeConnected = connections.find((c) => c.provider === 'tuya')?.connected ?? false;
   const smartcarConnected = connections.find((c) => c.provider === 'smartcar')?.connected ?? false;
 
   return (
@@ -40,7 +40,7 @@ export default function SmartsPage() {
 
         {/* Content */}
         {activeTab === 'devices' ? (
-          <DeviceGrid connected={smartthingsConnected} />
+          <DeviceGrid connected={smartHomeConnected} />
         ) : (
           <VehicleList connected={smartcarConnected} />
         )}

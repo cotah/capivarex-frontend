@@ -7,7 +7,7 @@ const steps = [
     number: '01',
     title: 'Connect your services',
     description:
-      'Link Spotify, Google Calendar, SmartThings, and more in a few clicks.',
+      'Link Spotify, Google Calendar, Smart Home, and more in a few clicks.',
   },
   {
     number: '02',

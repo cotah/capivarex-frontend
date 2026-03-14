@@ -130,7 +130,7 @@ export default function ProfileSection() {
         <EditableField
           label="Phone number"
           value={user?.phone_number || ''}
-          placeholder="+5511999999999"
+          placeholder="+353 89 123 4567"
           type="tel"
           onSave={(v) => updateField('phone_number', v)}
         />

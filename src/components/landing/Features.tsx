@@ -17,7 +17,7 @@ const features = [
   {
     icon: Home,
     title: 'Smart Home',
-    description: 'Control lights, locks, thermostats and more via SmartThings.',
+    description: 'Control lights, locks, thermostats and more via Tuya Smart Home.',
   },
   {
     icon: ShoppingCart,
