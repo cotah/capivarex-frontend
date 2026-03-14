@@ -70,14 +70,20 @@ export default function ConnectionsSection() {
       '/api/webapp/market/integrations'
     )
       .then((data) => {
-        const map = Object.fromEntries((data.integrations ?? []).map((i) => [i.id, i]));
+        const items = data.integrations ?? [];
+        // Map by provider field (backend) to match frontend IDs
+        const byProvider = Object.fromEntries(items.map((i: Record<string, unknown>) => [i.provider, i]));
+        const byId = Object.fromEntries(items.map((i: Record<string, unknown>) => [i.id, i]));
         setIntegrations((prev) =>
-          prev.map((i) => ({
-            ...i,
-            connected: map[i.id]?.is_connected ?? map[i.id]?.connected ?? false,
-            account: map[i.id]?.account,
-            last_sync: map[i.id]?.last_sync,
-          }))
+          prev.map((i) => {
+            const match = byProvider[i.id] || byId[i.id];
+            return {
+              ...i,
+              connected: !!(match?.connected || match?.is_connected),
+              account: (match?.account as string) || undefined,
+              last_sync: (match?.last_sync as string) || undefined,
+            };
+          })
         );
       })
       .catch(() => {})
