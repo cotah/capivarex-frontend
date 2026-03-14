@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plug, Circle, ExternalLink, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
 
 interface Integration {
   id: string;
@@ -10,14 +11,16 @@ interface Integration {
   connected: boolean;
   account?: string;
   last_sync?: string;
-  connect_url?: string;
+  oauth_path: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+
 const STATIC_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
-  { id: 'google_calendar', name: 'Google Calendar', icon: '📅', connect_url: '/api/auth/google/calendar' },
-  { id: 'spotify',         name: 'Spotify',         icon: '🎵', connect_url: '/api/auth/spotify'         },
-  { id: 'github',          name: 'GitHub',           icon: '🐙', connect_url: '/api/auth/github'          },
-  { id: 'smartthings',     name: 'SmartThings',      icon: '🏠', connect_url: '/api/auth/smartthings'     },
+  { id: 'google',       name: 'Google',         icon: '📅', oauth_path: '/api/auth/google/connect' },
+  { id: 'spotify',      name: 'Spotify',        icon: '🎵', oauth_path: '/api/auth/spotify/connect' },
+  { id: 'smartthings',  name: 'SmartThings',    icon: '🏠', oauth_path: '/api/v1/smartthings/connect' },
+  { id: 'smartcar',     name: 'Connected Car',  icon: '🚗', oauth_path: '/api/v1/car/connect' },
 ];
 
 function timeAgo(iso?: string): string {
@@ -32,13 +35,14 @@ function timeAgo(iso?: string): string {
 }
 
 export default function ConnectionsSection() {
+  const user = useAuthStore((s) => s.user);
   const [integrations, setIntegrations] = useState<Integration[]>(
     STATIC_INTEGRATIONS.map((i) => ({ ...i, connected: false }))
   );
   const [loading, setLoading] = useState(true);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchStatus = useCallback(() => {
     apiClient<{ integrations: { id: string; connected: boolean; account?: string; last_sync?: string }[] }>(
       '/api/webapp/market/integrations'
     )
@@ -56,6 +60,28 @@ export default function ConnectionsSection() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  const handleConnect = useCallback(
+    (conn: Integration) => {
+      if (!user?.id) return;
+
+      const url = `${API_URL}${conn.oauth_path}?user_id=${user.id}`;
+      const popup = window.open(url, 'oauth', 'width=600,height=700');
+
+      // Poll for popup close → refresh status
+      const check = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(check);
+          fetchStatus();
+        }
+      }, 1000);
+    },
+    [user?.id, fetchStatus],
+  );
 
   const handleDisconnect = async (id: string) => {
     setDisconnecting(id);
@@ -86,6 +112,9 @@ export default function ConnectionsSection() {
                 <span className="text-lg">{conn.icon}</span>
                 <div>
                   <p className="text-base text-text">{conn.name}</p>
+                  {conn.id === 'google' && (
+                    <p className="text-xs text-text-muted/60">Calendar + Gmail</p>
+                  )}
                   <div className="flex items-center gap-1.5">
                     {loading ? (
                       <Loader2 size={10} className="animate-spin text-text-muted" />
@@ -116,13 +145,13 @@ export default function ConnectionsSection() {
                   {disconnecting === conn.id ? <Loader2 size={12} className="animate-spin" /> : 'Disconnect'}
                 </button>
               ) : (
-                <a
-                  href={conn.connect_url}
+                <button
+                  onClick={() => handleConnect(conn)}
                   className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent/20 transition-colors"
                 >
                   Connect
                   <ExternalLink size={12} />
-                </a>
+                </button>
               )}
             </div>
           </div>
