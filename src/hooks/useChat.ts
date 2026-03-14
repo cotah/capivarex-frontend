@@ -1,6 +1,6 @@
 import { useChatStore } from '@/stores/chatStore';
 import { useConversationStore } from '@/stores/conversationStore';
-import { sendMessage, ApiError } from '@/lib/api';
+import { sendMessage, sendMessageStream, ApiError } from '@/lib/api';
 import { nanoid } from 'nanoid';
 import type { MessageType } from '@/lib/types';
 import type { UploadMediaType } from '@/hooks/useFileUpload';
@@ -14,11 +14,12 @@ interface FileAttachmentMeta {
 }
 
 export function useChat() {
-  const { addMessage, setThinking } = useChatStore();
+  const { addMessage, appendToMessage, updateMessage, setThinking } = useChatStore();
 
   const _doSend = async (text: string, attachmentMeta?: FileAttachmentMeta) => {
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    // Add user message
     addMessage({
       id: nanoid(),
       role: 'user',
@@ -45,47 +46,126 @@ export function useChat() {
         conversationId = await useConversationStore.getState().createConversation();
       }
 
-      const response = await sendMessage(text, conversationId);
+      // Create placeholder assistant message for streaming
+      const assistantMsgId = nanoid();
+      let streamedText = '';
+      let streamFailed = false;
 
-      const reply =
-        (response.text as string) ||
-        (response.response as string) ||
-        (response.message as string) ||
-        (response.content as string) ||
-        (response.answer as string) ||
-        (response.reply as string) ||
-        '';
+      try {
+        await sendMessageStream(text, conversationId, {
+          onStart: (data) => {
+            // Remove thinking indicator, show empty assistant message
+            setThinking(false);
+            addMessage({
+              id: assistantMsgId,
+              role: 'assistant',
+              text: '',
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+            // Update conversation_id if it was created by backend
+            if (data.conversation_id && !useConversationStore.getState().activeConversationId) {
+              useConversationStore.getState().setActiveConversation(data.conversation_id);
+            }
+          },
+          onToken: (token) => {
+            streamedText += token;
+            appendToMessage(assistantMsgId, token);
+          },
+          onData: (data) => {
+            // Update message with extra data (images, etc)
+            updateMessage(assistantMsgId, { data: data as Record<string, unknown> });
+          },
+          onDone: (data) => {
+            // Update message with final metadata
+            updateMessage(assistantMsgId, {
+              type: (data.type as MessageType) || 'text',
+              data: data.data as Record<string, unknown> | undefined,
+            });
 
-      console.debug('[Chat] sendMessage response keys:', Object.keys(response), 'reply:', reply);
+            // Update conversation title
+            if (data.conversation_title) {
+              useConversationStore.getState().renameConversation(
+                conversationId!, data.conversation_title as string
+              );
+            } else {
+              const words = text.trim().split(/\s+/);
+              const autoTitle = words.slice(0, 3).join(' ') || 'New conversation';
+              const suffix = words.length > 3 ? '...' : '';
+              useConversationStore.getState().renameConversation(
+                conversationId!, autoTitle + suffix
+              );
+            }
 
-      addMessage({
-        id: nanoid(),
-        role: 'assistant',
-        text: reply || 'No response',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: response.type as MessageType | undefined,
-        data: response.data as Record<string, unknown> | undefined,
-      });
-
-      if (conversationId) {
-        useConversationStore.getState().addMessageToConversation(conversationId, {
-          id: nanoid(),
-          role: 'assistant',
-          text: reply,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            if (conversationId) {
+              useConversationStore.getState().addMessageToConversation(conversationId, {
+                id: assistantMsgId,
+                role: 'assistant',
+                text: streamedText,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              });
+            }
+          },
+          onError: (error) => {
+            updateMessage(assistantMsgId, { text: 'Sorry, something went wrong. Please try again.' });
+            console.error('[Chat] Stream error:', error);
+          },
         });
+      } catch (streamError) {
+        streamFailed = true;
+        console.warn('[Chat] Stream failed, falling back to regular:', streamError);
+
+        // If streaming failed before onStart, we still have thinking indicator
+        // Remove the empty assistant message if it was created
+        if (streamedText === '') {
+          // Remove placeholder — fall through to regular send below
+        }
+
+        // Check if it's a quota error
+        if (streamError instanceof ApiError && streamError.status === 429) {
+          throw streamError; // Re-throw to be caught by outer catch
+        }
       }
 
-      if (response.conversation_title) {
-        useConversationStore.getState().renameConversation(conversationId, response.conversation_title as string);
-      } else {
-        // Auto-rename with first 3 words of user text
-        const words = text.trim().split(/\s+/);
-        const autoTitle = words.slice(0, 3).join(' ')
-          || attachmentMeta?.filename?.split('.')[0]
-          || 'New conversation';
-        const suffix = words.length > 3 ? '...' : '';
-        useConversationStore.getState().renameConversation(conversationId, autoTitle + suffix);
+      // Fallback to non-streaming if stream failed
+      if (streamFailed && streamedText === '') {
+        const response = await sendMessage(text, conversationId);
+
+        const reply =
+          (response.text as string) ||
+          (response.response as string) ||
+          (response.message as string) ||
+          (response.content as string) ||
+          (response.answer as string) ||
+          (response.reply as string) ||
+          '';
+
+        // If we already created a placeholder, update it; otherwise add new
+        addMessage({
+          id: nanoid(),
+          role: 'assistant',
+          text: reply || 'No response',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          type: response.type as MessageType | undefined,
+          data: response.data as Record<string, unknown> | undefined,
+        });
+
+        if (response.conversation_title) {
+          useConversationStore.getState().renameConversation(conversationId, response.conversation_title as string);
+        } else {
+          const words = text.trim().split(/\s+/);
+          const autoTitle = words.slice(0, 3).join(' ') || 'New conversation';
+          const suffix = words.length > 3 ? '...' : '';
+          useConversationStore.getState().renameConversation(conversationId, autoTitle + suffix);
+        }
+
+        if (conversationId) {
+          useConversationStore.getState().addMessageToConversation(conversationId, {
+            id: nanoid(),
+            role: 'assistant',
+            text: reply,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          });
+        }
       }
     } catch (error) {
       const isQuotaExceeded = error instanceof ApiError && error.status === 429;
@@ -93,7 +173,7 @@ export function useChat() {
         id: nanoid(),
         role: 'assistant',
         text: isQuotaExceeded
-          ? 'Daily limit reached. Upgrade your plan to continue. [Upgrade \u2192](/pricing)'
+          ? 'Daily limit reached. Upgrade your plan to continue. [Upgrade →](/pricing)'
           : 'Sorry, something went wrong. Please try again.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       });

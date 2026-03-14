@@ -84,6 +84,91 @@ export async function sendMessage(
   });
 }
 
+/**
+ * Stream chat response via SSE.
+ * Calls onToken for each token, onDone when complete.
+ */
+export async function sendMessageStream(
+  message: string,
+  conversationId: string | undefined,
+  callbacks: {
+    onStart?: (data: { agent: string; conversation_id: string }) => void;
+    onToken?: (token: string) => void;
+    onData?: (data: Record<string, unknown>) => void;
+    onDone?: (data: Record<string, unknown>) => void;
+    onError?: (error: string) => void;
+  },
+): Promise<void> {
+  const headers = await getHeaders();
+
+  const response = await fetch(`${API_URL}/api/webapp/chat/stream`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      message,
+      ...(conversationId ? { conversation_id: conversationId } : {}),
+    }),
+  });
+
+  if (!response.ok) {
+    const msg = await response.text().catch(() => 'Unknown error');
+    if (response.status === 429) {
+      throw new ApiError(429, msg);
+    }
+    throw new ApiError(response.status, msg);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Process complete SSE events (separated by \n\n)
+      const events = buffer.split('\n\n');
+      buffer = events.pop() || ''; // Keep incomplete event in buffer
+
+      for (const event of events) {
+        const dataLine = event.trim();
+        if (!dataLine.startsWith('data: ')) continue;
+
+        try {
+          const data = JSON.parse(dataLine.slice(6));
+
+          switch (data.type) {
+            case 'start':
+              callbacks.onStart?.(data);
+              break;
+            case 'token':
+              callbacks.onToken?.(data.content || '');
+              break;
+            case 'data':
+              callbacks.onData?.(data.data || {});
+              break;
+            case 'done':
+              callbacks.onDone?.(data);
+              break;
+            case 'error':
+              callbacks.onError?.(data.detail || 'Stream error');
+              break;
+          }
+        } catch {
+          // Skip malformed JSON
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Quota
 // ---------------------------------------------------------------------------
