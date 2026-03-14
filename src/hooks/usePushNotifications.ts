@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useAuthStore } from '@/stores/authStore';
+import { createClient } from '@/lib/supabase/client';
 
 const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -13,6 +16,16 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray.buffer as ArrayBuffer;
+}
+
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token || useAuthStore.getState().token;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 }
 
 export interface PushState {
@@ -71,15 +84,13 @@ export function usePushNotifications() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
       });
 
-      /* Send subscription to backend */
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? '';
-      if (apiUrl) {
-        await fetch(`${apiUrl}/notifications/subscribe`, {
+      // Send subscription to backend with auth
+      if (API_URL) {
+        const headers = await getAuthHeaders();
+        await fetch(`${API_URL}/api/webapp/notifications/subscribe`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription),
-        }).catch(() => {
-          /* backend might not exist yet */
+          headers,
+          body: JSON.stringify(subscription.toJSON()),
         });
       }
 
@@ -96,7 +107,18 @@ export function usePushNotifications() {
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
-      if (sub) await sub.unsubscribe();
+      if (sub) {
+        // Tell backend to remove subscription
+        if (API_URL) {
+          const headers = await getAuthHeaders();
+          await fetch(`${API_URL}/api/webapp/notifications/unsubscribe`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(sub.toJSON()),
+          }).catch(() => {});
+        }
+        await sub.unsubscribe();
+      }
       setState((s) => ({ ...s, subscribed: false, loading: false }));
     } catch {
       setState((s) => ({ ...s, loading: false }));
