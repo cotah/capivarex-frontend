@@ -74,7 +74,7 @@ export default function ConnectionsSection() {
         setIntegrations((prev) =>
           prev.map((i) => ({
             ...i,
-            connected: map[i.id]?.connected ?? false,
+            connected: map[i.id]?.is_connected ?? map[i.id]?.connected ?? false,
             account: map[i.id]?.account,
             last_sync: map[i.id]?.last_sync,
           }))
