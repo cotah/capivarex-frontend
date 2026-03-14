@@ -79,12 +79,12 @@ const PLAN_RANK: Record<PlanType, number> = { free: 0, me: 1, everywhere: 2 };
 const OAUTH_MAP: Record<string, string> = {
   google: '/api/auth/google/connect',
   spotify: '/api/auth/spotify/connect',
-  smartthings: '/api/auth/smartthings/connect',
-  smartcar: '/api/auth/smartcar/connect',
+  smartthings: '/api/v1/smartthings/connect',
+  smartcar: '/api/v1/car/connect',
   github: '/api/auth/github/connect',
 };
 
-const COMING_SOON_OAUTH = new Set(['smartthings', 'smartcar', 'github']);
+const COMING_SOON_OAUTH = new Set(['github']);
 
 export default function ServiceGrid() {
   const user = useAuthStore((s) => s.user);
