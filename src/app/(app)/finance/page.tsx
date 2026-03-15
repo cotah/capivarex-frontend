@@ -29,8 +29,8 @@ export default function FinancePage() {
     async function load() {
       try {
         const data = await apiClient<PortfolioResponse>('/api/webapp/finance/portfolio');
-        setStocks(data.stocks || []);
-        setCrypto(data.crypto || []);
+        setStocks((data.stocks || []).map(s => ({ ...s, positive: s.change >= 0 })));
+        setCrypto((data.crypto || []).map(c => ({ ...c, positive: c.change >= 0 })));
       } catch {
         // toast already shown
       } finally {

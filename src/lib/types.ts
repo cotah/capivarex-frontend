@@ -199,6 +199,7 @@ export interface NewsArticle {
   id: string;
   title: string;
   source: string;
+  summary?: string;
   timeAgo: string;
 }
 

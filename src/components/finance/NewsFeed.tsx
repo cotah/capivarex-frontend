@@ -22,6 +22,7 @@ export default function NewsFeed() {
             id: (item.id as string) || '',
             title: (item.title as string) || '',
             source: (item.source as string) || '',
+            summary: (item.summary as string) || '',
             timeAgo: (item.time_ago as string) || (item.timeAgo as string) || '',
           })),
         );
@@ -49,7 +50,7 @@ export default function NewsFeed() {
   return (
     <div className="space-y-2">
       {news.map((item) => (
-        <NewsItem key={item.id} title={item.title} source={item.source} timeAgo={item.timeAgo} />
+        <NewsItem key={item.id} title={item.title} source={item.source} timeAgo={item.timeAgo} summary={item.summary} />
       ))}
     </div>
   );
