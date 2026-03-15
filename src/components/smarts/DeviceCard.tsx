@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface DeviceCardProps {
   id: string;
@@ -23,12 +24,15 @@ export default function DeviceCard({ id, name, icon, status, room, type }: Devic
     setIsOn(newValue); // Optimistic update
     setToggling(true);
     try {
-      const resp = await apiClient<{ ok: boolean }>(`/api/webapp/smarts/devices/${id}/command`, {
+      const resp = await apiClient<{ ok: boolean; error?: string }>(`/api/webapp/smarts/devices/${id}/command`, {
         method: 'POST',
         body: JSON.stringify({ code: 'switch_led', value: newValue }),
       });
       if (!resp.ok) {
         setIsOn(!newValue); // Revert on failure
+        if (resp.error) {
+          toast.error(resp.error, { duration: 5000 });
+        }
       }
     } catch {
       setIsOn(!newValue); // Revert on error
