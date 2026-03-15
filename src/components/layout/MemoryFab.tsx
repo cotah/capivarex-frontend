@@ -10,6 +10,7 @@ import { useChatStore } from '@/stores/chatStore';
  */
 export default function MemoryFab() {
   const isThinking = useChatStore((s) => s.isThinking);
+  const hasMessages = useChatStore((s) => s.messages.length > 0);
 
   return (
     <Link
@@ -18,8 +19,9 @@ export default function MemoryFab() {
       className={[
         // Only visible on desktop (md+)
         'hidden md:flex',
-        // Positioning
-        'fixed bottom-6 right-6 z-40',
+        // Positioning — shift up when chat input is at bottom
+        'fixed right-6 z-40',
+        hasMessages ? 'bottom-20' : 'bottom-6',
         // Shape
         'h-10 w-10 items-center justify-center rounded-full',
         // Base style — subtle glass
