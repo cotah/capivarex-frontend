@@ -1,7 +1,7 @@
 'use client';
 import { useT } from '@/i18n';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Home } from 'lucide-react';
 import SubTabs from '@/components/shared/SubTabs';
@@ -17,7 +17,11 @@ const tabs = [
 export default function SmartsPage() {
   const t = useT();
   const [activeTab, setActiveTab] = useState('devices');
-  const connections = useServicesStore((s) => s.connections);
+  const { connections, fetchAll } = useServicesStore();
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const smartHomeConnected = connections.find((c) => c.provider === 'tuya')?.connected ?? false;
   const smartcarConnected = connections.find((c) => c.provider === 'smartcar')?.connected ?? false;
