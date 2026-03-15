@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { apiClient } from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 
 interface DeviceCardProps {
+  id: string;
   name: string;
   icon: string;
   status: string;
@@ -10,9 +13,29 @@ interface DeviceCardProps {
   type: string;
 }
 
-export default function DeviceCard({ name, icon, status, room, type }: DeviceCardProps) {
+export default function DeviceCard({ id, name, icon, status, room, type }: DeviceCardProps) {
   const isToggleable = type === 'light' || type === 'plug';
   const [isOn, setIsOn] = useState(status === 'on');
+  const [toggling, setToggling] = useState(false);
+
+  const handleToggle = async () => {
+    const newValue = !isOn;
+    setIsOn(newValue); // Optimistic update
+    setToggling(true);
+    try {
+      const resp = await apiClient<{ ok: boolean }>(`/api/webapp/smarts/devices/${id}/command`, {
+        method: 'POST',
+        body: JSON.stringify({ code: 'switch_led', value: newValue }),
+      });
+      if (!resp.ok) {
+        setIsOn(!newValue); // Revert on failure
+      }
+    } catch {
+      setIsOn(!newValue); // Revert on error
+    } finally {
+      setToggling(false);
+    }
+  };
 
   const statusLabel =
     type === 'lock'
@@ -35,7 +58,11 @@ export default function DeviceCard({ name, icon, status, room, type }: DeviceCar
       <div className="flex items-start justify-between mb-3">
         <span className="text-2xl">{icon}</span>
         <div className="flex items-center gap-1.5">
-          <span className={`inline-block w-1.5 h-1.5 rounded-full ${statusColor === 'text-success' ? 'bg-success' : 'bg-text-muted/40'}`} />
+          {toggling ? (
+            <Loader2 size={12} className="animate-spin text-accent" />
+          ) : (
+            <span className={`inline-block w-1.5 h-1.5 rounded-full ${statusColor === 'text-success' ? 'bg-success' : 'bg-text-muted/40'}`} />
+          )}
           <span className={`text-sm ${statusColor}`}>{statusLabel}</span>
         </div>
       </div>
@@ -43,10 +70,11 @@ export default function DeviceCard({ name, icon, status, room, type }: DeviceCar
       <p className="text-sm text-text-muted mb-3">{room}</p>
       {isToggleable && (
         <button
-          onClick={() => setIsOn(!isOn)}
+          onClick={handleToggle}
+          disabled={toggling}
           className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
             isOn ? 'bg-amber-500' : 'bg-gray-600'
-          }`}
+          } ${toggling ? 'opacity-50' : ''}`}
         >
           <span
             className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${

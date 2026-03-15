@@ -63,6 +63,7 @@ export default function DeviceGrid({ connected = true }: DeviceGridProps) {
       {devices.map((d) => (
         <DeviceCard
           key={d.id}
+          id={d.id}
           name={d.name}
           icon={d.icon}
           status={d.status}

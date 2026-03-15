@@ -69,7 +69,7 @@ export default function VehicleList({ connected = true }: VehicleListProps) {
         title="No vehicle connected"
         description="Connect your car with Smartcar"
         actionLabel="Connect"
-        actionHref="/services"
+        actionHref="/settings"
       />
     );
   }
