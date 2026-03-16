@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, TrendingUp, BarChart3, Settings, X, Phone } from 'lucide-react';
@@ -13,7 +12,6 @@ interface MoreMenuProps {
 }
 
 export default function MoreMenu({ open, onClose }: MoreMenuProps) {
-  const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useT();
 
@@ -24,8 +22,6 @@ export default function MoreMenu({ open, onClose }: MoreMenuProps) {
     { href: '/calls', label: t('nav.calls'), icon: Phone },
     { href: '/settings', label: t('nav.settings'), icon: Settings },
   ];
-
-  const isActive = (href: string) => pathname.startsWith(href);
 
   // Close on outside click
   useEffect(() => {
@@ -99,11 +95,7 @@ export default function MoreMenu({ open, onClose }: MoreMenuProps) {
                   key={href}
                   href={href}
                   onClick={onClose}
-                  className={`flex items-center gap-4 rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-200 ${
-                    isActive(href)
-                      ? 'bg-accent-soft text-accent'
-                      : 'text-text-muted hover:text-text hover:bg-white/5'
-                  }`}
+                  className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-200 text-text-muted hover:text-text hover:bg-white/5 active:bg-accent-soft active:text-accent"
                 >
                   <Icon size={22} />
                   {label}

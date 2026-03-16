@@ -15,26 +15,33 @@ interface DeviceGridProps {
 export default function DeviceGrid({ connected = true }: DeviceGridProps) {
   const [devices, setDevices] = useState<SmartDevice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(connected);
 
   useEffect(() => {
-    if (!connected) {
-      setLoading(false);
-      return;
-    }
     async function load() {
       try {
-        const resp = await apiClient<{ devices: SmartDevice[] } | SmartDevice[]>('/api/webapp/smarts/devices');
-        setDevices(Array.isArray(resp) ? resp : (resp.devices || []));
+        const resp = await apiClient<{ devices: SmartDevice[]; connected: boolean } | SmartDevice[]>(
+          '/api/webapp/smarts/devices'
+        );
+        if (Array.isArray(resp)) {
+          setDevices(resp);
+          setIsConnected(resp.length > 0);
+        } else {
+          setDevices(resp.devices || []);
+          setIsConnected(resp.connected ?? (resp.devices?.length > 0));
+        }
       } catch {
-        // toast already shown
+        setIsConnected(false);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [connected]);
+  }, []);
 
-  if (!connected) {
+  if (loading) return <LoadingSpinner />;
+
+  if (!isConnected) {
     return (
       <EmptyState
         icon={Home}

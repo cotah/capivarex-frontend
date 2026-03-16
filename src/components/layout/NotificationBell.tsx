@@ -123,7 +123,7 @@ export default function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 top-full mt-2 w-80 rounded-2xl glass-strong border border-glass-border shadow-2xl z-[100] overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-white/10 shadow-2xl z-[100] overflow-hidden bg-[#141420]"
           >
             {/* Panel header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
