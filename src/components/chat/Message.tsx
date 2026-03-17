@@ -106,38 +106,15 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
           )}
         </div>
         {attachment && <FileChip attachment={attachment} />}
-        {!isUser && message.type === 'music' && <MusicCard data={message.data} />}
+        {/* Grupo 2 - Coming Soon: music card desabilitado temporariamente */}
+        {/* {!isUser && message.type === 'music' && <MusicCard data={message.data} />} */}
         {!isUser && message.type === 'calendar' && <CalendarCard data={message.data} />}
-        {!isUser && singleImageUrl !== undefined && (
-          <div className="relative mt-3 rounded-xl overflow-hidden border border-glass-border max-w-md w-full">
-            <Image src={resolveUrl(singleImageUrl)} alt={typeof message.data?.prompt === 'string' ? message.data.prompt : 'Generated image'}
-              width={448} height={448} className="w-full rounded-xl cursor-pointer" unoptimized onClick={() => window.open(resolveUrl(singleImageUrl), '_blank')} />
-          </div>
-        )}
-        {!isUser && hasMultipleImages && rawImageUrls.map((url, i) => (
-          <div key={i} className="relative mt-3 rounded-xl overflow-hidden border border-glass-border max-w-md w-full">
-            <Image src={resolveUrl(url)} alt={`Generated image ${i + 1}`} width={448} height={448}
-              className="w-full rounded-xl cursor-pointer" unoptimized onClick={() => window.open(resolveUrl(url), '_blank')} />
-          </div>
-        ))}
-        {!isUser && videoId !== undefined && (
-          <div className="mt-3 rounded-xl overflow-hidden border border-glass-border aspect-video max-w-md w-full">
-            <iframe src={`https://www.youtube.com/embed/${videoId}`} className="w-full h-full"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-          </div>
-        )}
-        {!isUser && videoUrl !== undefined && (
-          <div className="mt-3 rounded-xl overflow-hidden border border-glass-border max-w-md w-full">
-            <video src={resolveUrl(videoUrl)} controls className="w-full rounded-xl" preload="metadata" />
-          </div>
-        )}
-        {!isUser && videoId !== undefined && (
-          <button onClick={() => castYouTube(videoId)}
-            className="mt-1.5 flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm text-text-muted hover:text-accent hover:bg-accent/5 transition-colors">
-            <Tv size={12} />Cast to TV
-          </button>
-        )}
+        {/* Grupo 3 - Desativado: image generation, YouTube embed, video, cast to TV */}
+        {/* {!isUser && singleImageUrl !== undefined && (...)} */}
+        {/* {!isUser && hasMultipleImages && (...)} */}
+        {/* {!isUser && videoId !== undefined && (...)} */}
+        {/* {!isUser && videoUrl !== undefined && (...)} */}
+        {/* {!isUser && videoId !== undefined && (<button ... Cast to TV />)} */}
         <div className="mt-1 flex items-center gap-2 px-1">
           <span className="text-sm text-text-muted">{message.time}</span>
           {!isUser && onTTSToggle && (

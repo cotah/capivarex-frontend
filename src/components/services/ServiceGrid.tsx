@@ -10,70 +10,48 @@ import type { ServiceDefinition, PlanType } from '@/lib/types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const ALL_SERVICES: ServiceDefinition[] = [
-  // ── Communication ──
+  // ── Grupo 1 — Core Business (ativos) ──
   { id: 'chat', name: 'AI Chat', icon: 'MessageSquare', description: 'Intelligent conversation with context', category: 'Communication', plans: ['free', 'me', 'everywhere'] },
   { id: 'voice', name: 'Voice Assistant', icon: 'Mic', description: 'Voice input and text-to-speech', category: 'Communication', plans: ['me', 'everywhere'] },
-  { id: 'twilio', name: 'Phone Calls', icon: 'Phone', description: 'Make and receive phone calls', category: 'Communication', plans: ['me', 'everywhere'] },
   { id: 'email', name: 'Gmail', icon: 'Mail', description: 'Read, compose, and manage emails', category: 'Communication', plans: ['me', 'everywhere'], oauth: 'google' },
-
-  // ── Productivity ──
   { id: 'calendar', name: 'Google Calendar', icon: 'Calendar', description: 'Manage events and schedule', category: 'Productivity', plans: ['me', 'everywhere'], oauth: 'google' },
   { id: 'notes', name: 'Notes', icon: 'StickyNote', description: 'Create and manage personal notes', category: 'Productivity', plans: ['free', 'me', 'everywhere'] },
   { id: 'reminder', name: 'Reminders', icon: 'Bell', description: 'Set reminders and alarms', category: 'Productivity', plans: ['free', 'me', 'everywhere'] },
   { id: 'timer', name: 'Timers', icon: 'Timer', description: 'Countdown and stopwatch timers', category: 'Productivity', plans: ['free', 'me', 'everywhere'] },
   { id: 'translate', name: 'Translate', icon: 'Languages', description: 'Translate text between languages', category: 'Productivity', plans: ['free', 'me', 'everywhere'] },
-  { id: 'time', name: 'Time & Date', icon: 'Clock', description: 'World clocks, timezones, conversions', category: 'Productivity', plans: ['free', 'me', 'everywhere'] },
-
-  // ── Entertainment ──
-  { id: 'music', name: 'Spotify', icon: 'Music', description: 'Control playback, playlists, discover music', category: 'Entertainment', plans: ['me', 'everywhere'], oauth: 'spotify' },
-  { id: 'youtube', name: 'YouTube', icon: 'Youtube', description: 'Search and play videos', category: 'Entertainment', plans: ['free', 'me', 'everywhere'] },
-  { id: 'media_cast', name: 'Cast to TV', icon: 'Tv', description: 'Send content to your TV via Chromecast', category: 'Entertainment', plans: ['everywhere'] },
-
-  // ── Smart Home ──
-  { id: 'smarthome', name: 'Smart Home', icon: 'Home', description: 'Control lights, plugs, sensors, thermostat and more', category: 'Smart Home', plans: ['me', 'everywhere'] },
-
-  // ── Transport & Navigation ──
-  { id: 'traffic', name: 'Traffic', icon: 'Navigation', description: 'Real-time traffic and route info', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
-  { id: 'transport', name: 'Public Transport', icon: 'Bus', description: 'Bus, train, metro schedules and routes', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
   { id: 'maps', name: 'Maps', icon: 'Map', description: 'Directions, places, navigation', category: 'Transport', plans: ['free', 'me', 'everywhere'] },
-  { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['me', 'everywhere'], oauth: 'smartcar' },
-  { id: 'leaving_now', name: 'Smart Departure', icon: 'Navigation', description: 'Traffic + weather + calendar combined', category: 'Transport', plans: ['me', 'everywhere'] },
-
-  // ── Travel ──
-  { id: 'flights', name: 'Smart Flights', icon: 'Plane', description: 'Search flights, compare prices, and book tickets', category: 'Travel', plans: ['me', 'everywhere'] },
-  { id: 'stay', name: 'Smart Stay', icon: 'Hotel', description: 'Find hotels, Airbnb, and accommodation deals', category: 'Travel', plans: ['me', 'everywhere'] },
-
-  // ── Shopping & Finance ──
-  { id: 'mercado', name: 'Smart Shopping', icon: 'ShoppingCart', description: 'OCR receipts, price tracking, shopping lists', category: 'Shopping', plans: ['me', 'everywhere'] },
-  { id: 'finance', name: 'Finance', icon: 'TrendingUp', description: 'Stocks, crypto, exchange rates', category: 'Finance', plans: ['me', 'everywhere'] },
-  { id: 'crypto', name: 'Crypto', icon: 'Coins', description: 'Cryptocurrency prices and portfolio', category: 'Finance', plans: ['me', 'everywhere'] },
-
-  // ── Information ──
+  { id: 'finance', name: 'Finance', icon: 'TrendingUp', description: 'Stocks and exchange rates', category: 'Finance', plans: ['me', 'everywhere'] },
   { id: 'weather', name: 'Weather', icon: 'Cloud', description: 'Forecasts and weather alerts', category: 'Information', plans: ['free', 'me', 'everywhere'] },
   { id: 'search', name: 'Web Search', icon: 'Search', description: 'Search the web for answers', category: 'Information', plans: ['free', 'me', 'everywhere'] },
   { id: 'research', name: 'Deep Research', icon: 'BookOpen', description: 'In-depth research and analysis', category: 'Information', plans: ['me', 'everywhere'] },
-
-  // ── Food & Places ──
-  { id: 'restaurant', name: 'Restaurants', icon: 'UtensilsCrossed', description: 'Find, review, and book restaurants', category: 'Food', plans: ['me', 'everywhere'] },
-
-  // ── Development ──
-  { id: 'dev', name: 'Dev Assistant', icon: 'Code', description: 'Code generation, debugging, explanations', category: 'Development', plans: ['me', 'everywhere'] },
-  { id: 'github', name: 'GitHub', icon: 'Github', description: 'Manage repos, commits, issues', category: 'Development', plans: ['me', 'everywhere'], oauth: 'github' },
-
-  // ── Image & Media ──
-  { id: 'image', name: 'Image Generation', icon: 'ImageIcon', description: 'Generate images with AI', category: 'Media', plans: ['me', 'everywhere'] },
-
-  // ── Tracking ──
   { id: 'tracking', name: 'Package Tracking', icon: 'Package', description: 'Track deliveries and shipments', category: 'Tracking', plans: ['me', 'everywhere'] },
-
-  // ── Communication ──
   { id: 'whatsapp', name: 'WhatsApp', icon: 'MessageCircle', description: 'Use CAPIVAREX via WhatsApp', category: 'Communication', plans: ['everywhere'] },
 
-  // ── Coming Soon ──
+  // ── Grupo 2 — Coming Soon Q3 2026 ──
+  { id: 'twilio', name: 'Phone Calls', icon: 'Phone', description: 'Make and receive phone calls', category: 'Communication', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'music', name: 'Spotify', icon: 'Music', description: 'Control playback, playlists, discover music', category: 'Entertainment', plans: ['me', 'everywhere'], oauth: 'spotify', comingSoon: true },
+  { id: 'smarthome', name: 'Smart Home', icon: 'Home', description: 'Control lights, plugs, sensors, thermostat and more', category: 'Smart Home', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'traffic', name: 'Traffic', icon: 'Navigation', description: 'Real-time traffic and route info', category: 'Transport', plans: ['free', 'me', 'everywhere'], comingSoon: true },
+  { id: 'transport', name: 'Public Transport', icon: 'Bus', description: 'Bus, train, metro schedules and routes', category: 'Transport', plans: ['free', 'me', 'everywhere'], comingSoon: true },
+  { id: 'car', name: 'Connected Car', icon: 'Car', description: 'Battery, location, charging status', category: 'Transport', plans: ['me', 'everywhere'], oauth: 'smartcar', comingSoon: true },
+  { id: 'leaving_now', name: 'Smart Departure', icon: 'Navigation', description: 'Traffic + weather + calendar combined', category: 'Transport', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'flights', name: 'Smart Flights', icon: 'Plane', description: 'Search flights, compare prices, and book tickets', category: 'Travel', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'stay', name: 'Smart Stay', icon: 'Hotel', description: 'Find hotels, Airbnb, and accommodation deals', category: 'Travel', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'mercado', name: 'Smart Shopping', icon: 'ShoppingCart', description: 'OCR receipts, price tracking, shopping lists', category: 'Shopping', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'crypto', name: 'Crypto', icon: 'Coins', description: 'Cryptocurrency prices and portfolio', category: 'Finance', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'restaurant', name: 'Restaurants', icon: 'UtensilsCrossed', description: 'Find, review, and book restaurants', category: 'Food', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'dev', name: 'Dev Assistant', icon: 'Code', description: 'Code generation, debugging, explanations', category: 'Development', plans: ['me', 'everywhere'], comingSoon: true },
+  { id: 'github', name: 'GitHub', icon: 'Github', description: 'Manage repos, commits, issues', category: 'Development', plans: ['me', 'everywhere'], oauth: 'github', comingSoon: true },
   { id: 'canva', name: 'Canva', icon: 'Palette', description: 'Create designs, posts, social media art', category: 'Media', plans: ['me', 'everywhere'], comingSoon: true },
   { id: 'outlook', name: 'Outlook', icon: 'Mail', description: 'Microsoft email integration', category: 'Communication', plans: ['me', 'everywhere'], comingSoon: true },
   { id: 'uber', name: 'Uber', icon: 'Car', description: 'Request rides', category: 'Transport', plans: ['everywhere'], comingSoon: true },
   { id: 'ev_charging', name: 'EV Charging', icon: 'Zap', description: 'Find charging stations nearby', category: 'Transport', plans: ['me', 'everywhere'], comingSoon: true },
+
+  // ── Grupo 3 — Desativado: oculto da interface ──
+  { id: 'image', name: 'Image Generation', icon: 'ImageIcon', description: 'Generate images with AI', category: 'Media', plans: ['me', 'everywhere'], hidden: true },    // Grupo 3 - Desativado
+  { id: 'youtube', name: 'YouTube', icon: 'Youtube', description: 'Search and play videos', category: 'Entertainment', plans: ['free', 'me', 'everywhere'], hidden: true }, // Grupo 3 - Desativado
+  { id: 'media_cast', name: 'Cast to TV', icon: 'Tv', description: 'Send content to your TV via Chromecast', category: 'Entertainment', plans: ['everywhere'], hidden: true }, // Grupo 3 - Desativado
+  { id: 'time', name: 'Time & Date', icon: 'Clock', description: 'World clocks, timezones, conversions', category: 'Productivity', plans: ['free', 'me', 'everywhere'], hidden: true }, // Grupo 3 - Desativado
 ];
 
 const PLAN_RANK: Record<PlanType, number> = { free: 0, me: 1, everywhere: 2 };
@@ -164,17 +142,20 @@ export default function ServiceGrid() {
     return PLAN_RANK[userPlan] < PLAN_RANK[minPlan];
   };
 
+  // Filter out hidden services (Grupo 3 — Desativado) before splitting
+  const VISIBLE_SERVICES = ALL_SERVICES.filter((s) => !s.hidden);
+
   // Split into 4 sections
-  const connected = ALL_SERVICES.filter(
+  const connected = VISIBLE_SERVICES.filter(
     (s) => !s.comingSoon && isConnected(s),
   );
-  const available = ALL_SERVICES.filter(
+  const available = VISIBLE_SERVICES.filter(
     (s) => !s.comingSoon && !isConnected(s) && !serviceNeedsUpgrade(s),
   );
-  const requiresUpgrade = ALL_SERVICES.filter(
+  const requiresUpgrade = VISIBLE_SERVICES.filter(
     (s) => !s.comingSoon && !isConnected(s) && serviceNeedsUpgrade(s),
   );
-  const comingSoon = ALL_SERVICES.filter((s) => s.comingSoon);
+  const comingSoon = VISIBLE_SERVICES.filter((s) => s.comingSoon);
 
   const renderSection = (
     title: string,

@@ -14,7 +14,7 @@ import type { PortfolioResponse, StockItem, CryptoItem } from '@/lib/types';
 
 const tabs = [
   { id: 'stocks', label: 'Stocks' },
-  { id: 'crypto', label: 'Crypto' },
+  { id: 'crypto', label: 'Crypto (Em Breve)', disabled: true },  // Grupo 2 - Coming Soon Q3 2026
   { id: 'news', label: 'News' },
 ];
 

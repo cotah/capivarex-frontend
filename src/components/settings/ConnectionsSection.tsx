@@ -17,11 +17,14 @@ interface Integration {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
+// Grupo 2 — Coming Soon: Spotify, Tuya, Smartcar desabilitados temporariamente
+const COMING_SOON_IDS = new Set(['spotify', 'tuya', 'smartcar']);
+
 const STATIC_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
   { id: 'google',   name: 'Google',        icon: '📅', oauth_path: '/api/auth/google/connect' },
-  { id: 'spotify',  name: 'Spotify',       icon: '🎵', oauth_path: '/api/auth/spotify/connect' },
-  { id: 'tuya',     name: 'Smart Home',    icon: '🏠', oauth_path: '', loginFlow: true },
-  { id: 'smartcar', name: 'Connected Car', icon: '🚗', oauth_path: '/api/v1/car/connect' },
+  { id: 'spotify',  name: 'Spotify',       icon: '🎵', oauth_path: '/api/auth/spotify/connect' },     // Grupo 2 - Coming Soon Q3 2026
+  { id: 'tuya',     name: 'Smart Home',    icon: '🏠', oauth_path: '', loginFlow: true },              // Grupo 2 - Coming Soon Q3 2026
+  { id: 'smartcar', name: 'Connected Car', icon: '🚗', oauth_path: '/api/v1/car/connect' },            // Grupo 2 - Coming Soon Q3 2026
 ];
 
 const COUNTRY_CODES = [
@@ -204,7 +207,11 @@ export default function ConnectionsSection() {
                     </div>
                   </div>
                 </div>
-                {conn.connected ? (
+                {COMING_SOON_IDS.has(conn.id) ? (
+                  <span className="rounded-full bg-accent/15 border border-accent/20 px-2.5 py-0.5 text-xs font-medium text-accent uppercase tracking-wider">
+                    Em Breve
+                  </span>
+                ) : conn.connected ? (
                   <button
                     onClick={() => handleDisconnect(conn.id)}
                     disabled={disconnecting === conn.id}

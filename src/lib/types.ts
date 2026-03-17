@@ -68,6 +68,7 @@ export interface ServiceDefinition {
   statusPath?: string;
   minPlan?: PlanType;
   comingSoon?: boolean;
+  hidden?: boolean;  // Grupo 3 - Desativado: oculto completamente da interface
 }
 
 export interface ServiceConnection {
