@@ -152,3 +152,15 @@ body::before {
   animation: brainPulse 1.4s ease-in-out infinite;
   border-color: rgba(201, 164, 97, 0.4);
 }
+
+/* Performance: CSS animations instead of framer-motion for simple transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fadeIn var(--duration, 300ms) ease-out forwards;
+}
+.fade-in {
+  --duration: 300ms;
+}

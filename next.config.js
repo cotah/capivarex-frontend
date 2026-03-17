@@ -59,6 +59,14 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Performance: remove console.log in production
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+  // Performance: optimize package imports
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'react-hot-toast'],
+  },
   async headers() {
     return [
       {

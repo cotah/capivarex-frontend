@@ -1,18 +1,24 @@
 'use client';
 import { useT } from '@/i18n';
+import dynamic from 'next/dynamic';
 
-import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
-import ServiceGrid from '@/components/services/ServiceGrid';
+
+// Dynamic import — ServiceGrid is heavy (API calls + OAuth logic)
+const ServiceGrid = dynamic(() => import('@/components/services/ServiceGrid'), {
+  loading: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="glass rounded-2xl p-5 animate-pulse h-24" />
+      ))}
+    </div>
+  ),
+});
 
 export default function ServicesPage() {
   const t = useT();
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
-    >
+    <div className="px-4 py-8 animate-in fade-in duration-300">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8">
@@ -28,6 +34,6 @@ export default function ServicesPage() {
         {/* Grid */}
         <ServiceGrid />
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,11 +1,12 @@
 'use client';
 
 import { Toaster } from 'react-hot-toast';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <LazyMotion features={domAnimation}>
       {children}
       <InstallPrompt />
       <Toaster
@@ -20,6 +21,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       />
-    </>
+    </LazyMotion>
   );
 }

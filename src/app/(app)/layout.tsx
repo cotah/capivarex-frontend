@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import AuthGuard from '@/components/auth/AuthGuard';
 import TopBar from '@/components/layout/TopBar';
 import BottomBar from '@/components/layout/BottomBar';
 import MemoryFab from '@/components/layout/MemoryFab';
-import OnboardingModal from '@/components/onboarding/OnboardingModal';
+
+// Lazy load — not needed on first render
+const OnboardingModal = dynamic(() => import('@/components/onboarding/OnboardingModal'), {
+  ssr: false,
+});
 
 export default function AppLayout({
   children,
