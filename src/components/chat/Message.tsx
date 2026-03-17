@@ -1,8 +1,6 @@
-'use client';
 
 import { motion } from 'framer-motion';
-import { Tv, Volume2, VolumeX, Loader2 } from 'lucide-react';
-import Image from 'next/image';
+import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
@@ -21,17 +19,8 @@ const sanitizeSchema = {
     (tag: string) => !['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'textarea'].includes(tag)
   ),
 };
-import MusicCard from './MusicCard';
 import CalendarCard from './CalendarCard';
-import { castYouTube } from '@/lib/cast';
 import { mediaTypeIcon, UploadMediaType } from '@/hooks/useFileUpload';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
-function resolveUrl(path: string): string {
-  if (path.startsWith('http')) return path;
-  return `${API_URL}${path}`;
-}
 
 type TTSState = 'idle' | 'loading' | 'playing';
 
@@ -77,11 +66,6 @@ function FileChip({ attachment }: { attachment: Record<string, unknown> }) {
 export default function Message({ message, ttsState = 'idle', onTTSToggle }: MessageProps) {
   const isUser = message.role === 'user';
   const isVoice = message.source === 'voice';
-  const videoId = typeof message.data?.video_id === 'string' ? message.data.video_id : undefined;
-  const videoUrl = typeof message.data?.video_url === 'string' ? message.data.video_url : undefined;
-  const rawImageUrls = Array.isArray(message.data?.image_urls) ? (message.data.image_urls as string[]) : undefined;
-  const hasMultipleImages = rawImageUrls !== undefined && rawImageUrls.length > 0;
-  const singleImageUrl = !hasMultipleImages && typeof message.data?.image_url === 'string' ? message.data.image_url : undefined;
   const attachment = isUser && message.data?.attachment ? (message.data.attachment as Record<string, unknown>) : null;
   const voiceBorderUser = isVoice ? 'border-2 border-amber-500' : 'border border-accent/20';
   const voiceBorderBot = isVoice ? 'border border-amber-500/30' : '';
@@ -106,15 +90,11 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
           )}
         </div>
         {attachment && <FileChip attachment={attachment} />}
-        {/* Grupo 2 - Coming Soon: music card desabilitado temporariamente */}
+        {/* Grupo 2 - Coming Soon: music card disabled temporarily — reactivate with device launch */}
         {/* {!isUser && message.type === 'music' && <MusicCard data={message.data} />} */}
         {!isUser && message.type === 'calendar' && <CalendarCard data={message.data} />}
-        {/* Grupo 3 - Desativado: image generation, YouTube embed, video, cast to TV */}
-        {/* {!isUser && singleImageUrl !== undefined && (...)} */}
-        {/* {!isUser && hasMultipleImages && (...)} */}
-        {/* {!isUser && videoId !== undefined && (...)} */}
-        {/* {!isUser && videoUrl !== undefined && (...)} */}
-        {/* {!isUser && videoId !== undefined && (<button ... Cast to TV />)} */}
+        {/* Grupo 3 - Disabled: image generation, YouTube embed, video, cast to TV */}
+        {/* Preserved for future Enterprise plan reactivation */}
         <div className="mt-1 flex items-center gap-2 px-1">
           <span className="text-sm text-text-muted">{message.time}</span>
           {!isUser && onTTSToggle && (
