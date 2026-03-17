@@ -2,7 +2,7 @@
 import { useT } from '@/i18n';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+
 import { ShoppingCart, ChevronDown } from 'lucide-react';
 import StatsGrid from '@/components/insights/StatsGrid';
 import SpendingChart from '@/components/insights/SpendingChart';
@@ -93,10 +93,8 @@ export default function InsightsPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
+    <div
+      className="px-4 py-8 animate-in fade-in"
     >
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
@@ -150,6 +148,6 @@ export default function InsightsPage() {
         {/* Products Table */}
         <ProductsTable />
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,23 +1,21 @@
 'use client';
 import { useT } from '@/i18n';
+import dynamic from 'next/dynamic';
 
-import { motion } from 'framer-motion';
 import { Settings, Trash2 } from 'lucide-react';
 import ProfileSection from '@/components/settings/ProfileSection';
-import BillingSection from '@/components/settings/BillingSection';
-import ConnectionsSection from '@/components/settings/ConnectionsSection';
-import NotificationSettings from '@/components/settings/NotificationSettings';
-import SecuritySection from '@/components/settings/SecuritySection';
 import { logout } from '@/lib/auth';
+
+// Below-the-fold: lazy load heavy sections
+const BillingSection = dynamic(() => import('@/components/settings/BillingSection'));
+const ConnectionsSection = dynamic(() => import('@/components/settings/ConnectionsSection'));
+const NotificationSettings = dynamic(() => import('@/components/settings/NotificationSettings'));
+const SecuritySection = dynamic(() => import('@/components/settings/SecuritySection'));
 
 export default function SettingsPage() {
   const t = useT();
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
-    >
+    <div className="px-4 py-8 animate-in fade-in">
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="flex items-center gap-2">
           <Settings size={18} className="text-accent" />
@@ -49,6 +47,6 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
-    </motion.div>
+    </div>
   );
 }

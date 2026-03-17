@@ -1,7 +1,7 @@
 'use client';
 import { useT } from '@/i18n';
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+
 import { Phone, Clock } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -43,10 +43,8 @@ export default function CallsPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
+    <div
+      className="px-4 py-8 animate-in fade-in"
     >
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="flex items-center gap-2">
@@ -85,6 +83,6 @@ export default function CallsPage() {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

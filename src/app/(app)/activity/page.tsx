@@ -1,7 +1,7 @@
 'use client';
 import { useT } from '@/i18n';
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+
 import { Clock, BellOff, CheckCheck } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import ActivityFeedPage from '@/components/activity/ActivityFeedPage';
@@ -82,10 +82,8 @@ export default function ActivityPage() {
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
+    <div
+      className="px-4 py-8 animate-in fade-in"
     >
       <div className="mx-auto max-w-3xl space-y-5">
         {/* Header */}
@@ -185,6 +183,6 @@ export default function ActivityPage() {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

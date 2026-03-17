@@ -2,7 +2,7 @@
 import { useT } from '@/i18n';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+
 import { TrendingUp } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import SubTabs from '@/components/shared/SubTabs';
@@ -43,10 +43,8 @@ export default function FinancePage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
+    <div
+      className="px-4 py-8 animate-in fade-in"
     >
       <div className="mx-auto max-w-3xl">
         {/* Header */}
@@ -63,6 +61,6 @@ export default function FinancePage() {
         {activeTab === 'crypto' && <CryptoList crypto={crypto} />}
         {activeTab === 'news' && <NewsFeed />}
       </div>
-    </motion.div>
+    </div>
   );
 }

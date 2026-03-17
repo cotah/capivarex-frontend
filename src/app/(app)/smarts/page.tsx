@@ -2,7 +2,7 @@
 import { useT } from '@/i18n';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+
 import { Home } from 'lucide-react';
 import SubTabs from '@/components/shared/SubTabs';
 import DeviceGrid from '@/components/smarts/DeviceGrid';
@@ -27,10 +27,8 @@ export default function SmartsPage() {
   const smartcarConnected = connections.find((c) => c.provider === 'smartcar')?.connected ?? false;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
+    <div
+      className="px-4 py-8 animate-in fade-in"
     >
       <div className="mx-auto max-w-3xl">
         {/* Header */}
@@ -49,6 +47,6 @@ export default function SmartsPage() {
           <VehicleList connected={smartcarConnected} />
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

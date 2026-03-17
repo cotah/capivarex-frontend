@@ -2,7 +2,7 @@
 import { useT } from '@/i18n';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+
 import { Brain } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import MemoryCard from '@/components/memory/MemoryCard';
@@ -62,10 +62,8 @@ export default function MemoryPage() {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="px-4 py-8"
+    <div
+      className="px-4 py-8 animate-in fade-in"
     >
       <div className="mx-auto max-w-3xl space-y-6">
         {/* Header */}
@@ -99,6 +97,6 @@ export default function MemoryPage() {
           </section>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }

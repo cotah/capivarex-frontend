@@ -3,7 +3,7 @@ import { useT } from '@/i18n';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+
 import { useAuthStore } from '@/stores/authStore';
 
 export default function BillingSuccessPage() {
@@ -20,10 +20,7 @@ export default function BillingSuccessPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-bg">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
+      <div
         className="glass rounded-2xl p-8 max-w-md w-full text-center"
       >
         <div className="text-5xl mb-4">🎉</div>
@@ -41,7 +38,7 @@ export default function BillingSuccessPage() {
         >
           {t('billing.go_to_chat')}
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 }

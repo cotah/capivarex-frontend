@@ -3,15 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import LandingNav from '@/components/landing/LandingNav';
 import Hero from '@/components/landing/Hero';
-import Features from '@/components/landing/Features';
-import HowItWorks from '@/components/landing/HowItWorks';
-import Demo from '@/components/landing/Demo';
-import LandingPricing from '@/components/landing/LandingPricing';
-import FAQ from '@/components/landing/FAQ';
-import FinalCTA from '@/components/landing/FinalCTA';
-import Footer from '@/components/landing/Footer';
+
+// Below-the-fold: lazy load (user doesn't see on first paint)
+const Features = dynamic(() => import('@/components/landing/Features'));
+const HowItWorks = dynamic(() => import('@/components/landing/HowItWorks'));
+const Demo = dynamic(() => import('@/components/landing/Demo'));
+const LandingPricing = dynamic(() => import('@/components/landing/LandingPricing'));
+const FAQ = dynamic(() => import('@/components/landing/FAQ'));
+const FinalCTA = dynamic(() => import('@/components/landing/FinalCTA'));
+const Footer = dynamic(() => import('@/components/landing/Footer'));
 
 export default function LandingPage() {
   const router = useRouter();

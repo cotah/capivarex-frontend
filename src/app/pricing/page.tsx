@@ -1,7 +1,7 @@
 'use client';
 import { useT } from '@/i18n';
 
-import { motion } from 'framer-motion';
+
 import PricingCards from '@/components/billing/PricingCards';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -12,9 +12,7 @@ export default function PricingPage() {
     <div className="relative z-10 min-h-screen px-4 py-12">
       <div className="mx-auto max-w-4xl">
         {/* Back link */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        <div
           className="mb-8"
         >
           <Link
@@ -24,12 +22,10 @@ export default function PricingPage() {
             <ArrowLeft size={14} />
             {t('common.back')}
           </Link>
-        </motion.div>
+        </div>
 
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
           className="text-center mb-10"
         >
           <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">
@@ -38,27 +34,21 @@ export default function PricingPage() {
           <p className="text-sm text-text-muted">
             Start free, upgrade when you&apos;re ready
           </p>
-        </motion.div>
+        </div>
 
         {/* Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div
         >
           <PricingCards />
-        </motion.div>
+        </div>
 
         {/* Footer note */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+        <p
           className="text-center text-sm text-text-muted/50 mt-8"
         >
           {t('billing.all_plans_note')}
           Cancel anytime.
-        </motion.p>
+        </p>
       </div>
     </div>
   );
