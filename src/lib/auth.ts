@@ -37,6 +37,7 @@ export async function register(
   name: string,
   email: string,
   password: string,
+  phone?: string,
 ): Promise<User> {
   const supabase = createClient();
 
@@ -61,6 +62,24 @@ export async function register(
   if (data.session) {
     useAuthStore.getState().setToken(data.session.access_token);
   }
+
+  // Save phone and trigger welcome message (non-blocking)
+  if (phone) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl) {
+      fetch(`${apiUrl}/api/webhooks/whatsapp/register-phone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: data.user.id,
+          phone,
+          name,
+          plan: 'basic',
+        }),
+      }).catch(() => {});  // Fire and forget
+    }
+  }
+
   return user;
 }
 
