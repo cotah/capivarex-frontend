@@ -58,7 +58,7 @@ const ALL_SERVICES: ServiceDefinition[] = [
 
   // ── Development ──
   { id: 'dev', name: 'Dev Assistant', icon: 'Code', description: 'Code generation, debugging, explanations', category: 'Development', plans: ['me', 'everywhere'] },
-  { id: 'github', name: 'GitHub', icon: 'Github', description: 'Manage repos, commits, issues', category: 'Development', plans: ['me', 'everywhere'], oauth: 'github', comingSoon: true },
+  { id: 'github', name: 'GitHub', icon: 'Github', description: 'Manage repos, commits, issues', category: 'Development', plans: ['me', 'everywhere'], oauth: 'github' },
 
   // ── Image & Media ──
   { id: 'image', name: 'Image Generation', icon: 'ImageIcon', description: 'Generate images with AI', category: 'Media', plans: ['me', 'everywhere'] },
@@ -66,9 +66,11 @@ const ALL_SERVICES: ServiceDefinition[] = [
   // ── Tracking ──
   { id: 'tracking', name: 'Package Tracking', icon: 'Package', description: 'Track deliveries and shipments', category: 'Tracking', plans: ['me', 'everywhere'] },
 
+  // ── Communication ──
+  { id: 'whatsapp', name: 'WhatsApp', icon: 'MessageCircle', description: 'Use CAPIVAREX via WhatsApp', category: 'Communication', plans: ['everywhere'] },
+
   // ── Coming Soon ──
   { id: 'canva', name: 'Canva', icon: 'Palette', description: 'Create designs, posts, social media art', category: 'Media', plans: ['me', 'everywhere'], comingSoon: true },
-  { id: 'whatsapp', name: 'WhatsApp', icon: 'MessageCircle', description: 'Use CAPIVAREX via WhatsApp', category: 'Communication', plans: ['everywhere'], comingSoon: true },
   { id: 'outlook', name: 'Outlook', icon: 'Mail', description: 'Microsoft email integration', category: 'Communication', plans: ['me', 'everywhere'], comingSoon: true },
   { id: 'uber', name: 'Uber', icon: 'Car', description: 'Request rides', category: 'Transport', plans: ['everywhere'], comingSoon: true },
   { id: 'ev_charging', name: 'EV Charging', icon: 'Zap', description: 'Find charging stations nearby', category: 'Transport', plans: ['me', 'everywhere'], comingSoon: true },
@@ -83,7 +85,7 @@ const OAUTH_MAP: Record<string, string> = {
   github: '/api/auth/github/connect',
 };
 
-const COMING_SOON_OAUTH = new Set(['github']);
+const COMING_SOON_OAUTH = new Set<string>([]);
 
 export default function ServiceGrid() {
   const user = useAuthStore((s) => s.user);
