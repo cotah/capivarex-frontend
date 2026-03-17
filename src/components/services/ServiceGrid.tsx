@@ -82,7 +82,7 @@ const OAUTH_MAP: Record<string, string> = {
   google: '/api/auth/google/connect',
   spotify: '/api/auth/spotify/connect',
   smartcar: '/api/v1/car/connect',
-  github: '/api/auth/github/connect',
+  github: '/api/v1/auth/github/connect',
 };
 
 const COMING_SOON_OAUTH = new Set<string>([]);
