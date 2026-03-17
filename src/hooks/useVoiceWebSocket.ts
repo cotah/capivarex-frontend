@@ -4,9 +4,12 @@ import { useAuthStore } from '@/stores/authStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-function buildWsUrl(conversationId: string, token: string): string {
+/**
+ * Build WebSocket URL WITHOUT the token (security: token sent in first message).
+ */
+function buildWsUrl(): string {
   const base = API_URL.replace(/^http/, 'ws');
-  return `${base}/api/webapp/voice/ws?token=${encodeURIComponent(token)}&conversation_id=${encodeURIComponent(conversationId)}`;
+  return `${base}/api/webapp/voice/ws`;
 }
 
 export interface VoiceWsCallbacks {
@@ -54,13 +57,20 @@ export function useVoiceWebSocket(callbacks: VoiceWsCallbacks) {
       return;
     }
 
-    const url = buildWsUrl(conversationId, token);
+    // SECURITY: Connect WITHOUT token in URL
+    const url = buildWsUrl();
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
     // Stale-connection guard: ignore events from replaced connections
     ws.onopen = () => {
       if (wsRef.current !== ws) return;
+      // SECURITY: Send token as first message, not in URL
+      ws.send(JSON.stringify({
+        type: 'auth',
+        token,
+        conversation_id: conversationId,
+      }));
       setIsConnected(true);
     };
 

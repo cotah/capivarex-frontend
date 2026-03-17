@@ -62,9 +62,37 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'capivarex-auth',
       partialize: (state) => ({ user: state.user, token: state.token }),
+      // SECURITY: Use sessionStorage instead of localStorage
+      // - sessionStorage is cleared when tab closes (limits XSS token theft window)
+      // - localStorage persists forever (attacker can steal token even after logout)
+      storage: {
+        getItem: (name) => {
+          if (typeof window === 'undefined') return null;
+          const value = sessionStorage.getItem(name);
+          return value ? JSON.parse(value) : null;
+        },
+        setItem: (name, value) => {
+          if (typeof window === 'undefined') return;
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          if (typeof window === 'undefined') return;
+          sessionStorage.removeItem(name);
+          // Also clean any legacy localStorage data
+          localStorage.removeItem(name);
+        },
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setLoading(false);
+        }
+        // Migrate: if token exists in localStorage but not sessionStorage, move it
+        if (typeof window !== 'undefined') {
+          const legacy = localStorage.getItem('capivarex-auth');
+          if (legacy && !sessionStorage.getItem('capivarex-auth')) {
+            sessionStorage.setItem('capivarex-auth', legacy);
+            localStorage.removeItem('capivarex-auth');
+          }
         }
       },
     },

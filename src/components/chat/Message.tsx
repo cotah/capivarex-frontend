@@ -5,7 +5,22 @@ import { Tv, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { ChatMessage } from '@/lib/types';
+
+// Sanitization schema: allow safe markdown features, block XSS
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    a: [...(defaultSchema.attributes?.a || []), ['target', '_blank'], ['rel', 'noopener noreferrer']],
+    code: [...(defaultSchema.attributes?.code || []), 'className'],
+  },
+  // Block dangerous elements
+  tagNames: (defaultSchema.tagNames || []).filter(
+    (tag: string) => !['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'textarea'].includes(tag)
+  ),
+};
 import MusicCard from './MusicCard';
 import CalendarCard from './CalendarCard';
 import { castYouTube } from '@/lib/cast';
@@ -79,7 +94,7 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
           {!isUser && !message.text ? (
             <span className="inline-block w-2 h-5 bg-accent/60 animate-pulse rounded-sm" />
           ) : (
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[[rehypeSanitize, sanitizeSchema]]} components={{
             a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent underline break-all hover:text-accent/80 transition-colors">{children}</a>,
             p: ({ children }) => <span>{children}</span>,
             strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
@@ -108,6 +123,7 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
         {!isUser && videoId !== undefined && (
           <div className="mt-3 rounded-xl overflow-hidden border border-glass-border aspect-video max-w-md w-full">
             <iframe src={`https://www.youtube.com/embed/${videoId}`} className="w-full h-full"
+              sandbox="allow-scripts allow-same-origin allow-presentation"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
           </div>
         )}
