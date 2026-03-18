@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import type { ChatMessage } from '@/lib/types';
 
+// PERFORMANCE: Limit in-memory messages to prevent slow re-renders in long conversations.
+// Older messages are trimmed; the full history is preserved server-side.
+const MAX_MESSAGES = 300;
+
 interface ChatStore {
   messages: ChatMessage[];
   isThinking: boolean;
@@ -16,7 +20,10 @@ export const useChatStore = create<ChatStore>((set) => ({
   messages: [],
   isThinking: false,
   voiceOpen: false,
-  addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
+  addMessage: (msg) => set((s) => {
+    const updated = [...s.messages, msg];
+    return { messages: updated.length > MAX_MESSAGES ? updated.slice(-MAX_MESSAGES) : updated };
+  }),
   updateMessage: (id, update) =>
     set((s) => ({
       messages: s.messages.map((m) => (m.id === id ? { ...m, ...update } : m)),
