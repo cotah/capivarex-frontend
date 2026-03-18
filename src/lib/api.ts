@@ -102,9 +102,15 @@ export async function sendMessageStream(
 ): Promise<void> {
   const headers = await getHeaders();
 
+  // SAFETY: Abort stream if backend doesn't respond within 90s
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 90_000);
+
+  try {
   const response = await fetch(`${API_URL}/api/webapp/chat/stream`, {
     method: 'POST',
     headers,
+    signal: controller.signal,
     body: JSON.stringify({
       message,
       ...(conversationId ? { conversation_id: conversationId } : {}),
@@ -170,6 +176,9 @@ export async function sendMessageStream(
     }
   } finally {
     reader.releaseLock();
+  }
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

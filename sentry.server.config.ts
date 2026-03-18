@@ -1,8 +1,10 @@
 import * as Sentry from '@sentry/nextjs';
 
+const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN || '';
+
 Sentry.init({
-  dsn: 'https://c141a47b43b9cea936110801b1c0e3ae@o4510932417576960.ingest.de.sentry.io/4511032652660816',
+  dsn: SENTRY_DSN,
   environment: process.env.NODE_ENV,
-  enabled: process.env.NODE_ENV === 'production',
+  enabled: process.env.NODE_ENV === 'production' && !!SENTRY_DSN,
   tracesSampleRate: 0.2,
 });

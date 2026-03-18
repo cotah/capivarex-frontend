@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
@@ -138,6 +138,21 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
       resolveRef.current = resolve;
       mr.stop();
     });
+  }, []);
+
+  // SAFETY: Stop microphone tracks if component unmounts while recording
+  useEffect(() => {
+    return () => {
+      const mr = mediaRecorderRef.current;
+      if (mr && mr.state === 'recording') {
+        mr.stop();
+      }
+      // Stop all audio tracks to release microphone
+      mr?.stream?.getTracks().forEach((t) => t.stop());
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   return { state, supported, startRecording, stopRecording };

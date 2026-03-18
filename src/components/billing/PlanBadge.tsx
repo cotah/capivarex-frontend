@@ -18,7 +18,7 @@ interface PlanBadgeProps {
 }
 
 export default function PlanBadge({ plan }: PlanBadgeProps) {
-  const style = planStyles[plan];
+  const style = planStyles[plan] || planStyles.professional;
 
   return (
     <span
