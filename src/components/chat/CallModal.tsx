@@ -22,11 +22,11 @@ interface CallModalProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; pulse: boolean }> = {
-  initiated:    { label: 'Iniciando...', color: 'text-yellow-400',  pulse: true  },
-  ringing:      { label: 'Chamando...',  color: 'text-blue-400',    pulse: true  },
-  'in-progress':{ label: 'Em chamada',   color: 'text-green-400',   pulse: true  },
-  completed:    { label: 'Encerrada',    color: 'text-text-muted',  pulse: false },
-  failed:       { label: 'Falhou',       color: 'text-red-400',     pulse: false },
+  initiated:    { label: 'Initiating...', color: 'text-yellow-400',  pulse: true  },
+  ringing:      { label: 'Ringing...',    color: 'text-blue-400',    pulse: true  },
+  'in-progress':{ label: 'In call',       color: 'text-green-400',   pulse: true  },
+  completed:    { label: 'Completed',     color: 'text-text-muted',  pulse: false },
+  failed:       { label: 'Failed',        color: 'text-red-400',     pulse: false },
 };
 
 function formatDuration(seconds?: number): string {
@@ -39,17 +39,17 @@ function formatDuration(seconds?: number): string {
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return 'agora';
-  if (m < 60) return `${m}m atrás`;
+  if (m < 1) return 'now';
+  if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h atrás`;
-  return new Date(iso).toLocaleDateString('pt-BR');
+  if (h < 24) return `${h}h ago`;
+  return new Date(iso).toLocaleDateString('en-US');
 }
 
 export default function CallModal({ onClose }: CallModalProps) {
   const t = useT();
   const user = useAuthStore((s) => s.user);
-  const canCall = user?.plan === 'everywhere';
+  const canCall = user?.plan === 'executive';
 
   const [phone, setPhone] = useState('');
   const [activeCall, setActiveCall] = useState<CallStatus | null>(null);
@@ -110,7 +110,7 @@ export default function CallModal({ onClose }: CallModalProps) {
         }
       }, 3000);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Erro ao iniciar chamada';
+      const msg = e instanceof Error ? e.message : 'Error starting call';
       setError(msg);
     } finally {
       setLoading(false);
@@ -150,13 +150,13 @@ export default function CallModal({ onClose }: CallModalProps) {
           {!canCall ? (
             <div className="rounded-xl bg-accent/5 border border-accent/20 p-4 text-center space-y-2">
               <p className="text-sm text-text-muted">
-                Chamadas de voz requerem o plano <span className="text-accent font-semibold">{t('billing.everywhere')}</span>.
+                Voice calls require the <span className="text-accent font-semibold">{t('billing.executive')}</span> plan.
               </p>
               <a
                 href="/pricing"
                 className="inline-block text-sm font-medium text-accent hover:underline"
               >
-                Ver planos →
+                View plans →
               </a>
             </div>
           ) : activeCall ? (
@@ -182,7 +182,7 @@ export default function CallModal({ onClose }: CallModalProps) {
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 py-2.5 text-sm font-medium hover:bg-red-500/25 transition-colors"
               >
                 <PhoneOff size={14} />
-                Encerrar
+                End call
               </button>
             </div>
           ) : (
@@ -202,7 +202,7 @@ export default function CallModal({ onClose }: CallModalProps) {
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent/15 border border-accent/30 text-accent py-3 text-sm font-semibold hover:bg-accent/25 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Phone size={15} />
-                {loading ? 'Iniciando...' : 'Ligar'}
+                {loading ? 'Initiating...' : 'Call'}
               </button>
             </div>
           )}
@@ -215,7 +215,7 @@ export default function CallModal({ onClose }: CallModalProps) {
                 className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text transition-colors w-full"
               >
                 <Clock size={12} />
-                Histórico ({history.length})
+                History ({history.length})
                 {historyOpen ? <ChevronUp size={12} className="ml-auto" /> : <ChevronDown size={12} className="ml-auto" />}
               </button>
               <AnimatePresence>

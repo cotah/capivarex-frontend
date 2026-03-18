@@ -15,19 +15,19 @@ const faqs = [
   },
   {
     q: 'Which services are supported?',
-    a: 'Currently we support Spotify, Google Calendar, Gmail, Tuya Smart Home, Smartcar, GitHub, and WhatsApp (Everywhere plan). Outlook and Canva integrations are coming soon.',
+    a: 'Currently we support Spotify, Google Calendar, Gmail, Tuya Smart Home, Smartcar, GitHub, and WhatsApp (Executive plan). Outlook and Canva integrations are coming soon.',
   },
   {
     q: 'Can I use it on my phone?',
     a: 'Absolutely. CAPIVAREX is a PWA — install it directly from your browser on iOS or Android for a native app experience.',
   },
   {
-    q: 'How does the free plan work?',
-    a: 'The free plan includes 30 messages per day, 5 agents, and Telegram access. No credit card required.',
+    q: 'What does the Professional plan include?',
+    a: 'The Professional plan includes Telegram access, 10 core agents, a 30-minute proactive loop, and 30 minutes of voice per month.',
   },
   {
     q: 'Can I cast media to my TV?',
-    a: 'Yes. With the Everywhere plan, you can cast music, videos, and other media to any Chromecast-enabled device.',
+    a: 'Yes. With the Executive plan, you can cast music, videos, and other media to any Chromecast-enabled device.',
   },
   {
     q: 'How do I cancel my subscription?',

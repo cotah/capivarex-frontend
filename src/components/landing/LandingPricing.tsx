@@ -18,7 +18,7 @@ export default function LandingPricing() {
             Simple pricing
           </h2>
           <p className="mt-3 text-text-muted text-sm">
-            Start free, upgrade when you&apos;re ready.
+            Choose the plan that fits your needs.
           </p>
         </motion.div>
 

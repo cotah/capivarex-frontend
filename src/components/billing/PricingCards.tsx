@@ -13,47 +13,30 @@ function usePlans(): PlanInfo[] {
   const t = useT();
   return [
     {
-      id: 'free',
-      name: t('billing.free'),
-      price: '0',
-      priceValue: 0,
-      features: [
-        t('billing_features.free_1'),
-        t('billing_features.free_2'),
-        t('billing_features.free_3'),
-        t('billing_features.free_4'),
-      ],
-    },
-    {
-      id: 'me',
-      name: t('billing.me'),
-      price: '15.99',
-      priceValue: 15.99,
+      id: 'professional',
+      name: t('billing.professional'),
+      price: '39.99',
+      priceValue: 39.99,
       highlighted: true,
       features: [
-        t('billing_features.me_1'),
-        t('billing_features.me_2'),
-        t('billing_features.me_3'),
-        t('billing_features.me_4'),
-        t('billing_features.me_5'),
-        t('billing_features.me_6'),
+        t('billing_features.professional_1'),
+        t('billing_features.professional_2'),
+        t('billing_features.professional_3'),
+        t('billing_features.professional_4'),
       ],
     },
     {
-      id: 'everywhere',
-      name: t('billing.everywhere'),
-      price: '49.99',
-      priceValue: 49.99,
+      id: 'executive',
+      name: t('billing.executive'),
+      price: '79.00',
+      priceValue: 79.00,
       features: [
-        t('billing_features.everywhere_1'),
-        t('billing_features.everywhere_2'),
-        t('billing_features.everywhere_3'),
-        t('billing_features.everywhere_4'),
-        t('billing_features.everywhere_5'),
-        t('billing_features.everywhere_6'),
-        t('billing_features.everywhere_7'),
-        t('billing_features.everywhere_8'),
-        t('billing_features.everywhere_9'),
+        t('billing_features.executive_1'),
+        t('billing_features.executive_2'),
+        t('billing_features.executive_3'),
+        t('billing_features.executive_4'),
+        t('billing_features.executive_5'),
+        t('billing_features.executive_6'),
       ],
     },
   ];
@@ -62,13 +45,13 @@ function usePlans(): PlanInfo[] {
 export default function PricingCards() {
   const user = useAuthStore((s) => s.user);
   const router = useRouter();
-  const currentPlan = user?.plan || 'free';
+  const currentPlan = user?.plan || 'professional';
   const [loadingPlan, setLoadingPlan] = useState<PlanType | null>(null);
   const t = useT();
   const plans = usePlans();
 
   const handleUpgrade = async (planId: PlanType) => {
-    if (planId === 'free' || planId === currentPlan) return;
+    if (planId === currentPlan) return;
 
     if (!user) {
       router.push('/login');
@@ -77,7 +60,7 @@ export default function PricingCards() {
 
     setLoadingPlan(planId);
     try {
-      await redirectToCheckout(planId as 'me' | 'everywhere');
+      await redirectToCheckout(planId as 'professional' | 'executive');
     } catch {
       toast.error(t('billing.checkout_error'));
       setLoadingPlan(null);
@@ -85,7 +68,7 @@ export default function PricingCards() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       {plans.map((plan) => {
         const isCurrent = currentPlan === plan.id;
         const isHighlighted = plan.highlighted;
@@ -143,13 +126,6 @@ export default function PricingCards() {
                 className="w-full rounded-xl border border-accent/30 py-2.5 text-sm font-medium text-accent cursor-default"
               >
                 Current Plan
-              </button>
-            ) : plan.id === 'free' ? (
-              <button
-                onClick={() => router.push(user ? '/chat' : '/register')}
-                className="w-full rounded-xl glass py-2.5 text-sm text-text-muted hover:text-text transition-colors"
-              >
-                {user ? 'Current Plan' : 'Get Started'}
               </button>
             ) : (
               <button

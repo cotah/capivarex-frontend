@@ -1,3 +1,4 @@
+'use client';
 
 import { motion } from 'framer-motion';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
@@ -90,11 +91,15 @@ export default function Message({ message, ttsState = 'idle', onTTSToggle }: Mes
           )}
         </div>
         {attachment && <FileChip attachment={attachment} />}
-        {/* Grupo 2 - Coming Soon: music card disabled temporarily — reactivate with device launch */}
+        {/* Grupo 2 - Coming Soon: music card desabilitado temporariamente */}
         {/* {!isUser && message.type === 'music' && <MusicCard data={message.data} />} */}
         {!isUser && message.type === 'calendar' && <CalendarCard data={message.data} />}
-        {/* Grupo 3 - Disabled: image generation, YouTube embed, video, cast to TV */}
-        {/* Preserved for future Enterprise plan reactivation */}
+        {/* Grupo 3 - Desativado: image generation, YouTube embed, video, cast to TV */}
+        {/* {!isUser && singleImageUrl !== undefined && (...)} */}
+        {/* {!isUser && hasMultipleImages && (...)} */}
+        {/* {!isUser && videoId !== undefined && (...)} */}
+        {/* {!isUser && videoUrl !== undefined && (...)} */}
+        {/* {!isUser && videoId !== undefined && (<button ... Cast to TV />)} */}
         <div className="mt-1 flex items-center gap-2 px-1">
           <span className="text-sm text-text-muted">{message.time}</span>
           {!isUser && onTTSToggle && (

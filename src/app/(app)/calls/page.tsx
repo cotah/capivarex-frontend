@@ -16,11 +16,11 @@ interface CallHistoryItem {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  initiated:     { label: 'Iniciada',    color: 'text-yellow-400' },
-  ringing:       { label: 'Chamando',    color: 'text-blue-400'   },
-  'in-progress': { label: 'Em chamada',  color: 'text-green-400'  },
-  completed:     { label: 'Encerrada',   color: 'text-text-muted' },
-  failed:        { label: 'Falhou',      color: 'text-red-400'    },
+  initiated:     { label: 'Initiated',   color: 'text-yellow-400' },
+  ringing:       { label: 'Ringing',     color: 'text-blue-400'   },
+  'in-progress': { label: 'In call',     color: 'text-green-400'  },
+  completed:     { label: 'Completed',   color: 'text-text-muted' },
+  failed:        { label: 'Failed',      color: 'text-red-400'    },
 };
 
 function formatDuration(s?: number) {

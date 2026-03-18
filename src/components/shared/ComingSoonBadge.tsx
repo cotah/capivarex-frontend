@@ -9,7 +9,7 @@ interface ComingSoonBadgeProps {
 
 export default function ComingSoonBadge({
   children,
-  message = 'Esta funcionalidade está em beta fechado e será liberada em breve.',
+  message = 'This feature is in closed beta and will be released soon.',
 }: ComingSoonBadgeProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -30,7 +30,7 @@ export default function ComingSoonBadge({
       {/* Badge */}
       <div className="absolute top-3 right-3 z-10">
         <span className="rounded-full bg-accent/15 border border-accent/20 px-2.5 py-0.5 text-xs font-medium text-accent uppercase tracking-wider">
-          Em Breve
+          Coming Soon
         </span>
       </div>
 

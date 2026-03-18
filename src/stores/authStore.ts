@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const { getBillingStatus } = await import('@/lib/stripe');
           const data = await getBillingStatus();
-          const plan = (data.plan as PlanType) || 'free';
+          const plan = (data.plan as PlanType) || 'professional';
           const user = get().user;
           if (user) set({ user: { ...user, plan } });
         } catch {
@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthStore>()(
             language?: string;
             plan?: string;
           }>('/api/webapp/user/me');
-          const plan = (data.plan as PlanType) || 'free';
+          const plan = (data.plan as PlanType) || 'professional';
           set((state) => ({
             user: state.user ? { ...state.user, ...data, plan } : null,
           }));

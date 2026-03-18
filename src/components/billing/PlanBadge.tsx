@@ -3,16 +3,12 @@
 import type { PlanType } from '@/lib/types';
 
 const planStyles: Record<PlanType, { label: string; className: string }> = {
-  free: {
-    label: 'Free',
-    className: 'bg-white/5 text-text-muted border-white/10',
-  },
-  me: {
-    label: 'Me',
+  professional: {
+    label: 'Professional',
     className: 'bg-accent/10 text-accent border-accent/20',
   },
-  everywhere: {
-    label: 'Everywhere',
+  executive: {
+    label: 'Executive',
     className: 'bg-accent/20 text-accent border-accent/30',
   },
 };

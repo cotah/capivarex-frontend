@@ -7,11 +7,10 @@ import Link from 'next/link';
 import ConnectButton from './ConnectButton';
 import type { ServiceDefinition, PlanType } from '@/lib/types';
 
-const PLAN_RANK: Record<PlanType, number> = { free: 0, me: 1, everywhere: 2 };
+const PLAN_RANK: Record<PlanType, number> = { professional: 0, executive: 1 };
 const PLAN_LABEL: Record<PlanType, string> = {
-  free: 'Free',
-  me: 'Me',
-  everywhere: 'Everywhere',
+  professional: 'Professional',
+  executive: 'Executive',
 };
 
 interface ServiceCardProps {
@@ -24,9 +23,8 @@ interface ServiceCardProps {
 }
 
 function getMinPlan(service: ServiceDefinition): PlanType {
-  if (service.plans.includes('free')) return 'free';
-  if (service.plans.includes('me')) return 'me';
-  return 'everywhere';
+  if (service.plans.includes('professional')) return 'professional';
+  return 'executive';
 }
 
 function ServiceIcon({ name }: { name: string }) {

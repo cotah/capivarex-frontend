@@ -5,11 +5,10 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import type { PlanType } from '@/lib/types';
 
-const PLAN_RANK: Record<PlanType, number> = { free: 0, me: 1, everywhere: 2 };
+const PLAN_RANK: Record<PlanType, number> = { professional: 0, executive: 1 };
 const PLAN_LABEL: Record<PlanType, string> = {
-  free: 'Free',
-  me: 'Me',
-  everywhere: 'Everywhere',
+  professional: 'Professional',
+  executive: 'Executive',
 };
 
 interface ConnectButtonProps {

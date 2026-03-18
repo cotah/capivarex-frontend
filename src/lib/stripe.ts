@@ -14,7 +14,7 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   };
 }
 
-export async function redirectToCheckout(plan: 'me' | 'everywhere') {
+export async function redirectToCheckout(plan: 'professional' | 'executive') {
   const user = useAuthStore.getState().user;
 
   const res = await fetch(`${API_URL}/api/billing/create-checkout`, {

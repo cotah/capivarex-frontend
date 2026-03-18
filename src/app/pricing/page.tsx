@@ -32,7 +32,7 @@ export default function PricingPage() {
             Choose Your Plan
           </h1>
           <p className="text-sm text-text-muted">
-            Start free, upgrade when you&apos;re ready
+            Choose the plan that fits your needs
           </p>
         </div>
 

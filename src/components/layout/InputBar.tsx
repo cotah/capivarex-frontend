@@ -77,18 +77,18 @@ export default function InputBar({ centered = false }: InputBarProps) {
   const handleShareLocation = useCallback(() => {
     setAttachMenuOpen(false);
     if (!navigator.geolocation) {
-      send('📍 Meu dispositivo não suporta geolocalização.');
+      send('📍 My device does not support geolocation.');
       return;
     }
     setSharingLocation(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        send(`📍 Minha localização atual: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        send(`📍 My current location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
         setSharingLocation(false);
       },
       () => {
-        send('📍 Não consegui obter sua localização. Verifique as permissões do navegador.');
+        send('📍 Could not get your location. Please check browser permissions.');
         setSharingLocation(false);
       },
       { enableHighAccuracy: true, timeout: 10000 },

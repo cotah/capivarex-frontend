@@ -21,10 +21,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const COMING_SOON_IDS = new Set(['spotify', 'tuya', 'smartcar']);
 
 const STATIC_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
-  { id: 'google',   name: 'Google',        icon: '📅', oauth_path: '/api/auth/google/connect' },
-  { id: 'spotify',  name: 'Spotify',       icon: '🎵', oauth_path: '/api/auth/spotify/connect' },     // Grupo 2 - Coming Soon Q3 2026
-  { id: 'tuya',     name: 'Smart Home',    icon: '🏠', oauth_path: '', loginFlow: true },              // Grupo 2 - Coming Soon Q3 2026
-  { id: 'smartcar', name: 'Connected Car', icon: '🚗', oauth_path: '/api/v1/car/connect' },            // Grupo 2 - Coming Soon Q3 2026
+  { id: 'google',    name: 'Google',        icon: '📅', oauth_path: '/api/auth/google/connect' },
+  { id: 'microsoft', name: 'Microsoft',     icon: '📧', oauth_path: '/api/v1/auth/microsoft/connect' },
+  { id: 'notion',    name: 'Notion',        icon: '📝', oauth_path: '/api/auth/notion/login' },
+  { id: 'spotify',   name: 'Spotify',       icon: '🎵', oauth_path: '/api/auth/spotify/connect' },     // Grupo 2 - Coming Soon Q3 2026
+  { id: 'tuya',      name: 'Smart Home',    icon: '🏠', oauth_path: '', loginFlow: true },              // Grupo 2 - Coming Soon Q3 2026
+  { id: 'smartcar',  name: 'Connected Car', icon: '🚗', oauth_path: '/api/v1/car/connect' },            // Grupo 2 - Coming Soon Q3 2026
 ];
 
 const COUNTRY_CODES = [
@@ -182,6 +184,12 @@ export default function ConnectionsSection() {
                     <p className="text-base text-text">{conn.name}</p>
                     {conn.id === 'google' && (
                       <p className="text-xs text-text-muted/60">Calendar + Gmail</p>
+                    )}
+                    {conn.id === 'microsoft' && (
+                      <p className="text-xs text-text-muted/60">Outlook + Calendar + Teams</p>
+                    )}
+                    {conn.id === 'notion' && (
+                      <p className="text-xs text-text-muted/60">Sync notes to Notion</p>
                     )}
                     {conn.id === 'tuya' && (
                       <p className="text-xs text-text-muted/60">Tuya Smart / Smart Life</p>

@@ -23,8 +23,8 @@ export default function QuotaIndicator() {
 
   if (!quota || !user) return null;
 
-  // Unlimited for 'everywhere' plan
-  if (user.plan === 'everywhere') {
+  // Unlimited for 'executive' plan
+  if (user.plan === 'executive') {
     return (
       <div className="px-4 py-2 text-xs text-text-muted text-center">
         Unlimited messages

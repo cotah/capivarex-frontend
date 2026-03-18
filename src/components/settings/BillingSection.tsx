@@ -13,7 +13,7 @@ import { useT } from '@/i18n';
 
 export default function BillingSection() {
   const user = useAuthStore((s) => s.user);
-  const plan = user?.plan || 'free';
+  const plan = user?.plan || 'professional';
 
   const [quota, setQuota] = useState<QuotaInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,15 +82,15 @@ export default function BillingSection() {
         )}
 
         <div className="flex flex-col sm:flex-row gap-2 pt-2">
-          {plan !== 'everywhere' && (
+          {plan !== 'executive' && (
             <Link
               href="/pricing"
               className="flex-1 flex items-center justify-center rounded-xl bg-accent py-2 text-base font-medium text-bg hover:bg-accent/90 transition-colors"
             >
-              {plan === 'free' ? t('billing.upgrade_plan') : t('billing.upgrade_everywhere')}
+              {t('billing.upgrade_plan')}
             </Link>
           )}
-          {plan !== 'free' && (
+          {(
             <button
               onClick={async () => {
                 setPortalLoading(true);

@@ -16,7 +16,7 @@ export default function BillingSuccessPage() {
     fetchBillingStatus();
   }, [fetchBillingStatus]);
 
-  const planName = user?.plan === 'everywhere' ? 'Everywhere' : user?.plan === 'me' ? 'Me' : 'Free';
+  const planName = user?.plan === 'executive' ? 'Executive' : 'Professional';
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-bg">

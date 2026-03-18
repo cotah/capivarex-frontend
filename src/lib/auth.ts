@@ -9,7 +9,7 @@ function mapSupabaseUser(
     id: supabaseUser.id,
     email: supabaseUser.email || '',
     name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
-    plan: (supabaseUser.user_metadata?.plan as User['plan']) || 'free',
+    plan: (supabaseUser.user_metadata?.plan as User['plan']) || 'professional',
     telegramChatId: supabaseUser.user_metadata?.telegram_chat_id as string | undefined,
     language: supabaseUser.user_metadata?.language as string | undefined,
   };
@@ -74,7 +74,7 @@ export async function register(
           user_id: data.user.id,
           phone,
           name,
-          plan: 'basic',
+          plan: 'professional',
         }),
       }).catch(() => {});  // Fire and forget
     }

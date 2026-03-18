@@ -30,7 +30,7 @@ export interface ServiceInfo {
   status: string;
 }
 
-export type PlanType = 'free' | 'me' | 'everywhere';
+export type PlanType = 'professional' | 'executive';
 
 export interface User {
   id: string;
