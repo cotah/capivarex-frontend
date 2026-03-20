@@ -135,33 +135,59 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
       }
       const reply = lastReplyRef.current;
       if (audioBase64) {
-        const audio = audioElRef.current ?? new Audio();
-        audioElRef.current = audio;
-        isBotSpeakingRef.current = true;
-        audio.src = `data:${contentType};base64,${audioBase64}`;
-        audio.onended = () => {
-          isBotSpeakingRef.current = false;
-          if (!isClosingRef.current) {
-            setTimeout(() => {
-              if (!isClosingRef.current) startListeningRef.current?.();
-            }, 400);
+        try {
+          // Convert base64 to Blob URL (data URIs can fail on iOS for large audio)
+          const binaryString = atob(audioBase64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
           }
-        };
-        audio.onerror = () => {
-          isBotSpeakingRef.current = false;
+          const blob = new Blob([bytes], { type: contentType || 'audio/mpeg' });
+          const blobUrl = URL.createObjectURL(blob);
+
+          const audio = audioElRef.current ?? new Audio();
+          audioElRef.current = audio;
+          isBotSpeakingRef.current = true;
+
+          // Revoke previous blob URL to avoid memory leak
+          if (audio.src.startsWith('blob:')) {
+            URL.revokeObjectURL(audio.src);
+          }
+
+          audio.src = blobUrl;
+          audio.onended = () => {
+            isBotSpeakingRef.current = false;
+            URL.revokeObjectURL(blobUrl);
+            if (!isClosingRef.current) {
+              setTimeout(() => {
+                if (!isClosingRef.current) startListeningRef.current?.();
+              }, 400);
+            }
+          };
+          audio.onerror = (e) => {
+            console.error('[Voice] Audio playback error:', e);
+            isBotSpeakingRef.current = false;
+            URL.revokeObjectURL(blobUrl);
+            if (!isClosingRef.current) startListeningRef.current?.();
+          };
+          audio.play().catch((err) => {
+            console.error('[Voice] audio.play() failed:', err.message || err);
+            isBotSpeakingRef.current = false;
+            URL.revokeObjectURL(blobUrl);
+            if (!isClosingRef.current) startListeningRef.current?.();
+          });
+          audio.addEventListener('loadedmetadata', () => {
+            const durationMs = (audio.duration || 3) * 1000;
+            startTypewriter(reply, durationMs);
+          }, { once: true });
+          setTimeout(() => {
+            if (!typewriterRef.current) startTypewriter(reply);
+          }, 500);
+        } catch (decodeErr) {
+          console.error('[Voice] Failed to decode audio base64:', decodeErr);
+          startTypewriter(reply);
           if (!isClosingRef.current) startListeningRef.current?.();
-        };
-        audio.play().catch(() => {
-          isBotSpeakingRef.current = false;
-          if (!isClosingRef.current) startListeningRef.current?.();
-        });
-        audio.addEventListener('loadedmetadata', () => {
-          const durationMs = (audio.duration || 3) * 1000;
-          startTypewriter(reply, durationMs);
-        }, { once: true });
-        setTimeout(() => {
-          if (!typewriterRef.current) startTypewriter(reply);
-        }, 500);
+        }
       } else {
         startTypewriter(reply);
         if (!isClosingRef.current) startListeningRef.current?.();
@@ -348,9 +374,19 @@ export default function VoiceOverlay({ onClose }: VoiceOverlayProps) {
     isClosingRef.current = false;
     isBotSpeakingRef.current = false;
 
-    // iOS: unlock audio element inside user gesture (mount = click)
+    // iOS: unlock audio element inside user gesture (mount = click on voice button)
+    // IMPORTANT: el.load() does NOT unlock on iOS — must call el.play()
     const el = new Audio();
-    el.load();
+    // Tiny silent MP3 (1 frame) — triggers iOS audio unlock
+    el.src = 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRBqSAAAAAAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRBqSAAAAAAAAAAAAAAAAAAAA';
+    el.volume = 0;
+    el.play().then(() => {
+      el.pause();
+      el.src = '';
+      el.volume = 1;
+    }).catch(() => {
+      // Silent fail — will work on desktop, may need user tap on iOS
+    });
     audioElRef.current = el;
 
     // Sequential init: get/create conversation, then connect WS
