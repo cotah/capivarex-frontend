@@ -19,3 +19,6 @@ Sentry.init({
     /^Failed to fetch$/,
   ],
 });
+
+// Required by @sentry/nextjs to instrument Next.js page navigations
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
