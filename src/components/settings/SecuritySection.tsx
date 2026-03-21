@@ -77,12 +77,12 @@ export default function SecuritySection() {
           setSummary(data.summary ?? null);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!cancelled) {
-          // 404 means endpoint not yet deployed — silently hide section
-          if (err?.status !== 404) {
-            setError('Could not load security events.');
-          }
+          // Endpoint may not be deployed yet, or no events exist —
+          // either way, show a clean state instead of an error
+          setEvents([]);
+          setSummary(null);
         }
       })
       .finally(() => {

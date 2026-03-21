@@ -30,6 +30,10 @@ export async function login(email: string, password: string): Promise<User> {
   const user = mapSupabaseUser(data.user);
   useAuthStore.getState().setUser(user);
   useAuthStore.getState().setToken(data.session.access_token);
+
+  // Sync real language + plan from users table (user_metadata may be stale)
+  useAuthStore.getState().refreshUser().catch(() => {});
+
   return user;
 }
 
@@ -109,17 +113,18 @@ export async function fetchCurrentUser(): Promise<User | null> {
 
   const user = mapSupabaseUser(supabaseUser);
 
-  // Fetch the real plan from the users table (source of truth after Stripe webhooks).
-  // user_metadata.plan is NOT updated when the webhook writes to the users table,
-  // so we always read plan from the DB to keep the frontend in sync.
+  // Fetch the real plan + language from the users table (source of truth).
+  // user_metadata is NOT updated when settings are changed via the webapp,
+  // so we always read from the DB to keep the frontend in sync.
   const { data: dbUser } = await supabase
     .from('users')
-    .select('plan')
+    .select('plan, preferred_language')
     .eq('id', supabaseUser.id)
     .single();
 
   const currentPlan = (dbUser?.plan as User['plan']) ?? user.plan;
   user.plan = currentPlan;
+  user.language = dbUser?.preferred_language || user.language;
 
   useAuthStore.getState().setUser(user);
   if (session) {
