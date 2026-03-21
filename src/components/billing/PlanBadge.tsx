@@ -11,6 +11,22 @@ const planStyles: Record<PlanType, { label: string; className: string }> = {
     label: 'Executive',
     className: 'bg-accent/20 text-accent border-accent/30',
   },
+  ara: {
+    label: 'ARA',
+    className: 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20',
+  },
+  ara_plus_1: {
+    label: 'ARA + 1',
+    className: 'bg-[#D4A017]/15 text-[#D4A017] border-[#D4A017]/25',
+  },
+  capivarex_pro: {
+    label: 'CAPIVAREX Pro',
+    className: 'bg-accent/15 text-accent border-accent/25',
+  },
+  capivarex_ultimate: {
+    label: 'CAPIVAREX Ultimate',
+    className: 'bg-gradient-to-r from-accent/20 to-[#D4A017]/20 text-accent border-accent/30',
+  },
 };
 
 interface PlanBadgeProps {

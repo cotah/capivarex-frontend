@@ -30,7 +30,7 @@ export interface ServiceInfo {
   status: string;
 }
 
-export type PlanType = 'professional' | 'executive';
+export type PlanType = 'professional' | 'executive' | 'ara' | 'ara_plus_1' | 'capivarex_pro' | 'capivarex_ultimate';
 
 export interface User {
   id: string;
