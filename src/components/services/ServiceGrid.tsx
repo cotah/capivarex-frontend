@@ -57,7 +57,7 @@ const ALL_SERVICES: ServiceDefinition[] = [
   { id: 'time', name: 'Time & Date', icon: 'Clock', description: 'World clocks, timezones, conversions', category: 'Productivity', plans: ['professional', 'executive'], hidden: true }, // Grupo 3 - Desativado
 ];
 
-const PLAN_RANK: Record<PlanType, number> = { professional: 0, executive: 1 };
+const PLAN_RANK: Record<PlanType, number> = { professional: 0, executive: 1, ara: 0, ara_plus_1: 1, capivarex_pro: 2, capivarex_ultimate: 3 };
 
 const OAUTH_MAP: Record<string, string> = {
   google: '/api/auth/google/connect',

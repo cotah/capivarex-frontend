@@ -7,10 +7,14 @@ import Link from 'next/link';
 import ConnectButton from './ConnectButton';
 import type { ServiceDefinition, PlanType } from '@/lib/types';
 
-const PLAN_RANK: Record<PlanType, number> = { professional: 0, executive: 1 };
+const PLAN_RANK: Record<PlanType, number> = { professional: 0, executive: 1, ara: 0, ara_plus_1: 1, capivarex_pro: 2, capivarex_ultimate: 3 };
 const PLAN_LABEL: Record<PlanType, string> = {
   professional: 'Professional',
   executive: 'Executive',
+  ara: 'ARA',
+  ara_plus_1: 'ARA + 1',
+  capivarex_pro: 'CAPIVAREX Pro',
+  capivarex_ultimate: 'CAPIVAREX Ultimate',
 };
 
 interface ServiceCardProps {
