@@ -1,7 +1,7 @@
 'use client';
 import { useT } from '@/i18n';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 
 const PLAN_DISPLAY: Record<string, string> = {
@@ -18,7 +18,6 @@ const NEEDS_MODULE_SELECTION = new Set(['ara_plus_1', 'capivarex_pro']);
 
 export default function BillingSuccessPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const fetchBillingStatus = useAuthStore((s) => s.fetchBillingStatus);
   const t = useT();

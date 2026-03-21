@@ -6,7 +6,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/lib/api';
 import { Check, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useT } from '@/i18n';
 
 interface ModuleConfig {
   module_name: string;
@@ -27,7 +26,6 @@ const MAX_SELECTIONS: Record<string, number> = {
 export default function SelectModulesPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const t = useT();
   const [modules, setModules] = useState<ModuleConfig[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
