@@ -83,7 +83,7 @@ export default function ProfileSection() {
 
   const updateField = async (field: string, value: string) => {
     await apiClient('/api/webapp/user/profile', {
-      method: 'PATCH',
+      method: 'POST',
       body: JSON.stringify({ [field]: value }),
     });
     await refreshUser();
@@ -97,7 +97,7 @@ export default function ProfileSection() {
     setSavingLang(true);
     try {
       await apiClient('/api/webapp/user/profile', {
-        method: 'PATCH',
+        method: 'POST',
         body: JSON.stringify({ language: code }),
       });
       await refreshUser();

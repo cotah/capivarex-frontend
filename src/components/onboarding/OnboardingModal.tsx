@@ -33,7 +33,7 @@ export default function OnboardingModal({ onClose }: { onClose: () => void }) {
     setSaving(true);
     try {
       await apiClient('/api/webapp/user/profile', {
-        method: 'PATCH',
+        method: 'POST',
         body: JSON.stringify({
           preferred_language: language,
           ...(phone.trim() ? { phone_number: phone.trim() } : {}),
