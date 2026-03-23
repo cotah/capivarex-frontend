@@ -1,0 +1,37 @@
+{
+  "buildCommand": "next build",
+  "framework": "nextjs",
+  "regions": ["dub1"],
+  "headers": [
+    {
+      "source": "/landing",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }
+      ]
+    },
+    {
+      "source": "/pricing",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }
+      ]
+    },
+    {
+      "source": "/login",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=600, stale-while-revalidate=3600" }
+      ]
+    },
+    {
+      "source": "/register",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=600, stale-while-revalidate=3600" }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}

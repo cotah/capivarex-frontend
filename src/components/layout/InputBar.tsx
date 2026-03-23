@@ -1,0 +1,287 @@
+'use client';
+
+import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react';
+import { Send, Mic, MicOff, AudioLines, Loader2, Plus, Camera, FileText, Phone, MapPin } from 'lucide-react';
+import { useChat } from '@/hooks/useChat';
+import { useChatStore } from '@/stores/chatStore';
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
+import CallModal from '@/components/chat/CallModal';
+import FilePreview from '@/components/chat/FilePreview';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { useT } from '@/i18n';
+
+interface InputBarProps {
+  centered?: boolean;
+}
+
+export default function InputBar({ centered = false }: InputBarProps) {
+  const [text, setText] = useState('');
+  const setVoiceOpen = useChatStore((s) => s.setVoiceOpen);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [callModalOpen, setCallModalOpen] = useState(false);
+  const [sharingLocation, setSharingLocation] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const attachMenuRef = useRef<HTMLDivElement>(null);
+
+  const { send, sendWithFile } = useChat();
+  const isThinking = useChatStore((s) => s.isThinking);
+  const { state: micState, supported: micSupported, startRecording, stopRecording } = useVoiceRecorder();
+  const { uploadState, uploadResult, uploadError, upload, reset: resetUpload } = useFileUpload();
+  const t = useT();
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setPendingFile(file);
+    if (file.type.startsWith('image/')) {
+      setLocalPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setLocalPreviewUrl(null);
+    }
+    await upload(file);
+  }, [upload]);
+
+  const handleRemoveFile = useCallback(() => {
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+    setPendingFile(null);
+    resetUpload();
+  }, [resetUpload, localPreviewUrl]);
+
+  const handleAttachClick = useCallback(() => {
+    setAttachMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleFileFromGallery = useCallback(() => {
+    setAttachMenuOpen(false);
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileFromCamera = useCallback(() => {
+    setAttachMenuOpen(false);
+    cameraInputRef.current?.click();
+  }, []);
+
+  const handleCallClick = useCallback(() => {
+    setAttachMenuOpen(false);
+    setCallModalOpen(true);
+  }, []);
+
+  const handleShareLocation = useCallback(() => {
+    setAttachMenuOpen(false);
+    if (!navigator.geolocation) {
+      send('📍 My device does not support geolocation.');
+      return;
+    }
+    setSharingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        send(`📍 My current location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        setSharingLocation(false);
+      },
+      () => {
+        send('📍 Could not get your location. Please check browser permissions.');
+        setSharingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }, [send]);
+
+  // Close attach menu when clicking outside
+  useEffect(() => {
+    if (!attachMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
+        setAttachMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [attachMenuOpen]);
+
+  const handleMic = async () => {
+    if (micState === 'recording') {
+      const transcribed = await stopRecording();
+      if (transcribed) setText((prev) => (prev ? `${prev} ${transcribed}` : transcribed));
+      inputRef.current?.focus();
+    } else if (micState === 'idle') {
+      startRecording();
+    }
+  };
+
+  const handleSend = useCallback(() => {
+    const trimmed = text.trim();
+    const canSend = (trimmed || pendingFile) && !isThinking;
+    if (!canSend) return;
+
+    if (pendingFile && uploadResult) {
+      const fileContext = uploadResult.extracted_text
+        ? `[File: ${uploadResult.filename}]\n\n${uploadResult.extracted_text}`
+        : `[File: ${uploadResult.filename}]`;
+      const messageText = trimmed ? `${trimmed}\n\n${fileContext}` : fileContext;
+      sendWithFile(messageText, {
+        filename: uploadResult.filename,
+        mediaType: uploadResult.media_type,
+        preview: uploadResult.preview,
+        fileId: uploadResult.file_id,
+        localPreviewUrl: localPreviewUrl ?? undefined,
+      });
+      // Don't revoke immediately — Message.tsx uses during session
+      setLocalPreviewUrl(null);
+    } else if (trimmed) {
+      send(trimmed);
+    }
+
+    setText('');
+    setPendingFile(null);
+    resetUpload();
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.focus();
+    }
+  }, [text, pendingFile, uploadResult, isThinking, send, sendWithFile, resetUpload, localPreviewUrl]);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
+
+  const hasFile = pendingFile !== null;
+  const canSend = (text.trim().length > 0 || (hasFile && uploadState === 'done')) && !isThinking;
+
+  const inputRow = (
+    <div className="flex flex-col gap-2">
+      {pendingFile && (
+        <div className="px-1">
+          <FilePreview file={pendingFile} uploadState={uploadState} uploadResult={uploadResult} uploadError={uploadError} onRemove={handleRemoveFile} />
+        </div>
+      )}
+      <div className="flex items-center gap-2 rounded-2xl glass px-4 py-3">
+        <input ref={fileInputRef} type="file" className="hidden"
+          accept="image/*,audio/*,video/*,.pdf,.docx,.doc,.txt,.md"
+          onChange={handleFileChange} aria-label={t('attach.attach_file')} />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment"
+          className="hidden" onChange={handleFileChange} aria-label={t('attach.take_photo')} />
+
+        {/* Attach menu */}
+        <div className="relative" ref={attachMenuRef}>
+          <button
+            type="button"
+            onClick={handleAttachClick}
+            disabled={isThinking || hasFile}
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${hasFile ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-accent hover:bg-accent/5'} disabled:opacity-40`}
+            aria-label={t('attach.attach_file_or_photo')}
+          >
+            <Plus
+              size={18}
+              className={`transition-transform duration-200 ${attachMenuOpen ? 'rotate-45' : ''}`}
+            />
+          </button>
+
+          {attachMenuOpen && (
+            <div className="absolute bottom-10 left-0 z-50 flex flex-col gap-1 rounded-xl border border-glass-border bg-bg/95 backdrop-blur-xl p-1 shadow-xl min-w-[140px]">
+              <button
+                type="button"
+                onClick={handleFileFromGallery}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
+              >
+                <FileText size={15} />
+                {t('attach.file')}
+              </button>
+              <button
+                type="button"
+                onClick={handleFileFromCamera}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
+              >
+                <Camera size={15} />
+                {t('attach.camera')}
+              </button>
+              <button
+                type="button"
+                onClick={handleCallClick}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text"
+              >
+                <Phone size={15} />
+                {t('attach.call')}
+              </button>
+              <button
+                type="button"
+                onClick={handleShareLocation}
+                disabled={sharingLocation}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-white/5 hover:text-text disabled:opacity-50"
+              >
+                {sharingLocation ? <Loader2 size={15} className="animate-spin" /> : <MapPin size={15} />}
+                {sharingLocation ? t('attach.getting_location') : t('attach.location')}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <textarea
+          ref={inputRef}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            e.target.style.height = 'auto';
+            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder={hasFile ? t('chat.add_message_optional') : t('chat.ask_placeholder')}
+          disabled={isThinking}
+          rows={1}
+          className="flex-1 resize-none bg-transparent text-base text-text placeholder:text-text-muted outline-none disabled:opacity-50 overflow-hidden"
+          style={{ minHeight: '24px', maxHeight: '120px' }}
+        />
+        {micSupported && (
+          <button onClick={handleMic} disabled={micState === 'transcribing' || isThinking}
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${micState === 'recording' ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30' : micState === 'transcribing' ? 'bg-white/5 text-text-muted' : 'text-accent hover:text-accent/80 hover:bg-accent/5'}`}
+            aria-label={micState === 'recording' ? t('chat.stop_recording') : t('chat.voice_input')}>
+            {micState === 'transcribing' ? <Loader2 size={16} className="animate-spin" /> : micState === 'recording' ? <MicOff size={16} /> : <Mic size={16} />}
+          </button>
+        )}
+        <button onClick={handleSend} disabled={!canSend}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${canSend ? 'bg-accent text-bg hover:bg-accent/90 shadow-lg shadow-accent/20' : 'bg-white/5 text-text-muted'}`}
+          aria-label={t('chat.send_message')}>
+          {uploadState === 'uploading' ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+        </button>
+        <button onClick={() => {
+            // iOS Safari requer audio.play() dentro do gesto do utilizador
+            // Este silêncio desbloqueia audio.play() para toda a sessão
+            try {
+              const sil = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+              sil.play().catch(() => {});
+            } catch { /* ignore */ }
+            setVoiceOpen(true);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 transition-all duration-200"
+          aria-label={t('chat.voice_conversation')}>
+          <AudioLines size={16} />
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {centered ? (
+        <div className="w-full px-4">{inputRow}</div>
+      ) : (
+        <div className="fixed bottom-safe-16 md:bottom-0 left-0 right-0 z-50">
+          <div className="bg-bg/80 backdrop-blur-xl pt-1 pb-safe">
+            <div className="mx-auto max-w-3xl px-4 pb-2">{inputRow}</div>
+          </div>
+        </div>
+      )}
+      {callModalOpen && (
+        <CallModal onClose={() => setCallModalOpen(false)} />
+      )}
+    </>
+  );
+}
