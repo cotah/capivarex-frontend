@@ -188,7 +188,7 @@ export default function HeroSection() {
               before you check your phone, ARA has already read your calendar,
               checked your emails, looked up the weather, and prepared your
               daily briefing.{" "}
-              <span style={{ color: "#D4A017" }}>You don't ask. It just does.</span>
+              <span style={{ color: "#D4A017" }}>You don&apos;t ask. It just does.</span>
             </p>
 
             {/* CTAs */}
